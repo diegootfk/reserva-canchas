@@ -1,8 +1,8 @@
 package com.reservacanchas.cl.notificacion_service.service;
 
+import com.reservacanchas.cl.notificacion_service.exception.RecursoNoEncontradoException;
 import com.reservacanchas.cl.notificacion_service.model.Notificacion;
 import com.reservacanchas.cl.notificacion_service.repository.NotificacionRepository;
-import com.reservacanchas.cl.notificacion_service.exception.RecursoNoEncontradoException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -45,6 +45,29 @@ public class NotificacionService {
 
     public List<Notificacion> listar() {
         return notificacionRepository.findAll();
+    }
+
+    public Notificacion buscarPorId(Long id) {
+        return notificacionRepository.findById(id)
+                .orElseThrow(() -> new RecursoNoEncontradoException("Notificación no encontrada"));
+    }
+
+    public Notificacion actualizar(Long id, Notificacion notificacionActualizada) {
+        Notificacion notificacion = buscarPorId(id);
+
+        notificacion.setIdUsuario(notificacionActualizada.getIdUsuario());
+        notificacion.setIdReserva(notificacionActualizada.getIdReserva());
+        notificacion.setMensaje(notificacionActualizada.getMensaje());
+        notificacion.setTipoNotificacion(notificacionActualizada.getTipoNotificacion());
+        notificacion.setFechaEnvio(notificacionActualizada.getFechaEnvio());
+        notificacion.setEstado(notificacionActualizada.getEstado());
+
+        return notificacionRepository.save(notificacion);
+    }
+
+    public void eliminar(Long id) {
+        Notificacion notificacion = buscarPorId(id);
+        notificacionRepository.delete(notificacion);
     }
 
     public boolean existePorId(Long id) {
