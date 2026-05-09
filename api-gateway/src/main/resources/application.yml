@@ -1,0 +1,65 @@
+server:
+  port: 7090
+
+spring:
+  main:
+    web-application-type: reactive
+
+  application:
+    name: api-gateway
+
+  cloud:
+    gateway:
+      server:
+        webflux:
+          routes:
+
+            - id: usuario-service
+              uri: http://localhost:7091
+              predicates:
+                - Path=/usuarios/**
+
+            - id: cancha-service
+              uri: http://localhost:7092
+              predicates:
+                - Path=/canchas/**
+
+            - id: reserva-service
+              uri: http://localhost:7093
+              predicates:
+                - Path=/reservas/**
+            
+            - id: pago-service
+              uri: http://localhost:7094
+              predicates:
+                - Path=/pagos/**
+
+            - id: sede-service
+              uri: http://localhost:7095
+              predicates:
+                - Path=/sedes/**
+            
+            - id: horario-service
+              uri: http://localhost:7096
+              predicates:
+                - Path=/horarios/**
+            
+            - id: disponibilidad-service
+              uri: http://localhost:7097
+              predicates:
+                - Path=/disponibilidades/**
+
+            - id: notificacion-service
+              uri: http://localhost:7098
+              predicates:
+                - Path=/notificaciones/**
+
+            - id: resena-service
+              uri: http://localhost:7099
+              predicates:
+                - Path=/resenas/**
+
+            - id: mantenimiento-service
+              uri: http://localhost:7100
+              predicates:
+                - Path=/mantenimientos/**

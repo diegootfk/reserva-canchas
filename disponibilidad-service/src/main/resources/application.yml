@@ -1,0 +1,16 @@
+server:
+  port: 7097
+
+spring:
+  application:
+    name: disponibilidad-service
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/db_disponibilidad_service?createDatabaseIfNotExist=true
+    username: root
+    password:
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true

@@ -1,0 +1,16 @@
+server:
+  port: 7096
+
+spring:
+  application:
+    name: horario-service
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/db_horario_service?createDatabaseIfNotExist=true
+    username: root
+    password:
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true

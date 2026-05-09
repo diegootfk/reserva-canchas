@@ -1,0 +1,16 @@
+server:
+  port: 7093
+
+spring:
+  application:
+    name: reserva-service
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/db_reserva_service?createDatabaseIfNotExist=true
+    username: root
+    password:
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true

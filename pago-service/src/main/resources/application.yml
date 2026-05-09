@@ -1,0 +1,16 @@
+server:
+  port: 7094
+
+spring:
+  application:
+    name: pago-service
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/db_pago_service?createDatabaseIfNotExist=true
+    username: root
+    password:
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
