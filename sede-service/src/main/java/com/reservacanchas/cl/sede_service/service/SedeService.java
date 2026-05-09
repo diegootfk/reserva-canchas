@@ -23,6 +23,28 @@ public class SedeService {
         return sedeRepository.findAll();
     }
 
+    public Sede buscarPorId(Long id) {
+        return sedeRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Sede no encontrada"));
+    }
+
+    public Sede actualizar(Long id, Sede sedeActualizada) {
+        Sede sede = buscarPorId(id);
+
+        sede.setNombre(sedeActualizada.getNombre());
+        sede.setDireccion(sedeActualizada.getDireccion());
+        sede.setComuna(sedeActualizada.getComuna());
+        sede.setTelefono(sedeActualizada.getTelefono());
+        sede.setEstado(sedeActualizada.getEstado());
+
+        return sedeRepository.save(sede);
+    }
+
+    public void eliminar(Long id) {
+        Sede sede = buscarPorId(id);
+        sedeRepository.delete(sede);
+    }
+
     public boolean existePorId(Long id) {
         return sedeRepository.existsById(id);
     }
