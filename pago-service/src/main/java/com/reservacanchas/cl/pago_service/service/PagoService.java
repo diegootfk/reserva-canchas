@@ -1,9 +1,9 @@
 package com.reservacanchas.cl.pago_service.service;
 
 import com.reservacanchas.cl.pago_service.dto.PagoDTO;
+import com.reservacanchas.cl.pago_service.exception.RecursoNoEncontradoException;
 import com.reservacanchas.cl.pago_service.model.Pago;
 import com.reservacanchas.cl.pago_service.repository.PagoRepository;
-import com.reservacanchas.cl.pago_service.exception.RecursoNoEncontradoException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -42,6 +42,27 @@ public class PagoService {
 
     public List<Pago> listar() {
         return pagoRepository.findAll();
+    }
+
+    public Pago buscarPorId(Long id) {
+        return pagoRepository.findById(id)
+                .orElseThrow(() -> new RecursoNoEncontradoException("Pago no encontrado"));
+    }
+
+    public Pago actualizar(Long id, PagoDTO pagoDTO) {
+
+        Pago pago = buscarPorId(id);
+
+        pago.setIdReserva(pagoDTO.getIdReserva());
+        pago.setMonto(pagoDTO.getMonto());
+        pago.setMetodoPago(pagoDTO.getMetodoPago());
+
+        return pagoRepository.save(pago);
+    }
+
+    public void eliminar(Long id) {
+        Pago pago = buscarPorId(id);
+        pagoRepository.delete(pago);
     }
 
     public boolean existePorId(Long id) {

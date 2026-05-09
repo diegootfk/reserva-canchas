@@ -3,6 +3,8 @@ package com.reservacanchas.cl.pago_service.controller;
 import com.reservacanchas.cl.pago_service.dto.PagoDTO;
 import com.reservacanchas.cl.pago_service.model.Pago;
 import com.reservacanchas.cl.pago_service.service.PagoService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,13 +20,31 @@ public class PagoController {
     }
 
     @PostMapping
-    public Pago crear(@RequestBody PagoDTO pagoDTO) {
-        return pagoService.guardar(pagoDTO);
+    public ResponseEntity<Pago> crear(@RequestBody PagoDTO pagoDTO) {
+        Pago pago = pagoService.guardar(pagoDTO);
+        return new ResponseEntity<>(pago, HttpStatus.CREATED);
     }
 
     @GetMapping
-    public List<Pago> listar() {
-        return pagoService.listar();
+    public ResponseEntity<List<Pago>> listar() {
+        return ResponseEntity.ok(pagoService.listar());
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Pago> buscarPorId(@PathVariable Long id) {
+        return ResponseEntity.ok(pagoService.buscarPorId(id));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Pago> actualizar(@PathVariable Long id,
+                                           @RequestBody PagoDTO pagoDTO) {
+        return ResponseEntity.ok(pagoService.actualizar(id, pagoDTO));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> eliminar(@PathVariable Long id) {
+        pagoService.eliminar(id);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/{id}/exists")
