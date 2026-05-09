@@ -19,7 +19,6 @@ public class DisponibilidadService {
     }
 
     public Disponibilidad guardar(Disponibilidad disponibilidad) {
-
         Boolean canchaExiste = restTemplate.getForObject(
                 "http://localhost:9092/canchas/" + disponibilidad.getIdCancha() + "/exists",
                 Boolean.class
@@ -34,6 +33,28 @@ public class DisponibilidadService {
 
     public List<Disponibilidad> listar() {
         return disponibilidadRepository.findAll();
+    }
+
+    public Disponibilidad buscarPorId(Long id) {
+        return disponibilidadRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Disponibilidad no encontrada"));
+    }
+
+    public Disponibilidad actualizar(Long id, Disponibilidad disponibilidadActualizada) {
+        Disponibilidad disponibilidad = buscarPorId(id);
+
+        disponibilidad.setIdCancha(disponibilidadActualizada.getIdCancha());
+        disponibilidad.setFecha(disponibilidadActualizada.getFecha());
+        disponibilidad.setHoraInicio(disponibilidadActualizada.getHoraInicio());
+        disponibilidad.setHoraFin(disponibilidadActualizada.getHoraFin());
+        disponibilidad.setEstado(disponibilidadActualizada.getEstado());
+
+        return disponibilidadRepository.save(disponibilidad);
+    }
+
+    public void eliminar(Long id) {
+        Disponibilidad disponibilidad = buscarPorId(id);
+        disponibilidadRepository.delete(disponibilidad);
     }
 
     public boolean existePorId(Long id) {
