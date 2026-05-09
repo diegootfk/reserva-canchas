@@ -1,9 +1,9 @@
 package com.reservacanchas.cl.reserva_service.service;
 
 import com.reservacanchas.cl.reserva_service.dto.ReservaDTO;
+import com.reservacanchas.cl.reserva_service.exception.RecursoNoEncontradoException;
 import com.reservacanchas.cl.reserva_service.model.Reserva;
 import com.reservacanchas.cl.reserva_service.repository.ReservaRepository;
-import com.reservacanchas.cl.reserva_service.exception.RecursoNoEncontradoException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -51,6 +51,26 @@ public class ReservaService {
 
     public List<Reserva> listar() {
         return reservaRepository.findAll();
+    }
+
+    public Reserva buscarPorId(Long id) {
+        return reservaRepository.findById(id)
+                .orElseThrow(() -> new RecursoNoEncontradoException("Reserva no encontrada"));
+    }
+
+    public Reserva actualizar(Long id, ReservaDTO reservaDTO) {
+        Reserva reserva = buscarPorId(id);
+
+        reserva.setIdUsuario(reservaDTO.getIdUsuario());
+        reserva.setIdCancha(reservaDTO.getIdCancha());
+        reserva.setTotal(reservaDTO.getTotal());
+
+        return reservaRepository.save(reserva);
+    }
+
+    public void eliminar(Long id) {
+        Reserva reserva = buscarPorId(id);
+        reservaRepository.delete(reserva);
     }
 
     public boolean existePorId(Long id) {
