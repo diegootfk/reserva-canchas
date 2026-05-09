@@ -19,7 +19,6 @@ public class HorarioService {
     }
 
     public Horario guardar(Horario horario) {
-
         Boolean canchaExiste = restTemplate.getForObject(
                 "http://localhost:9092/canchas/" + horario.getIdCancha() + "/exists",
                 Boolean.class
@@ -34,6 +33,28 @@ public class HorarioService {
 
     public List<Horario> listar() {
         return horarioRepository.findAll();
+    }
+
+    public Horario buscarPorId(Long id) {
+        return horarioRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Horario no encontrado"));
+    }
+
+    public Horario actualizar(Long id, Horario horarioActualizado) {
+        Horario horario = buscarPorId(id);
+
+        horario.setIdCancha(horarioActualizado.getIdCancha());
+        horario.setDiaSemana(horarioActualizado.getDiaSemana());
+        horario.setHoraInicio(horarioActualizado.getHoraInicio());
+        horario.setHoraFin(horarioActualizado.getHoraFin());
+        horario.setEstado(horarioActualizado.getEstado());
+
+        return horarioRepository.save(horario);
+    }
+
+    public void eliminar(Long id) {
+        Horario horario = buscarPorId(id);
+        horarioRepository.delete(horario);
     }
 
     public boolean existePorId(Long id) {
