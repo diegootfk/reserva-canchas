@@ -37,6 +37,28 @@ public class MantenimientoService {
         return mantenimientoRepository.findAll();
     }
 
+    public Mantenimiento buscarPorId(Long id) {
+        return mantenimientoRepository.findById(id)
+                .orElseThrow(() -> new RecursoNoEncontradoException("Mantenimiento no encontrado"));
+    }
+
+    public Mantenimiento actualizar(Long id, Mantenimiento mantenimientoActualizado) {
+        Mantenimiento mantenimiento = buscarPorId(id);
+
+        mantenimiento.setIdCancha(mantenimientoActualizado.getIdCancha());
+        mantenimiento.setFechaInicio(mantenimientoActualizado.getFechaInicio());
+        mantenimiento.setFechaFin(mantenimientoActualizado.getFechaFin());
+        mantenimiento.setDescripcion(mantenimientoActualizado.getDescripcion());
+        mantenimiento.setEstado(mantenimientoActualizado.getEstado());
+
+        return mantenimientoRepository.save(mantenimiento);
+    }
+
+    public void eliminar(Long id) {
+        Mantenimiento mantenimiento = buscarPorId(id);
+        mantenimientoRepository.delete(mantenimiento);
+    }
+
     public boolean existePorId(Long id) {
         return mantenimientoRepository.existsById(id);
     }
