@@ -16,8 +16,7 @@ public class CanchaService {
         this.canchaRepository = canchaRepository;
     }
 
-    public Cancha guardar(CanchaDTO canchaDTO){
-
+    public Cancha guardar(CanchaDTO canchaDTO) {
         Cancha cancha = new Cancha();
 
         cancha.setNombre(canchaDTO.getNombre());
@@ -29,11 +28,33 @@ public class CanchaService {
         return canchaRepository.save(cancha);
     }
 
-    public List<Cancha> listar(){
+    public List<Cancha> listar() {
         return canchaRepository.findAll();
     }
 
-    public boolean existePorId(Long id){
+    public Cancha buscarPorId(Long id) {
+        return canchaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Cancha no encontrada"));
+    }
+
+    public Cancha actualizar(Long id, CanchaDTO canchaDTO) {
+        Cancha cancha = buscarPorId(id);
+
+        cancha.setNombre(canchaDTO.getNombre());
+        cancha.setTipoCancha(canchaDTO.getTipoCancha());
+        cancha.setPrecioHora(canchaDTO.getPrecioHora());
+        cancha.setCapacidad(canchaDTO.getCapacidad());
+        cancha.setEstado(canchaDTO.getEstado());
+
+        return canchaRepository.save(cancha);
+    }
+
+    public void eliminar(Long id) {
+        Cancha cancha = buscarPorId(id);
+        canchaRepository.delete(cancha);
+    }
+
+    public boolean existePorId(Long id) {
         return canchaRepository.existsById(id);
     }
 }
