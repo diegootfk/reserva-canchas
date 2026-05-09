@@ -16,8 +16,7 @@ public class UsuarioService {
         this.usuarioRepository = usuarioRepository;
     }
 
-    public Usuario guardar(UsuarioDTO usuarioDTO){
-
+    public Usuario guardar(UsuarioDTO usuarioDTO) {
         Usuario usuario = new Usuario();
         usuario.setNombre(usuarioDTO.getNombre());
         usuario.setApellido(usuarioDTO.getApellido());
@@ -29,11 +28,34 @@ public class UsuarioService {
         return usuarioRepository.save(usuario);
     }
 
-    public List<Usuario> listar(){
+    public List<Usuario> listar() {
         return usuarioRepository.findAll();
     }
 
-    public boolean existePorId(Long id){
+    public Usuario buscarPorId(Long id) {
+        return usuarioRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+    }
+
+    public Usuario actualizar(Long id, UsuarioDTO usuarioDTO) {
+        Usuario usuario = buscarPorId(id);
+
+        usuario.setNombre(usuarioDTO.getNombre());
+        usuario.setApellido(usuarioDTO.getApellido());
+        usuario.setEmail(usuarioDTO.getEmail());
+        usuario.setPassword(usuarioDTO.getPassword());
+        usuario.setTelefono(usuarioDTO.getTelefono());
+        usuario.setEstado(usuarioDTO.getEstado());
+
+        return usuarioRepository.save(usuario);
+    }
+
+    public void eliminar(Long id) {
+        Usuario usuario = buscarPorId(id);
+        usuarioRepository.delete(usuario);
+    }
+
+    public boolean existePorId(Long id) {
         return usuarioRepository.existsById(id);
     }
 }
