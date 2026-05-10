@@ -3,6 +3,9 @@ package com.reservacanchas.cl.pago_service.controller;
 import com.reservacanchas.cl.pago_service.dto.PagoDTO;
 import com.reservacanchas.cl.pago_service.model.Pago;
 import com.reservacanchas.cl.pago_service.service.PagoService;
+
+import jakarta.validation.Valid;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,7 +23,7 @@ public class PagoController {
     }
 
     @PostMapping
-    public ResponseEntity<Pago> crear(@RequestBody PagoDTO pagoDTO) {
+    public ResponseEntity<Pago> crear(@Valid @RequestBody PagoDTO pagoDTO) {
         Pago pago = pagoService.guardar(pagoDTO);
         return new ResponseEntity<>(pago, HttpStatus.CREATED);
     }
@@ -37,7 +40,7 @@ public class PagoController {
 
     @PutMapping("/{id}")
     public ResponseEntity<Pago> actualizar(@PathVariable Long id,
-                                           @RequestBody PagoDTO pagoDTO) {
+                                           @Valid @RequestBody PagoDTO pagoDTO) {
         return ResponseEntity.ok(pagoService.actualizar(id, pagoDTO));
     }
 
