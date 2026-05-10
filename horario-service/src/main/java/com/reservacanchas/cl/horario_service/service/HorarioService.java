@@ -1,7 +1,10 @@
 package com.reservacanchas.cl.horario_service.service;
 
+import com.reservacanchas.cl.horario_service.exception.BadRequestException;
+import com.reservacanchas.cl.horario_service.exception.ResourceNotFoundException;
 import com.reservacanchas.cl.horario_service.model.Horario;
 import com.reservacanchas.cl.horario_service.repository.HorarioRepository;
+
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -19,13 +22,18 @@ public class HorarioService {
     }
 
     public Horario guardar(Horario horario) {
+
+        if (horario.getDiaSemana() == null || horario.getDiaSemana().isBlank()) {
+            throw new BadRequestException("El día de la semana es obligatorio");
+        }
+
         Boolean canchaExiste = restTemplate.getForObject(
                 "http://localhost:7092/canchas/" + horario.getIdCancha() + "/exists",
                 Boolean.class
         );
 
         if (canchaExiste == null || !canchaExiste) {
-            throw new RuntimeException("La cancha no existe");
+            throw new ResourceNotFoundException("La cancha no existe");
         }
 
         return horarioRepository.save(horario);
@@ -37,10 +45,12 @@ public class HorarioService {
 
     public Horario buscarPorId(Long id) {
         return horarioRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Horario no encontrado"));
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Horario no encontrado"));
     }
 
     public Horario actualizar(Long id, Horario horarioActualizado) {
+
         Horario horario = buscarPorId(id);
 
         horario.setIdCancha(horarioActualizado.getIdCancha());
@@ -53,7 +63,9 @@ public class HorarioService {
     }
 
     public void eliminar(Long id) {
+
         Horario horario = buscarPorId(id);
+
         horarioRepository.delete(horario);
     }
 
