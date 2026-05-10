@@ -10,7 +10,9 @@ spring:
     username: root
     password:
 
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog-master.yaml
+
   jpa:
     hibernate:
-      ddl-auto: update
-    show-sql: true
+      ddl-auto: none

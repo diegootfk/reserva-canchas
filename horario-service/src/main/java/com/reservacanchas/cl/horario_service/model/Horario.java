@@ -16,9 +16,17 @@ public class Horario {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "id_cancha")
     private Long idCancha;
+
+    @Column(name = "dia_semana")
     private String diaSemana;
+
+    @Column(name = "hora_inicio")
     private String horaInicio;
+
+    @Column(name = "hora_fin")
     private String horaFin;
+
     private String estado;
 }
