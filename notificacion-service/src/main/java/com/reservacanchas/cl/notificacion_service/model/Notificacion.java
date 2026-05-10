@@ -16,10 +16,19 @@ public class Notificacion {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "id_usuario")
     private Long idUsuario;
+
+    @Column(name = "id_reserva")
     private Long idReserva;
+
     private String mensaje;
+
+    @Column(name = "tipo_notificacion")
     private String tipoNotificacion;
+
+    @Column(name = "fecha_envio")
     private String fechaEnvio;
+
     private String estado;
 }
