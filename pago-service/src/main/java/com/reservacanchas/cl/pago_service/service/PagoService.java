@@ -1,7 +1,7 @@
 package com.reservacanchas.cl.pago_service.service;
 
 import com.reservacanchas.cl.pago_service.dto.PagoDTO;
-import com.reservacanchas.cl.pago_service.exception.RecursoNoEncontradoException;
+import com.reservacanchas.cl.pago_service.exception.ResourceNotFoundException;
 import com.reservacanchas.cl.pago_service.model.Pago;
 import com.reservacanchas.cl.pago_service.repository.PagoRepository;
 
@@ -37,7 +37,7 @@ public class PagoService {
 
         if (reservaExiste == null || !reservaExiste) {
             logger.warn("No se pudo registrar pago. Reserva {} no existe", pagoDTO.getIdReserva());
-            throw new RecursoNoEncontradoException("La reserva no existe");
+            throw new ResourceNotFoundException("La reserva no existe");
         }
 
         Pago pago = new Pago();
@@ -64,7 +64,7 @@ public class PagoService {
         return pagoRepository.findById(id)
                 .orElseThrow(() -> {
                     logger.warn("Pago con ID {} no encontrado", id);
-                    return new RecursoNoEncontradoException("Pago no encontrado");
+                    return new ResourceNotFoundException("Pago no encontrado");
                 });
     }
 
