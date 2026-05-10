@@ -1,6 +1,6 @@
 package com.reservacanchas.cl.resena_service.service;
 
-import com.reservacanchas.cl.resena_service.exception.RecursoNoEncontradoException;
+import com.reservacanchas.cl.resena_service.exception.ResourceNotFoundException;
 import com.reservacanchas.cl.resena_service.model.Resena;
 import com.reservacanchas.cl.resena_service.repository.ResenaRepository;
 import org.springframework.stereotype.Service;
@@ -27,7 +27,7 @@ public class ResenaService {
         );
 
         if (usuarioExiste == null || !usuarioExiste) {
-            throw new RecursoNoEncontradoException("Usuario no existe");
+            throw new ResourceNotFoundException("Usuario no existe");
         }
 
         Boolean canchaExiste = restTemplate.getForObject(
@@ -36,7 +36,7 @@ public class ResenaService {
         );
 
         if (canchaExiste == null || !canchaExiste) {
-            throw new RecursoNoEncontradoException("Cancha no existe");
+            throw new ResourceNotFoundException("Cancha no existe");
         }
 
         Boolean reservaExiste = restTemplate.getForObject(
@@ -45,7 +45,7 @@ public class ResenaService {
         );
 
         if (reservaExiste == null || !reservaExiste) {
-            throw new RecursoNoEncontradoException("Reserva no existe");
+            throw new ResourceNotFoundException("Reserva no existe");
         }
 
         return resenaRepository.save(resena);
@@ -57,7 +57,7 @@ public class ResenaService {
 
     public Resena buscarPorId(Long id) {
         return resenaRepository.findById(id)
-                .orElseThrow(() -> new RecursoNoEncontradoException("Reseña no encontrada"));
+                .orElseThrow(() -> new ResourceNotFoundException("Reseña no encontrada"));
     }
 
     public Resena actualizar(Long id, Resena resenaActualizada) {
