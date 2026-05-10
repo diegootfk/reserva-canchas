@@ -12,9 +12,11 @@ import org.springframework.security.config.annotation.web.reactive.EnableWebFlux
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 
+import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.NimbusReactiveJwtDecoder;
 import org.springframework.security.oauth2.jwt.ReactiveJwtDecoder;
-import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
+
+import org.springframework.security.oauth2.server.resource.authentication.ReactiveJwtAuthenticationConverter;
 
 @Configuration
 @EnableWebFluxSecurity
@@ -28,20 +30,17 @@ public class SecurityConfig {
 
         return http
                 .csrf(csrf -> csrf.disable())
-
                 .authorizeExchange(exchanges -> exchanges
-
-                        // LIBRES
                         .pathMatchers("/auth/**").permitAll()
 
-                        // TODO LO DEMÁS PROTEGIDO
+                        .pathMatchers("/usuarios/**").hasAuthority("ROLE_ADMIN")
+                        .pathMatchers("/pagos/**").hasAuthority("ROLE_ADMIN")
+
                         .anyExchange().authenticated()
                 )
-
                 .oauth2ResourceServer(oauth2 -> oauth2
-                        .jwt(jwt -> {})
+                        .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter()))
                 )
-
                 .build();
     }
 
@@ -57,5 +56,26 @@ public class SecurityConfig {
                 .withSecretKey(key)
                 .macAlgorithm(MacAlgorithm.HS384)
                 .build();
+    }
+
+    @Bean
+    public ReactiveJwtAuthenticationConverter jwtAuthenticationConverter() {
+
+        ReactiveJwtAuthenticationConverter converter =
+                new ReactiveJwtAuthenticationConverter();
+
+        converter.setJwtGrantedAuthoritiesConverter(jwt -> {
+            String role = jwt.getClaimAsString("role");
+
+            if (role == null) {
+                return reactor.core.publisher.Flux.empty();
+            }
+
+            return reactor.core.publisher.Flux.just(
+                new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_" + role)
+        );
+    });
+
+        return converter;
     }
 }

@@ -30,7 +30,7 @@ public class UserService {
             return null;
         }
 
-        return jwtService.generateToken(email);
+        return jwtService.generateToken(email, user.getRole());
     }
 
     public String register(String email, String password) {

@@ -19,15 +19,16 @@ public class JwtService {
         return Keys.hmacShaKeyFor(secret.getBytes());
     }
 
-    public String generateToken(String email) {
+    public String generateToken(String email, String role) {
         Date ahora = new Date();
         Date expiracion = new Date(ahora.getTime() + 1000 * 60 * 60);
 
         return Jwts.builder()
                 .subject(email)
+                .claim("role", role)
                 .issuedAt(ahora)
                 .expiration(expiracion)
-                .signWith(getKey())
+                .signWith(getKey(), Jwts.SIG.HS384)
                 .compact();
     }
 
