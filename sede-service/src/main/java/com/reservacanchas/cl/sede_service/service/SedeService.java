@@ -1,7 +1,10 @@
 package com.reservacanchas.cl.sede_service.service;
 
+import com.reservacanchas.cl.sede_service.exception.BadRequestException;
+import com.reservacanchas.cl.sede_service.exception.ResourceNotFoundException;
 import com.reservacanchas.cl.sede_service.model.Sede;
 import com.reservacanchas.cl.sede_service.repository.SedeRepository;
+
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,6 +19,11 @@ public class SedeService {
     }
 
     public Sede guardar(Sede sede) {
+
+        if (sede.getNombre() == null || sede.getNombre().isBlank()) {
+            throw new BadRequestException("El nombre de la sede es obligatorio");
+        }
+
         return sedeRepository.save(sede);
     }
 
@@ -25,10 +33,12 @@ public class SedeService {
 
     public Sede buscarPorId(Long id) {
         return sedeRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Sede no encontrada"));
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Sede no encontrada"));
     }
 
     public Sede actualizar(Long id, Sede sedeActualizada) {
+
         Sede sede = buscarPorId(id);
 
         sede.setNombre(sedeActualizada.getNombre());
@@ -41,7 +51,9 @@ public class SedeService {
     }
 
     public void eliminar(Long id) {
+
         Sede sede = buscarPorId(id);
+
         sedeRepository.delete(sede);
     }
 
