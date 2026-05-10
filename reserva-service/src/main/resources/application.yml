@@ -18,3 +18,9 @@ spring:
     hibernate:
       ddl-auto: none
     show-sql: true
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          secret-key: esta_es_nuestra_klae_secreta_123456789_viva_el_ping_pong
