@@ -16,9 +16,15 @@ public class Mantenimiento {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "id_cancha")
     private Long idCancha;
+
+    @Column(name = "fecha_inicio")
     private String fechaInicio;
+
+    @Column(name = "fecha_fin")
     private String fechaFin;
+
     private String descripcion;
     private String estado;
 }
