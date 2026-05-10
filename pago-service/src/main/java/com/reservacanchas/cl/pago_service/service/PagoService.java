@@ -68,4 +68,16 @@ public class PagoService {
     public boolean existePorId(Long id) {
         return pagoRepository.existsById(id);
     }
+
+    public List<Pago> buscarPorMetodoPago(String metodoPago) {
+        return pagoRepository.findByMetodoPago(metodoPago);
+    }
+
+    public List<Pago> buscarPorEstadoPago(String estadoPago) {
+        return pagoRepository.findByEstadoPago(estadoPago);
+    }
+
+    public List<Pago> buscarPorReserva(Long idReserva) {
+        return pagoRepository.findByIdReserva(idReserva);
+    }
 }

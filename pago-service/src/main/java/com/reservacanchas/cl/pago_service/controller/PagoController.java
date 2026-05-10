@@ -51,4 +51,19 @@ public class PagoController {
     public boolean existe(@PathVariable Long id) {
         return pagoService.existePorId(id);
     }
+
+    @GetMapping("/metodo/{metodoPago}")
+    public ResponseEntity<List<Pago>> buscarPorMetodoPago(@PathVariable String metodoPago) {
+        return ResponseEntity.ok(pagoService.buscarPorMetodoPago(metodoPago));
+    }
+
+    @GetMapping("/estado/{estadoPago}")
+    public ResponseEntity<List<Pago>> buscarPorEstadoPago(@PathVariable String estadoPago) {
+        return ResponseEntity.ok(pagoService.buscarPorEstadoPago(estadoPago));
+    }
+
+    @GetMapping("/reserva/{idReserva}")
+    public ResponseEntity<List<Pago>> buscarPorReserva(@PathVariable Long idReserva) {
+        return ResponseEntity.ok(pagoService.buscarPorReserva(idReserva));
+    }
 }
