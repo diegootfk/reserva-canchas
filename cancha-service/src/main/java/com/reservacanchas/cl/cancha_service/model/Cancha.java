@@ -17,8 +17,13 @@ public class Cancha {
     private Long id;
 
     private String nombre;
+
+    @Column(name = "tipo_cancha")
     private String tipoCancha;
+
+    @Column(name = "precio_hora")
     private Double precioHora;
+
     private Integer capacidad;
     private String estado;
 }
