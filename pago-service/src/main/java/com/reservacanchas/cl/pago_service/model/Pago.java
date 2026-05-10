@@ -16,8 +16,14 @@ public class Pago {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "id_reserva")
     private Long idReserva;
+
     private Double monto;
+
+    @Column(name = "metodo_pago")
     private String metodoPago;
+
+    @Column(name = "estado_pago")
     private String estadoPago;
 }
