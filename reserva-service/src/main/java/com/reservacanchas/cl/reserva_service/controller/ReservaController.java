@@ -50,4 +50,19 @@ public class ReservaController {
     public boolean existe(@PathVariable Long id) {
         return reservaService.existePorId(id);
     }
+
+    @GetMapping("/estado/{estado}")
+    public ResponseEntity<List<Reserva>> buscarPorEstado(@PathVariable String estado) {
+        return ResponseEntity.ok(reservaService.buscarPorEstado(estado));
+    }
+
+    @GetMapping("/usuario/{idUsuario}")
+    public ResponseEntity<List<Reserva>> buscarPorUsuario(@PathVariable Long idUsuario) {
+        return ResponseEntity.ok(reservaService.buscarPorUsuario(idUsuario));
+    }
+
+    @GetMapping("/cancha/{idCancha}")
+    public ResponseEntity<List<Reserva>> buscarPorCancha(@PathVariable Long idCancha) {
+        return ResponseEntity.ok(reservaService.buscarPorCancha(idCancha));
+    }
 }

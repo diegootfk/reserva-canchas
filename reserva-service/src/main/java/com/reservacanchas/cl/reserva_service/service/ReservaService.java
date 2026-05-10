@@ -76,4 +76,16 @@ public class ReservaService {
     public boolean existePorId(Long id) {
         return reservaRepository.existsById(id);
     }
+
+    public List<Reserva> buscarPorEstado(String estado) {
+        return reservaRepository.findByEstado(estado);
+    }
+
+    public List<Reserva> buscarPorUsuario(Long idUsuario) {
+        return reservaRepository.findByIdUsuario(idUsuario);
+    }
+
+    public List<Reserva> buscarPorCancha(Long idCancha) {
+        return reservaRepository.findByIdCancha(idCancha);
+    }
 }
