@@ -16,8 +16,12 @@ public class Reserva {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "id_usuario")
     private Long idUsuario;
+
+    @Column(name = "id_cancha")
     private Long idCancha;
+
     private Double total;
     private String estado;
 }
