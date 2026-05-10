@@ -22,7 +22,7 @@ public class MantenimientoService {
     public Mantenimiento guardar(Mantenimiento mantenimiento) {
 
         Boolean canchaExiste = restTemplate.getForObject(
-                "http://localhost:9092/canchas/" + mantenimiento.getIdCancha() + "/exists",
+                "http://localhost:7092/canchas/" + mantenimiento.getIdCancha() + "/exists",
                 Boolean.class
         );
 

@@ -20,7 +20,7 @@ public class DisponibilidadService {
 
     public Disponibilidad guardar(Disponibilidad disponibilidad) {
         Boolean canchaExiste = restTemplate.getForObject(
-                "http://localhost:9092/canchas/" + disponibilidad.getIdCancha() + "/exists",
+                "http://localhost:7092/canchas/" + disponibilidad.getIdCancha() + "/exists",
                 Boolean.class
         );
 

@@ -20,7 +20,7 @@ public class HorarioService {
 
     public Horario guardar(Horario horario) {
         Boolean canchaExiste = restTemplate.getForObject(
-                "http://localhost:9092/canchas/" + horario.getIdCancha() + "/exists",
+                "http://localhost:7092/canchas/" + horario.getIdCancha() + "/exists",
                 Boolean.class
         );
 

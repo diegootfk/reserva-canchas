@@ -22,7 +22,7 @@ public class NotificacionService {
     public Notificacion guardar(Notificacion notificacion) {
 
         Boolean usuarioExiste = restTemplate.getForObject(
-                "http://localhost:9091/usuarios/" + notificacion.getIdUsuario() + "/exists",
+                "http://localhost:7091/usuarios/" + notificacion.getIdUsuario() + "/exists",
                 Boolean.class
         );
 
@@ -31,7 +31,7 @@ public class NotificacionService {
         }
 
         Boolean reservaExiste = restTemplate.getForObject(
-                "http://localhost:9093/reservas/" + notificacion.getIdReserva() + "/exists",
+                "http://localhost:7093/reservas/" + notificacion.getIdReserva() + "/exists",
                 Boolean.class
         );
 
