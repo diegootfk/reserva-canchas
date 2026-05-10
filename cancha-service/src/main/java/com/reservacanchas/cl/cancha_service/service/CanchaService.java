@@ -1,8 +1,11 @@
 package com.reservacanchas.cl.cancha_service.service;
 
 import com.reservacanchas.cl.cancha_service.dto.CanchaDTO;
+import com.reservacanchas.cl.cancha_service.exception.BadRequestException;
+import com.reservacanchas.cl.cancha_service.exception.ResourceNotFoundException;
 import com.reservacanchas.cl.cancha_service.model.Cancha;
 import com.reservacanchas.cl.cancha_service.repository.CanchaRepository;
+
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,6 +20,11 @@ public class CanchaService {
     }
 
     public Cancha guardar(CanchaDTO canchaDTO) {
+
+        if (canchaDTO.getNombre() == null || canchaDTO.getNombre().isBlank()) {
+            throw new BadRequestException("El nombre de la cancha es obligatorio");
+        }
+
         Cancha cancha = new Cancha();
 
         cancha.setNombre(canchaDTO.getNombre());
@@ -34,10 +42,12 @@ public class CanchaService {
 
     public Cancha buscarPorId(Long id) {
         return canchaRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Cancha no encontrada"));
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Cancha no encontrada"));
     }
 
     public Cancha actualizar(Long id, CanchaDTO canchaDTO) {
+
         Cancha cancha = buscarPorId(id);
 
         cancha.setNombre(canchaDTO.getNombre());
@@ -50,7 +60,9 @@ public class CanchaService {
     }
 
     public void eliminar(Long id) {
+
         Cancha cancha = buscarPorId(id);
+
         canchaRepository.delete(cancha);
     }
 
