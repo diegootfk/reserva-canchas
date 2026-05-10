@@ -8,6 +8,12 @@ spring:
   application:
     name: api-gateway
 
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          secret-key: esta_es_nuestra_klae_secreta_123456789_viva_el_ping_pong
+
   cloud:
     gateway:
       server:
@@ -28,7 +34,7 @@ spring:
               uri: http://localhost:7093
               predicates:
                 - Path=/reservas/**
-            
+
             - id: pago-service
               uri: http://localhost:7094
               predicates:
@@ -38,12 +44,12 @@ spring:
               uri: http://localhost:7095
               predicates:
                 - Path=/sedes/**
-            
+
             - id: horario-service
               uri: http://localhost:7096
               predicates:
                 - Path=/horarios/**
-            
+
             - id: disponibilidad-service
               uri: http://localhost:7097
               predicates:
@@ -63,3 +69,8 @@ spring:
               uri: http://localhost:7100
               predicates:
                 - Path=/mantenimientos/**
+
+            - id: auth-service
+              uri: http://localhost:7101
+              predicates:
+                - Path=/auth/**
