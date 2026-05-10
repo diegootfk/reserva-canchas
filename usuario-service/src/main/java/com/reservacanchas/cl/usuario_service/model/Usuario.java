@@ -22,4 +22,7 @@ public class Usuario {
     private String password;
     private String telefono;
     private String estado;
+
+    @Column(name = "id_rol")
+    private Long idRol;
 }

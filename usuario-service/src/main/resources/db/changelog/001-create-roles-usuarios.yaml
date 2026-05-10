@@ -1,0 +1,222 @@
+databaseChangeLog:
+  - changeSet:
+      id: 001-create-roles
+      author: reserva-canchas
+      changes:
+        - createTable:
+            tableName: roles
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: nombre_rol
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: descripcion
+                  type: VARCHAR(150)
+
+  - changeSet:
+      id: 002-create-usuarios
+      author: reserva-canchas
+      changes:
+        - createTable:
+            tableName: usuarios
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: nombre
+                  type: VARCHAR(80)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: apellido
+                  type: VARCHAR(80)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: email
+                  type: VARCHAR(120)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: password
+                  type: VARCHAR(120)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: telefono
+                  type: VARCHAR(20)
+              - column:
+                  name: estado
+                  type: VARCHAR(20)
+              - column:
+                  name: id_rol
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+
+        - addForeignKeyConstraint:
+            baseTableName: usuarios
+            baseColumnNames: id_rol
+            referencedTableName: roles
+            referencedColumnNames: id
+            constraintName: fk_usuarios_roles
+
+  - changeSet:
+      id: 003-insert-roles
+      author: reserva-canchas
+      changes:
+        - insert:
+            tableName: roles
+            columns:
+              - column:
+                  name: nombre_rol
+                  value: ADMIN
+              - column:
+                  name: descripcion
+                  value: Administrador del sistema
+        - insert:
+            tableName: roles
+            columns:
+              - column:
+                  name: nombre_rol
+                  value: CLIENTE
+              - column:
+                  name: descripcion
+                  value: Usuario cliente
+        - insert:
+            tableName: roles
+            columns:
+              - column:
+                  name: nombre_rol
+                  value: OPERADOR
+              - column:
+                  name: descripcion
+                  value: Operador del complejo deportivo
+
+  - changeSet:
+      id: 004-insert-usuarios
+      author: reserva-canchas
+      changes:
+        - insert:
+            tableName: usuarios
+            columns:
+              - column: { name: nombre, value: Diego }
+              - column: { name: apellido, value: Berrios }
+              - column: { name: email, value: di.berriosm@duocuc.cl }
+              - column: { name: password, value: "1234" }
+              - column: { name: telefono, value: "987654321" }
+              - column: { name: estado, value: ACTIVO }
+              - column: { name: id_rol, valueNumeric: 2 }
+
+        - insert:
+            tableName: usuarios
+            columns:
+              - column: { name: nombre, value: Oscar }
+              - column: { name: apellido, value: Muñoz }
+              - column: { name: email, value: o.munoz@duocuc.cl }
+              - column: { name: password, value: "1234" }
+              - column: { name: telefono, value: "912345678" }
+              - column: { name: estado, value: ACTIVO }
+              - column: { name: id_rol, valueNumeric: 2 }
+
+        - insert:
+            tableName: usuarios
+            columns:
+              - column: { name: nombre, value: Carlos }
+              - column: { name: apellido, value: Abarzua }
+              - column: { name: email, value: ca.abarzua@duoc.cl }
+              - column: { name: password, value: "admin123" }
+              - column: { name: telefono, value: "900000001" }
+              - column: { name: estado, value: ACTIVO }
+              - column: { name: id_rol, valueNumeric: 1 }
+
+        - insert:
+            tableName: usuarios
+            columns:
+              - column: { name: nombre, value: Ronald }
+              - column: { name: apellido, value: Villalobos }
+              - column: { name: email, value: ro.villaobos@duocuc.cl }
+              - column: { name: password, value: "op123" }
+              - column: { name: telefono, value: "900000002" }
+              - column: { name: estado, value: ACTIVO }
+              - column: { name: id_rol, valueNumeric: 3 }
+
+        - insert:
+            tableName: usuarios
+            columns:
+              - column: { name: nombre, value: Camila }
+              - column: { name: apellido, value: Rojas }
+              - column: { name: email, value: camila@test.cl }
+              - column: { name: password, value: "1234" }
+              - column: { name: telefono, value: "911111111" }
+              - column: { name: estado, value: ACTIVO }
+              - column: { name: id_rol, valueNumeric: 2 }
+
+        - insert:
+            tableName: usuarios
+            columns:
+              - column: { name: nombre, value: Matias }
+              - column: { name: apellido, value: Gonzalez }
+              - column: { name: email, value: matias@test.cl }
+              - column: { name: password, value: "1234" }
+              - column: { name: telefono, value: "922222222" }
+              - column: { name: estado, value: ACTIVO }
+              - column: { name: id_rol, valueNumeric: 2 }
+
+        - insert:
+            tableName: usuarios
+            columns:
+              - column: { name: nombre, value: Fernanda }
+              - column: { name: apellido, value: Morales }
+              - column: { name: email, value: fernanda@test.cl }
+              - column: { name: password, value: "1234" }
+              - column: { name: telefono, value: "933333333" }
+              - column: { name: estado, value: ACTIVO }
+              - column: { name: id_rol, valueNumeric: 2 }
+
+        - insert:
+            tableName: usuarios
+            columns:
+              - column: { name: nombre, value: Nicolas }
+              - column: { name: apellido, value: Castro }
+              - column: { name: email, value: nicolas@test.cl }
+              - column: { name: password, value: "1234" }
+              - column: { name: telefono, value: "944444444" }
+              - column: { name: estado, value: ACTIVO }
+              - column: { name: id_rol, valueNumeric: 2 }
+
+        - insert:
+            tableName: usuarios
+            columns:
+              - column: { name: nombre, value: Javiera }
+              - column: { name: apellido, value: Torres }
+              - column: { name: email, value: javiera@test.cl }
+              - column: { name: password, value: "1234" }
+              - column: { name: telefono, value: "955555555" }
+              - column: { name: estado, value: ACTIVO }
+              - column: { name: id_rol, valueNumeric: 2 }
+
+        - insert:
+            tableName: usuarios
+            columns:
+              - column: { name: nombre, value: Benjamin }
+              - column: { name: apellido, value: Silva }
+              - column: { name: email, value: benjamin@test.cl }
+              - column: { name: password, value: "1234" }
+              - column: { name: telefono, value: "966666666" }
+              - column: { name: estado, value: ACTIVO }
+              - column: { name: id_rol, valueNumeric: 2 }

@@ -15,4 +15,5 @@ public class UsuarioDTO {
     private String password;
     private String telefono;
     private String estado;
+    private Long idRol;
 }

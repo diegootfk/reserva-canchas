@@ -24,7 +24,7 @@ public class UsuarioService {
         usuario.setPassword(usuarioDTO.getPassword());
         usuario.setTelefono(usuarioDTO.getTelefono());
         usuario.setEstado(usuarioDTO.getEstado());
-
+        usuario.setIdRol(usuarioDTO.getIdRol());
         return usuarioRepository.save(usuario);
     }
 
@@ -46,6 +46,7 @@ public class UsuarioService {
         usuario.setPassword(usuarioDTO.getPassword());
         usuario.setTelefono(usuarioDTO.getTelefono());
         usuario.setEstado(usuarioDTO.getEstado());
+        usuario.setIdRol(usuarioDTO.getIdRol());
 
         return usuarioRepository.save(usuario);
     }
