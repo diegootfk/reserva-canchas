@@ -3,6 +3,9 @@ package com.reservacanchas.cl.usuario_service.controller;
 import com.reservacanchas.cl.usuario_service.dto.UsuarioDTO;
 import com.reservacanchas.cl.usuario_service.model.Usuario;
 import com.reservacanchas.cl.usuario_service.service.UsuarioService;
+
+import jakarta.validation.Valid;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,7 +23,7 @@ public class UsuarioController {
     }
 
     @PostMapping
-    public ResponseEntity<Usuario> crear(@RequestBody UsuarioDTO usuarioDTO) {
+    public ResponseEntity<Usuario> crear(@Valid @RequestBody UsuarioDTO usuarioDTO) {
         Usuario usuario = usuarioService.guardar(usuarioDTO);
         return new ResponseEntity<>(usuario, HttpStatus.CREATED);
     }
@@ -36,7 +39,7 @@ public class UsuarioController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Usuario> actualizar(@PathVariable Long id, @RequestBody UsuarioDTO usuarioDTO) {
+    public ResponseEntity<Usuario> actualizar(@PathVariable Long id, @Valid @RequestBody UsuarioDTO usuarioDTO) {
         return ResponseEntity.ok(usuarioService.actualizar(id, usuarioDTO));
     }
 
