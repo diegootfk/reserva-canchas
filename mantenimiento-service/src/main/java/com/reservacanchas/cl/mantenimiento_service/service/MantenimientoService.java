@@ -1,6 +1,6 @@
 package com.reservacanchas.cl.mantenimiento_service.service;
 
-import com.reservacanchas.cl.mantenimiento_service.exception.RecursoNoEncontradoException;
+import com.reservacanchas.cl.mantenimiento_service.exception.ResourceNotFoundException;
 import com.reservacanchas.cl.mantenimiento_service.model.Mantenimiento;
 import com.reservacanchas.cl.mantenimiento_service.repository.MantenimientoRepository;
 import org.springframework.stereotype.Service;
@@ -27,7 +27,7 @@ public class MantenimientoService {
         );
 
         if (canchaExiste == null || !canchaExiste) {
-            throw new RecursoNoEncontradoException("La cancha no existe");
+            throw new ResourceNotFoundException("La cancha no existe");
         }
 
         return mantenimientoRepository.save(mantenimiento);
@@ -39,7 +39,7 @@ public class MantenimientoService {
 
     public Mantenimiento buscarPorId(Long id) {
         return mantenimientoRepository.findById(id)
-                .orElseThrow(() -> new RecursoNoEncontradoException("Mantenimiento no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Mantenimiento no encontrado"));
     }
 
     public Mantenimiento actualizar(Long id, Mantenimiento mantenimientoActualizado) {
