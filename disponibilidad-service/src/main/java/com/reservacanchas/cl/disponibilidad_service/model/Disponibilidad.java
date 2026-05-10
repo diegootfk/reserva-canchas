@@ -16,9 +16,16 @@ public class Disponibilidad {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "id_cancha")
     private Long idCancha;
+
     private String fecha;
+
+    @Column(name = "hora_inicio")
     private String horaInicio;
+
+    @Column(name = "hora_fin")
     private String horaFin;
+
     private String estado;
 }

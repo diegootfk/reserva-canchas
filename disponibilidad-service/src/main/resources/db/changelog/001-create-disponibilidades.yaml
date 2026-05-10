@@ -1,0 +1,45 @@
+databaseChangeLog:
+  - changeSet:
+      id: 001-create-disponibilidades
+      author: reserva-canchas
+      changes:
+        - createTable:
+            tableName: disponibilidades
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: id_cancha
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: fecha
+                  type: VARCHAR(30)
+              - column:
+                  name: hora_inicio
+                  type: VARCHAR(20)
+              - column:
+                  name: hora_fin
+                  type: VARCHAR(20)
+              - column:
+                  name: estado
+                  type: VARCHAR(30)
+
+  - changeSet:
+      id: 002-insert-disponibilidad
+      author: reserva-canchas
+      changes:
+        - insert:
+            tableName: disponibilidades
+            columns:
+              - column: { name: id_cancha, valueNumeric: 1 }
+              - column: { name: fecha, value: "2026-05-10" }
+              - column: { name: hora_inicio, value: "18:00" }
+              - column: { name: hora_fin, value: "19:00" }
+              - column: { name: estado, value: "DISPONIBLE" }
