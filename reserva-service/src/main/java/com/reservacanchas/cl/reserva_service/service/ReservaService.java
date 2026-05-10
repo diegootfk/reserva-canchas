@@ -1,7 +1,7 @@
 package com.reservacanchas.cl.reserva_service.service;
 
 import com.reservacanchas.cl.reserva_service.dto.ReservaDTO;
-import com.reservacanchas.cl.reserva_service.exception.RecursoNoEncontradoException;
+import com.reservacanchas.cl.reserva_service.exception.ResourceNotFoundException;
 import com.reservacanchas.cl.reserva_service.model.Reserva;
 import com.reservacanchas.cl.reserva_service.repository.ReservaRepository;
 
@@ -39,7 +39,7 @@ public class ReservaService {
 
         if (usuarioExiste == null || !usuarioExiste) {
             logger.warn("No se pudo crear reserva. Usuario {} no existe", reservaDTO.getIdUsuario());
-            throw new RecursoNoEncontradoException("El usuario no existe");
+            throw new ResourceNotFoundException("El usuario no existe");
         }
 
         Boolean canchaExiste = restTemplate.getForObject(
@@ -49,7 +49,7 @@ public class ReservaService {
 
         if (canchaExiste == null || !canchaExiste) {
             logger.warn("No se pudo crear reserva. Cancha {} no existe", reservaDTO.getIdCancha());
-            throw new RecursoNoEncontradoException("La cancha no existe");
+            throw new ResourceNotFoundException("La cancha no existe");
         }
 
         Reserva reserva = new Reserva();
@@ -76,7 +76,7 @@ public class ReservaService {
         return reservaRepository.findById(id)
                 .orElseThrow(() -> {
                     logger.warn("Reserva con ID {} no encontrada", id);
-                    return new RecursoNoEncontradoException("Reserva no encontrada");
+                    return new ResourceNotFoundException("Reserva no encontrada");
                 });
     }
 
