@@ -1,6 +1,6 @@
 package com.reservacanchas.cl.notificacion_service.service;
 
-import com.reservacanchas.cl.notificacion_service.exception.RecursoNoEncontradoException;
+import com.reservacanchas.cl.notificacion_service.exception.ResourceNotFoundException;
 import com.reservacanchas.cl.notificacion_service.model.Notificacion;
 import com.reservacanchas.cl.notificacion_service.repository.NotificacionRepository;
 import org.springframework.stereotype.Service;
@@ -27,7 +27,7 @@ public class NotificacionService {
         );
 
         if (usuarioExiste == null || !usuarioExiste) {
-            throw new RecursoNoEncontradoException("El usuario no existe");
+            throw new ResourceNotFoundException("El usuario no existe");
         }
 
         Boolean reservaExiste = restTemplate.getForObject(
@@ -36,7 +36,7 @@ public class NotificacionService {
         );
 
         if (reservaExiste == null || !reservaExiste) {
-            throw new RecursoNoEncontradoException("La reserva no existe");
+            throw new ResourceNotFoundException("La reserva no existe");
         }
 
         notificacion.setEstado("ENVIADA");
@@ -49,7 +49,7 @@ public class NotificacionService {
 
     public Notificacion buscarPorId(Long id) {
         return notificacionRepository.findById(id)
-                .orElseThrow(() -> new RecursoNoEncontradoException("Notificación no encontrada"));
+                .orElseThrow(() -> new ResourceNotFoundException("Notificación no encontrada"));
     }
 
     public Notificacion actualizar(Long id, Notificacion notificacionActualizada) {
