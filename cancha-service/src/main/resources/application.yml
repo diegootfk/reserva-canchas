@@ -18,3 +18,11 @@ spring:
     hibernate:
       ddl-auto: none
     show-sql: true
+
+  springdoc:
+    api-docs:
+      enabled: true
+
+    swagger-ui:
+      enabled: true
+      path: /doc/swagger-ui.html
