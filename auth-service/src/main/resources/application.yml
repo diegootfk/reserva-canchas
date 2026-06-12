@@ -17,3 +17,11 @@ spring:
 
 jwt:
   secret: esta_es_nuestra_klae_secreta_123456789_viva_el_ping_pong
+
+springdoc:
+  api-docs:
+    enabled: true
+
+  swagger-ui:
+    enabled: true
+    path: /doc/swagger-ui.html
