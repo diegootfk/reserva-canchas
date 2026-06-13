@@ -11,11 +11,19 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 
 import jakarta.validation.Valid;
 
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.Link;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 
 @Tag(
         name = "Pagos",
@@ -50,27 +58,39 @@ public class PagoController {
 
     @Operation(
             summary = "Listar pagos",
-            description = "Obtiene todos los pagos registrados en el sistema"
+            description = "Obtiene todos los pagos registrados en el sistema con enlaces HATEOAS"
     )
     @ApiResponse(responseCode = "200", description = "Listado obtenido correctamente")
     @GetMapping
-    public ResponseEntity<List<Pago>> listar() {
+    public ResponseEntity<CollectionModel<EntityModel<Pago>>> listar() {
 
-        return ResponseEntity.ok(pagoService.listar());
+        List<EntityModel<Pago>> pagos = pagoService.listar()
+                .stream()
+                .map(this::agregarLinks)
+                .collect(Collectors.toList());
+
+        CollectionModel<EntityModel<Pago>> respuesta = CollectionModel.of(
+                pagos,
+                linkTo(PagoController.class).withSelfRel()
+        );
+
+        return ResponseEntity.ok(respuesta);
     }
 
     @Operation(
             summary = "Buscar pago por ID",
-            description = "Obtiene un pago específico mediante su identificador"
+            description = "Obtiene un pago específico mediante su identificador con enlaces HATEOAS"
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Pago encontrado"),
             @ApiResponse(responseCode = "404", description = "Pago no encontrado")
     })
     @GetMapping("/{id}")
-    public ResponseEntity<Pago> buscarPorId(@PathVariable Long id) {
+    public ResponseEntity<EntityModel<Pago>> buscarPorId(@PathVariable Long id) {
 
-        return ResponseEntity.ok(pagoService.buscarPorId(id));
+        Pago pago = pagoService.buscarPorId(id);
+
+        return ResponseEntity.ok(agregarLinks(pago));
     }
 
     @Operation(
@@ -121,43 +141,85 @@ public class PagoController {
 
     @Operation(
             summary = "Buscar pagos por método",
-            description = "Obtiene todos los pagos realizados con un método de pago específico"
+            description = "Obtiene todos los pagos realizados con un método de pago específico con enlaces HATEOAS"
     )
     @ApiResponse(responseCode = "200", description = "Pagos encontrados correctamente")
     @GetMapping("/metodo/{metodoPago}")
-    public ResponseEntity<List<Pago>> buscarPorMetodoPago(
+    public ResponseEntity<CollectionModel<EntityModel<Pago>>> buscarPorMetodoPago(
             @PathVariable String metodoPago) {
 
-        return ResponseEntity.ok(
-                pagoService.buscarPorMetodoPago(metodoPago)
+        List<EntityModel<Pago>> pagos = pagoService.buscarPorMetodoPago(metodoPago)
+                .stream()
+                .map(this::agregarLinks)
+                .collect(Collectors.toList());
+
+        CollectionModel<EntityModel<Pago>> respuesta = CollectionModel.of(
+                pagos,
+                linkTo(PagoController.class).slash("metodo").slash(metodoPago).withSelfRel(),
+                linkTo(PagoController.class).withRel("pagos")
         );
+
+        return ResponseEntity.ok(respuesta);
     }
 
     @Operation(
             summary = "Buscar pagos por estado",
-            description = "Obtiene todos los pagos según su estado"
+            description = "Obtiene todos los pagos según su estado con enlaces HATEOAS"
     )
     @ApiResponse(responseCode = "200", description = "Pagos encontrados correctamente")
     @GetMapping("/estado/{estadoPago}")
-    public ResponseEntity<List<Pago>> buscarPorEstadoPago(
+    public ResponseEntity<CollectionModel<EntityModel<Pago>>> buscarPorEstadoPago(
             @PathVariable String estadoPago) {
 
-        return ResponseEntity.ok(
-                pagoService.buscarPorEstadoPago(estadoPago)
+        List<EntityModel<Pago>> pagos = pagoService.buscarPorEstadoPago(estadoPago)
+                .stream()
+                .map(this::agregarLinks)
+                .collect(Collectors.toList());
+
+        CollectionModel<EntityModel<Pago>> respuesta = CollectionModel.of(
+                pagos,
+                linkTo(PagoController.class).slash("estado").slash(estadoPago).withSelfRel(),
+                linkTo(PagoController.class).withRel("pagos")
         );
+
+        return ResponseEntity.ok(respuesta);
     }
 
     @Operation(
             summary = "Buscar pagos por reserva",
-            description = "Obtiene todos los pagos asociados a una reserva específica"
+            description = "Obtiene todos los pagos asociados a una reserva específica con enlaces HATEOAS"
     )
     @ApiResponse(responseCode = "200", description = "Pagos encontrados correctamente")
     @GetMapping("/reserva/{idReserva}")
-    public ResponseEntity<List<Pago>> buscarPorReserva(
+    public ResponseEntity<CollectionModel<EntityModel<Pago>>> buscarPorReserva(
             @PathVariable Long idReserva) {
 
-        return ResponseEntity.ok(
-                pagoService.buscarPorReserva(idReserva)
+        List<EntityModel<Pago>> pagos = pagoService.buscarPorReserva(idReserva)
+                .stream()
+                .map(this::agregarLinks)
+                .collect(Collectors.toList());
+
+        CollectionModel<EntityModel<Pago>> respuesta = CollectionModel.of(
+                pagos,
+                linkTo(PagoController.class).slash("reserva").slash(idReserva).withSelfRel(),
+                linkTo(PagoController.class).withRel("pagos"),
+                Link.of("http://localhost:7093/reservas/" + idReserva).withRel("reserva")
+        );
+
+        return ResponseEntity.ok(respuesta);
+    }
+
+    private EntityModel<Pago> agregarLinks(Pago pago) {
+
+        return EntityModel.of(
+                pago,
+                linkTo(PagoController.class).slash(pago.getId()).withSelfRel(),
+                linkTo(PagoController.class).withRel("pagos"),
+                linkTo(PagoController.class).slash(pago.getId()).slash("exists").withRel("existe"),
+                linkTo(PagoController.class).slash("metodo").slash(pago.getMetodoPago()).withRel("pagos-por-metodo"),
+                linkTo(PagoController.class).slash("estado").slash(pago.getEstadoPago()).withRel("pagos-por-estado"),
+                linkTo(PagoController.class).slash("reserva").slash(pago.getIdReserva()).withRel("pagos-por-reserva"),
+                Link.of("http://localhost:7093/reservas/" + pago.getIdReserva()).withRel("reserva")
         );
     }
 }
