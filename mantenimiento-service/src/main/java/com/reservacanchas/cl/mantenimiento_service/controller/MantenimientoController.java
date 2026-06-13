@@ -8,11 +8,19 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.Link;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 
 @Tag(
         name = "Mantenimientos",
@@ -47,27 +55,39 @@ public class MantenimientoController {
 
     @Operation(
             summary = "Listar mantenimientos",
-            description = "Obtiene todos los mantenimientos registrados"
+            description = "Obtiene todos los mantenimientos registrados con enlaces HATEOAS"
     )
     @ApiResponse(responseCode = "200", description = "Listado obtenido correctamente")
     @GetMapping
-    public ResponseEntity<List<Mantenimiento>> listar() {
+    public ResponseEntity<CollectionModel<EntityModel<Mantenimiento>>> listar() {
 
-        return ResponseEntity.ok(mantenimientoService.listar());
+        List<EntityModel<Mantenimiento>> mantenimientos = mantenimientoService.listar()
+                .stream()
+                .map(this::agregarLinks)
+                .collect(Collectors.toList());
+
+        CollectionModel<EntityModel<Mantenimiento>> respuesta = CollectionModel.of(
+                mantenimientos,
+                linkTo(MantenimientoController.class).withSelfRel()
+        );
+
+        return ResponseEntity.ok(respuesta);
     }
 
     @Operation(
             summary = "Buscar mantenimiento por ID",
-            description = "Obtiene un mantenimiento específico mediante su identificador"
+            description = "Obtiene un mantenimiento específico mediante su identificador con enlaces HATEOAS"
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Mantenimiento encontrado"),
             @ApiResponse(responseCode = "404", description = "Mantenimiento no encontrado")
     })
     @GetMapping("/{id}")
-    public ResponseEntity<Mantenimiento> buscarPorId(@PathVariable Long id) {
+    public ResponseEntity<EntityModel<Mantenimiento>> buscarPorId(@PathVariable Long id) {
 
-        return ResponseEntity.ok(mantenimientoService.buscarPorId(id));
+        Mantenimiento mantenimiento = mantenimientoService.buscarPorId(id);
+
+        return ResponseEntity.ok(agregarLinks(mantenimiento));
     }
 
     @Operation(
@@ -113,5 +133,16 @@ public class MantenimientoController {
     public boolean existe(@PathVariable Long id) {
 
         return mantenimientoService.existePorId(id);
+    }
+
+    private EntityModel<Mantenimiento> agregarLinks(Mantenimiento mantenimiento) {
+
+        return EntityModel.of(
+                mantenimiento,
+                linkTo(MantenimientoController.class).slash(mantenimiento.getId()).withSelfRel(),
+                linkTo(MantenimientoController.class).withRel("mantenimientos"),
+                linkTo(MantenimientoController.class).slash(mantenimiento.getId()).slash("exists").withRel("existe"),
+                Link.of("http://localhost:7092/canchas/" + mantenimiento.getIdCancha()).withRel("cancha")
+        );
     }
 }
