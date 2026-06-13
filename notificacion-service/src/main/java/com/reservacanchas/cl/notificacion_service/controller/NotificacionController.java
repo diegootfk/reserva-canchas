@@ -8,11 +8,19 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.Link;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 
 @Tag(
         name = "Notificaciones",
@@ -47,27 +55,39 @@ public class NotificacionController {
 
     @Operation(
             summary = "Listar notificaciones",
-            description = "Obtiene todas las notificaciones registradas"
+            description = "Obtiene todas las notificaciones registradas con enlaces HATEOAS"
     )
     @ApiResponse(responseCode = "200", description = "Listado obtenido correctamente")
     @GetMapping
-    public ResponseEntity<List<Notificacion>> listar() {
+    public ResponseEntity<CollectionModel<EntityModel<Notificacion>>> listar() {
 
-        return ResponseEntity.ok(notificacionService.listar());
+        List<EntityModel<Notificacion>> notificaciones = notificacionService.listar()
+                .stream()
+                .map(this::agregarLinks)
+                .collect(Collectors.toList());
+
+        CollectionModel<EntityModel<Notificacion>> respuesta = CollectionModel.of(
+                notificaciones,
+                linkTo(NotificacionController.class).withSelfRel()
+        );
+
+        return ResponseEntity.ok(respuesta);
     }
 
     @Operation(
             summary = "Buscar notificación por ID",
-            description = "Obtiene una notificación específica mediante su identificador"
+            description = "Obtiene una notificación específica mediante su identificador con enlaces HATEOAS"
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Notificación encontrada"),
             @ApiResponse(responseCode = "404", description = "Notificación no encontrada")
     })
     @GetMapping("/{id}")
-    public ResponseEntity<Notificacion> buscarPorId(@PathVariable Long id) {
+    public ResponseEntity<EntityModel<Notificacion>> buscarPorId(@PathVariable Long id) {
 
-        return ResponseEntity.ok(notificacionService.buscarPorId(id));
+        Notificacion notificacion = notificacionService.buscarPorId(id);
+
+        return ResponseEntity.ok(agregarLinks(notificacion));
     }
 
     @Operation(
@@ -113,5 +133,17 @@ public class NotificacionController {
     public boolean existe(@PathVariable Long id) {
 
         return notificacionService.existePorId(id);
+    }
+
+    private EntityModel<Notificacion> agregarLinks(Notificacion notificacion) {
+
+        return EntityModel.of(
+                notificacion,
+                linkTo(NotificacionController.class).slash(notificacion.getId()).withSelfRel(),
+                linkTo(NotificacionController.class).withRel("notificaciones"),
+                linkTo(NotificacionController.class).slash(notificacion.getId()).slash("exists").withRel("existe"),
+                Link.of("http://localhost:7091/usuarios/" + notificacion.getIdUsuario()).withRel("usuario"),
+                Link.of("http://localhost:7093/reservas/" + notificacion.getIdReserva()).withRel("reserva")
+        );
     }
 }
