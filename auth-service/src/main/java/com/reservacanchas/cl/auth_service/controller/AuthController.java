@@ -1,11 +1,21 @@
 package com.reservacanchas.cl.auth_service.controller;
 
 import com.reservacanchas.cl.auth_service.service.UserService;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
 
+@Tag(
+        name = "Autenticación",
+        description = "Endpoints para registro e inicio de sesión utilizando JWT"
+)
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
@@ -16,8 +26,17 @@ public class AuthController {
         this.userService = userService;
     }
 
+    @Operation(
+            summary = "Iniciar sesión",
+            description = "Permite autenticar un usuario y obtener un token JWT"
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Login realizado correctamente"),
+            @ApiResponse(responseCode = "401", description = "Credenciales inválidas")
+    })
     @PostMapping("/login")
     public Map<String, String> login(@RequestBody Map<String, String> request) {
+
         String email = request.get("email");
         String password = request.get("password");
 
@@ -36,8 +55,17 @@ public class AuthController {
         return response;
     }
 
+    @Operation(
+            summary = "Registrar usuario",
+            description = "Permite registrar un nuevo usuario en el sistema"
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Usuario registrado correctamente"),
+            @ApiResponse(responseCode = "400", description = "Datos inválidos")
+    })
     @PostMapping("/register")
     public Map<String, String> register(@RequestBody Map<String, String> request) {
+
         String email = request.get("email");
         String password = request.get("password");
 
