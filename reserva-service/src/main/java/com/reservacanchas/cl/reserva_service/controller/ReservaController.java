@@ -11,11 +11,19 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 
 import jakarta.validation.Valid;
 
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.Link;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 
 @Tag(
         name = "Reservas",
@@ -50,27 +58,39 @@ public class ReservaController {
 
     @Operation(
             summary = "Listar reservas",
-            description = "Obtiene todas las reservas registradas en el sistema"
+            description = "Obtiene todas las reservas registradas en el sistema con enlaces HATEOAS"
     )
     @ApiResponse(responseCode = "200", description = "Listado obtenido correctamente")
     @GetMapping
-    public ResponseEntity<List<Reserva>> listar() {
+    public ResponseEntity<CollectionModel<EntityModel<Reserva>>> listar() {
 
-        return ResponseEntity.ok(reservaService.listar());
+        List<EntityModel<Reserva>> reservas = reservaService.listar()
+                .stream()
+                .map(this::agregarLinks)
+                .collect(Collectors.toList());
+
+        CollectionModel<EntityModel<Reserva>> respuesta = CollectionModel.of(
+                reservas,
+                linkTo(ReservaController.class).withSelfRel()
+        );
+
+        return ResponseEntity.ok(respuesta);
     }
 
     @Operation(
             summary = "Buscar reserva por ID",
-            description = "Obtiene una reserva específica mediante su identificador"
+            description = "Obtiene una reserva específica mediante su identificador con enlaces HATEOAS"
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Reserva encontrada"),
             @ApiResponse(responseCode = "404", description = "Reserva no encontrada")
     })
     @GetMapping("/{id}")
-    public ResponseEntity<Reserva> buscarPorId(@PathVariable Long id) {
+    public ResponseEntity<EntityModel<Reserva>> buscarPorId(@PathVariable Long id) {
 
-        return ResponseEntity.ok(reservaService.buscarPorId(id));
+        Reserva reserva = reservaService.buscarPorId(id);
+
+        return ResponseEntity.ok(agregarLinks(reserva));
     }
 
     @Operation(
@@ -122,40 +142,85 @@ public class ReservaController {
 
     @Operation(
             summary = "Buscar reservas por estado",
-            description = "Obtiene todas las reservas según su estado"
+            description = "Obtiene todas las reservas según su estado con enlaces HATEOAS"
     )
     @ApiResponse(responseCode = "200", description = "Reservas encontradas correctamente")
     @GetMapping("/estado/{estado}")
-    public ResponseEntity<List<Reserva>> buscarPorEstado(@PathVariable String estado) {
+    public ResponseEntity<CollectionModel<EntityModel<Reserva>>> buscarPorEstado(@PathVariable String estado) {
 
-        return ResponseEntity.ok(
-                reservaService.buscarPorEstado(estado)
+        List<EntityModel<Reserva>> reservas = reservaService.buscarPorEstado(estado)
+                .stream()
+                .map(this::agregarLinks)
+                .collect(Collectors.toList());
+
+        CollectionModel<EntityModel<Reserva>> respuesta = CollectionModel.of(
+                reservas,
+                linkTo(ReservaController.class).slash("estado").slash(estado).withSelfRel(),
+                linkTo(ReservaController.class).withRel("reservas")
         );
+
+        return ResponseEntity.ok(respuesta);
     }
 
     @Operation(
             summary = "Buscar reservas por usuario",
-            description = "Obtiene todas las reservas asociadas a un usuario específico"
+            description = "Obtiene todas las reservas asociadas a un usuario específico con enlaces HATEOAS"
     )
     @ApiResponse(responseCode = "200", description = "Reservas encontradas correctamente")
     @GetMapping("/usuario/{idUsuario}")
-    public ResponseEntity<List<Reserva>> buscarPorUsuario(@PathVariable Long idUsuario) {
+    public ResponseEntity<CollectionModel<EntityModel<Reserva>>> buscarPorUsuario(@PathVariable Long idUsuario) {
 
-        return ResponseEntity.ok(
-                reservaService.buscarPorUsuario(idUsuario)
+        List<EntityModel<Reserva>> reservas = reservaService.buscarPorUsuario(idUsuario)
+                .stream()
+                .map(this::agregarLinks)
+                .collect(Collectors.toList());
+
+        CollectionModel<EntityModel<Reserva>> respuesta = CollectionModel.of(
+                reservas,
+                linkTo(ReservaController.class).slash("usuario").slash(idUsuario).withSelfRel(),
+                linkTo(ReservaController.class).withRel("reservas"),
+                Link.of("http://localhost:7091/usuarios/" + idUsuario).withRel("usuario")
         );
+
+        return ResponseEntity.ok(respuesta);
     }
 
     @Operation(
             summary = "Buscar reservas por cancha",
-            description = "Obtiene todas las reservas asociadas a una cancha específica"
+            description = "Obtiene todas las reservas asociadas a una cancha específica con enlaces HATEOAS"
     )
     @ApiResponse(responseCode = "200", description = "Reservas encontradas correctamente")
     @GetMapping("/cancha/{idCancha}")
-    public ResponseEntity<List<Reserva>> buscarPorCancha(@PathVariable Long idCancha) {
+    public ResponseEntity<CollectionModel<EntityModel<Reserva>>> buscarPorCancha(@PathVariable Long idCancha) {
 
-        return ResponseEntity.ok(
-                reservaService.buscarPorCancha(idCancha)
+        List<EntityModel<Reserva>> reservas = reservaService.buscarPorCancha(idCancha)
+                .stream()
+                .map(this::agregarLinks)
+                .collect(Collectors.toList());
+
+        CollectionModel<EntityModel<Reserva>> respuesta = CollectionModel.of(
+                reservas,
+                linkTo(ReservaController.class).slash("cancha").slash(idCancha).withSelfRel(),
+                linkTo(ReservaController.class).withRel("reservas"),
+                Link.of("http://localhost:7092/canchas/" + idCancha).withRel("cancha")
+        );
+
+        return ResponseEntity.ok(respuesta);
+    }
+
+    private EntityModel<Reserva> agregarLinks(Reserva reserva) {
+
+        return EntityModel.of(
+                reserva,
+                linkTo(ReservaController.class).slash(reserva.getId()).withSelfRel(),
+                linkTo(ReservaController.class).withRel("reservas"),
+                linkTo(ReservaController.class).slash(reserva.getId()).slash("exists").withRel("existe"),
+                linkTo(ReservaController.class).slash("estado").slash(reserva.getEstado()).withRel("reservas-por-estado"),
+                linkTo(ReservaController.class).slash("usuario").slash(reserva.getIdUsuario()).withRel("reservas-por-usuario"),
+                linkTo(ReservaController.class).slash("cancha").slash(reserva.getIdCancha()).withRel("reservas-por-cancha"),
+                Link.of("http://localhost:7091/usuarios/" + reserva.getIdUsuario()).withRel("usuario"),
+                Link.of("http://localhost:7092/canchas/" + reserva.getIdCancha()).withRel("cancha"),
+                Link.of("http://localhost:7094/pagos/reserva/" + reserva.getId()).withRel("pagos")
         );
     }
 }
