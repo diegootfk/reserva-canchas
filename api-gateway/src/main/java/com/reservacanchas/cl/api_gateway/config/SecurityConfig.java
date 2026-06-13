@@ -30,17 +30,32 @@ public class SecurityConfig {
 
         return http
                 .csrf(csrf -> csrf.disable())
+
                 .authorizeExchange(exchanges -> exchanges
+
+                        // AUTH
                         .pathMatchers("/auth/**").permitAll()
 
+                        // SWAGGER Y OPENAPI
+                        .pathMatchers(
+                                "/swagger-ui.html",
+                                "/swagger-ui/**",
+                                "/webjars/**",
+                                "/v3/api-docs/**",
+                                "/api-docs/**"
+                        ).permitAll()
+
+                        // ADMIN
                         .pathMatchers("/usuarios/**").hasAuthority("ROLE_ADMIN")
                         .pathMatchers("/pagos/**").hasAuthority("ROLE_ADMIN")
 
                         .anyExchange().authenticated()
                 )
+
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter()))
                 )
+
                 .build();
     }
 
@@ -65,6 +80,7 @@ public class SecurityConfig {
                 new ReactiveJwtAuthenticationConverter();
 
         converter.setJwtGrantedAuthoritiesConverter(jwt -> {
+
             String role = jwt.getClaimAsString("role");
 
             if (role == null) {
@@ -72,9 +88,11 @@ public class SecurityConfig {
             }
 
             return reactor.core.publisher.Flux.just(
-                new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_" + role)
-        );
-    });
+                    new org.springframework.security.core.authority.SimpleGrantedAuthority(
+                            "ROLE_" + role
+                    )
+            );
+        });
 
         return converter;
     }
