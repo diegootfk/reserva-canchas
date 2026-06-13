@@ -57,7 +57,7 @@ public class AuthController {
 
     @Operation(
             summary = "Registrar usuario",
-            description = "Permite registrar un nuevo usuario en el sistema"
+            description = "Permite registrar un nuevo usuario con rol USER"
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Usuario registrado correctamente"),
@@ -70,6 +70,28 @@ public class AuthController {
         String password = request.get("password");
 
         String resultado = userService.register(email, password);
+
+        Map<String, String> response = new HashMap<>();
+        response.put("message", resultado);
+
+        return response;
+    }
+
+    @Operation(
+            summary = "Registrar administrador",
+            description = "Permite registrar un nuevo usuario con rol ADMIN"
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Administrador registrado correctamente"),
+            @ApiResponse(responseCode = "400", description = "Datos inválidos")
+    })
+    @PostMapping("/register-admin")
+    public Map<String, String> registerAdmin(@RequestBody Map<String, String> request) {
+
+        String email = request.get("email");
+        String password = request.get("password");
+
+        String resultado = userService.registerAdmin(email, password);
 
         Map<String, String> response = new HashMap<>();
         response.put("message", resultado);
