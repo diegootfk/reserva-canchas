@@ -6,6 +6,7 @@ import com.reservacanchas.cl.resena_service.service.ResenaService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import org.springframework.http.HttpStatus;
@@ -18,6 +19,7 @@ import java.util.List;
         name = "Reseñas",
         description = "Operaciones para la gestión de reseñas de usuarios sobre las canchas"
 )
+@SecurityRequirement(name = "bearerAuth")
 @RestController
 @RequestMapping("/resenas")
 public class ResenaController {
