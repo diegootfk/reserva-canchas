@@ -50,13 +50,11 @@ public class SecurityConfig {
                         // USUARIOS
                         // =========================
 
-                        // USER o ADMIN
                         .pathMatchers(HttpMethod.GET,
                                 "/usuarios",
                                 "/usuarios/*")
                         .hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
 
-                        // SOLO ADMIN
                         .pathMatchers(HttpMethod.POST,
                                 "/usuarios")
                         .hasAuthority("ROLE_ADMIN")
@@ -67,6 +65,27 @@ public class SecurityConfig {
 
                         .pathMatchers(HttpMethod.DELETE,
                                 "/usuarios/*")
+                        .hasAuthority("ROLE_ADMIN")
+
+                        // =========================
+                        // SEDES
+                        // =========================
+
+                        .pathMatchers(HttpMethod.GET,
+                                "/sedes",
+                                "/sedes/*")
+                        .hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
+
+                        .pathMatchers(HttpMethod.POST,
+                                "/sedes")
+                        .hasAuthority("ROLE_ADMIN")
+
+                        .pathMatchers(HttpMethod.PUT,
+                                "/sedes/*")
+                        .hasAuthority("ROLE_ADMIN")
+
+                        .pathMatchers(HttpMethod.DELETE,
+                                "/sedes/*")
                         .hasAuthority("ROLE_ADMIN")
 
                         // =========================
