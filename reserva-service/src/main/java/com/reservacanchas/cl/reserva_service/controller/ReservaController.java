@@ -7,6 +7,7 @@ import com.reservacanchas.cl.reserva_service.service.ReservaService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import jakarta.validation.Valid;
@@ -21,6 +22,7 @@ import java.util.List;
         name = "Reservas",
         description = "Operaciones para la gestión de reservas de canchas y validación entre microservicios"
 )
+@SecurityRequirement(name = "bearerAuth")
 @RestController
 @RequestMapping("/reservas")
 public class ReservaController {
