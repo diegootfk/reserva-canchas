@@ -6,6 +6,7 @@ import com.reservacanchas.cl.notificacion_service.service.NotificacionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import org.springframework.http.HttpStatus;
@@ -18,6 +19,7 @@ import java.util.List;
         name = "Notificaciones",
         description = "Operaciones para la gestión de notificaciones del sistema"
 )
+@SecurityRequirement(name = "bearerAuth")
 @RestController
 @RequestMapping("/notificaciones")
 public class NotificacionController {
