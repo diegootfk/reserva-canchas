@@ -7,6 +7,7 @@ import javax.crypto.spec.SecretKeySpec;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
@@ -45,10 +46,37 @@ public class SecurityConfig {
                                 "/api-docs/**"
                         ).permitAll()
 
-                        // ADMIN
-                        .pathMatchers("/usuarios/**").hasAuthority("ROLE_ADMIN")
-                        .pathMatchers("/pagos/**").hasAuthority("ROLE_ADMIN")
+                        // =========================
+                        // USUARIOS
+                        // =========================
 
+                        // USER o ADMIN
+                        .pathMatchers(HttpMethod.GET,
+                                "/usuarios",
+                                "/usuarios/*")
+                        .hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
+
+                        // SOLO ADMIN
+                        .pathMatchers(HttpMethod.POST,
+                                "/usuarios")
+                        .hasAuthority("ROLE_ADMIN")
+
+                        .pathMatchers(HttpMethod.PUT,
+                                "/usuarios/*")
+                        .hasAuthority("ROLE_ADMIN")
+
+                        .pathMatchers(HttpMethod.DELETE,
+                                "/usuarios/*")
+                        .hasAuthority("ROLE_ADMIN")
+
+                        // =========================
+                        // PAGOS
+                        // =========================
+
+                        .pathMatchers("/pagos/**")
+                        .hasAuthority("ROLE_ADMIN")
+
+                        // RESTO DE MICROSERVICIOS
                         .anyExchange().authenticated()
                 )
 
