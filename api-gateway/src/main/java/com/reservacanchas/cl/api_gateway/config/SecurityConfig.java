@@ -34,70 +34,203 @@ public class SecurityConfig {
 
                 .authorizeExchange(exchanges -> exchanges
 
-                        // AUTH
-                        .pathMatchers("/auth/**").permitAll()
+                // AUTH
+                .pathMatchers("/auth/**").permitAll()
 
-                        // SWAGGER Y OPENAPI
-                        .pathMatchers(
-                                "/swagger-ui.html",
-                                "/swagger-ui/**",
-                                "/webjars/**",
-                                "/v3/api-docs/**",
-                                "/api-docs/**"
-                        ).permitAll()
+                // SWAGGER Y OPENAPI
+                .pathMatchers(
+                        "/swagger-ui.html",
+                        "/swagger-ui/**",
+                        "/webjars/**",
+                        "/v3/api-docs/**",
+                        "/api-docs/**"
+                ).permitAll()
 
-                        // =========================
-                        // USUARIOS
-                        // =========================
+                // =========================
+                // USUARIOS
+                // =========================
 
-                        .pathMatchers(HttpMethod.GET,
-                                "/usuarios",
-                                "/usuarios/*")
-                        .hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
+                .pathMatchers(HttpMethod.GET,
+                        "/usuarios",
+                        "/usuarios/*")
+                .hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
 
-                        .pathMatchers(HttpMethod.POST,
-                                "/usuarios")
-                        .hasAuthority("ROLE_ADMIN")
+                .pathMatchers(HttpMethod.POST,
+                        "/usuarios")
+                .hasAuthority("ROLE_ADMIN")
 
-                        .pathMatchers(HttpMethod.PUT,
-                                "/usuarios/*")
-                        .hasAuthority("ROLE_ADMIN")
+                .pathMatchers(HttpMethod.PUT,
+                        "/usuarios/*")
+                .hasAuthority("ROLE_ADMIN")
 
-                        .pathMatchers(HttpMethod.DELETE,
-                                "/usuarios/*")
-                        .hasAuthority("ROLE_ADMIN")
+                .pathMatchers(HttpMethod.DELETE,
+                        "/usuarios/*")
+                .hasAuthority("ROLE_ADMIN")
 
-                        // =========================
-                        // SEDES
-                        // =========================
+                // =========================
+                // SEDES
+                // =========================
 
-                        .pathMatchers(HttpMethod.GET,
-                                "/sedes",
-                                "/sedes/*")
-                        .hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
+                .pathMatchers(HttpMethod.GET,
+                        "/sedes",
+                        "/sedes/*")
+                .hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
 
-                        .pathMatchers(HttpMethod.POST,
-                                "/sedes")
-                        .hasAuthority("ROLE_ADMIN")
+                .pathMatchers(HttpMethod.POST,
+                        "/sedes")
+                .hasAuthority("ROLE_ADMIN")
 
-                        .pathMatchers(HttpMethod.PUT,
-                                "/sedes/*")
-                        .hasAuthority("ROLE_ADMIN")
+                .pathMatchers(HttpMethod.PUT,
+                        "/sedes/*")
+                .hasAuthority("ROLE_ADMIN")
 
-                        .pathMatchers(HttpMethod.DELETE,
-                                "/sedes/*")
-                        .hasAuthority("ROLE_ADMIN")
+                .pathMatchers(HttpMethod.DELETE,
+                        "/sedes/*")
+                .hasAuthority("ROLE_ADMIN")
 
-                        // =========================
-                        // PAGOS
-                        // =========================
+                // =========================
+                // RESERVAS
+                // =========================
 
-                        .pathMatchers("/pagos/**")
-                        .hasAuthority("ROLE_ADMIN")
+                .pathMatchers(HttpMethod.GET,
+                        "/reservas",
+                        "/reservas/*",
+                        "/reservas/estado/*",
+                        "/reservas/usuario/*",
+                        "/reservas/cancha/*")
+                .hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
 
-                        // RESTO DE MICROSERVICIOS
-                        .anyExchange().authenticated()
-                )
+                .pathMatchers(HttpMethod.POST,
+                        "/reservas")
+                .hasAuthority("ROLE_ADMIN")
+
+                .pathMatchers(HttpMethod.PUT,
+                        "/reservas/*")
+                .hasAuthority("ROLE_ADMIN")
+
+                .pathMatchers(HttpMethod.DELETE,
+                        "/reservas/*")
+                .hasAuthority("ROLE_ADMIN")
+
+                // =========================
+                // CANCHAS
+                // =========================
+
+                .pathMatchers(HttpMethod.GET,
+                        "/canchas",
+                        "/canchas/*")
+                .hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
+
+                .pathMatchers(HttpMethod.POST,
+                        "/canchas")
+                .hasAuthority("ROLE_ADMIN")
+
+                .pathMatchers(HttpMethod.PUT,
+                        "/canchas/*")
+                .hasAuthority("ROLE_ADMIN")
+
+                .pathMatchers(HttpMethod.DELETE,
+                        "/canchas/*")
+                .hasAuthority("ROLE_ADMIN")
+
+                // =========================
+                // HORARIOS
+                // =========================
+
+                .pathMatchers(HttpMethod.GET,
+                        "/horarios",
+                        "/horarios/*")
+                .hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
+
+                .pathMatchers(HttpMethod.POST,
+                        "/horarios")
+                .hasAuthority("ROLE_ADMIN")
+
+                .pathMatchers(HttpMethod.PUT,
+                        "/horarios/*")
+                .hasAuthority("ROLE_ADMIN")
+
+                .pathMatchers(HttpMethod.DELETE,
+                        "/horarios/*")
+                .hasAuthority("ROLE_ADMIN")
+
+                // =========================
+                // DISPONIBILIDADES
+                // =========================
+
+                .pathMatchers(HttpMethod.GET,
+                        "/disponibilidades",
+                        "/disponibilidades/*")
+                .hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
+
+                .pathMatchers(HttpMethod.POST,
+                        "/disponibilidades")
+                .hasAuthority("ROLE_ADMIN")
+
+                .pathMatchers(HttpMethod.PUT,
+                        "/disponibilidades/*")
+                .hasAuthority("ROLE_ADMIN")
+
+                .pathMatchers(HttpMethod.DELETE,
+                        "/disponibilidades/*")
+                .hasAuthority("ROLE_ADMIN")
+
+                // =========================
+                // RESEÑAS
+                // =========================
+
+                .pathMatchers(HttpMethod.GET,
+                        "/resenas",
+                        "/resenas/*")
+                .hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
+
+                .pathMatchers(HttpMethod.POST,
+                        "/resenas")
+                .hasAuthority("ROLE_ADMIN")
+
+                .pathMatchers(HttpMethod.PUT,
+                        "/resenas/*")
+                .hasAuthority("ROLE_ADMIN")
+
+                .pathMatchers(HttpMethod.DELETE,
+                        "/resenas/*")
+                .hasAuthority("ROLE_ADMIN")
+
+                // =========================
+                // NOTIFICACIONES
+                // =========================
+
+                .pathMatchers(HttpMethod.GET,
+                        "/notificaciones",
+                        "/notificaciones/*")
+                .hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
+
+                .pathMatchers(HttpMethod.POST,
+                        "/notificaciones")
+                .hasAuthority("ROLE_ADMIN")
+
+                .pathMatchers(HttpMethod.PUT,
+                        "/notificaciones/*")
+                .hasAuthority("ROLE_ADMIN")
+
+                .pathMatchers(HttpMethod.DELETE,
+                        "/notificaciones/*")
+                .hasAuthority("ROLE_ADMIN")
+
+                // =========================
+                // MANTENIMIENTOS
+                // =========================
+
+                .pathMatchers("/mantenimientos/**")
+                .hasAuthority("ROLE_ADMIN")
+
+                // =========================
+                // PAGOS
+                // =========================
+
+                .pathMatchers("/pagos/**")
+                .hasAuthority("ROLE_ADMIN")
+        )
 
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter()))
