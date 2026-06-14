@@ -7,6 +7,7 @@ import com.reservacanchas.cl.pago_service.service.PagoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import jakarta.validation.Valid;
@@ -21,6 +22,7 @@ import java.util.List;
         name = "Pagos",
         description = "Operaciones para la gestión de pagos asociados a reservas"
 )
+@SecurityRequirement(name = "bearerAuth")
 @RestController
 @RequestMapping("/pagos")
 public class PagoController {
