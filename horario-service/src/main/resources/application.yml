@@ -11,8 +11,18 @@ spring:
     password:
 
   liquibase:
-    change-log: classpath:db/changelog/db.changelog-master.yaml
+    enabled: true
+    change-log: classpath:/db/changelog/db.changelog-master.yaml
 
   jpa:
     hibernate:
       ddl-auto: none
+    show-sql: true
+
+springdoc:
+  api-docs:
+    enabled: true
+
+  swagger-ui:
+    enabled: true
+    path: /doc/swagger-ui.html

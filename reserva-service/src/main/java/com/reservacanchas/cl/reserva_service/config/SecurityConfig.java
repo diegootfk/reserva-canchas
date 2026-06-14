@@ -27,7 +27,20 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
+
+                        // SWAGGER / OPENAPI - público
+                        .requestMatchers(
+                                "/v3/api-docs/**",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html",
+                                "/doc/swagger-ui.html",
+                                "/doc/**"
+                        ).permitAll()
+
+                        // Endpoint público que ya tenías
                         .requestMatchers("/reservas/*/exists").permitAll()
+
+                        // Todo lo demás requiere JWT
                         .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2

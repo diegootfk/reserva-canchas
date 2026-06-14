@@ -11,13 +11,17 @@ public class UserService {
     private final JwtService jwtService;
     private final HashService hashService;
 
-    public UserService(UserRepository userRepository, JwtService jwtService, HashService hashService) {
+    public UserService(UserRepository userRepository,
+                       JwtService jwtService,
+                       HashService hashService) {
+
         this.userRepository = userRepository;
         this.jwtService = jwtService;
         this.hashService = hashService;
     }
 
     public String login(String email, String password) {
+
         User user = userRepository.findByEmail(email);
 
         if (user == null) {
@@ -34,6 +38,7 @@ public class UserService {
     }
 
     public String register(String email, String password) {
+
         User existe = userRepository.findByEmail(email);
 
         if (existe != null) {
@@ -41,6 +46,7 @@ public class UserService {
         }
 
         User user = new User();
+
         user.setEmail(email);
         user.setPassword(hashService.sha1(password));
         user.setRole("USER");
@@ -50,7 +56,27 @@ public class UserService {
         return "Usuario creado correctamente";
     }
 
+    public String registerAdmin(String email, String password) {
+
+        User existe = userRepository.findByEmail(email);
+
+        if (existe != null) {
+            return "Usuario ya existe";
+        }
+
+        User user = new User();
+
+        user.setEmail(email);
+        user.setPassword(hashService.sha1(password));
+        user.setRole("ADMIN");
+
+        userRepository.save(user);
+
+        return "Administrador creado correctamente";
+    }
+
     public String getRole(String email) {
+
         User user = userRepository.findByEmail(email);
 
         if (user == null) {

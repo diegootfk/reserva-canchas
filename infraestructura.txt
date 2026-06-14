@@ -1,0 +1,2724 @@
+﻿
+
+====================================================
+ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\api-gateway\src\main\java\com\reservacanchas\cl\api_gateway\ApiGatewayApplication.java
+====================================================
+
+package com.reservacanchas.cl.api_gateway;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class ApiGatewayApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.run(ApiGatewayApplication.class, args);
+	}
+
+}
+
+
+====================================================
+ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\api-gateway\src\main\java\com\reservacanchas\cl\api_gateway\config\SecurityConfig.java
+====================================================
+
+package com.reservacanchas.cl.api_gateway.config;
+
+import java.nio.charset.StandardCharsets;
+
+import javax.crypto.spec.SecretKeySpec;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
+
+import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
+import org.springframework.security.config.web.server.ServerHttpSecurity;
+import org.springframework.security.web.server.SecurityWebFilterChain;
+
+import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
+import org.springframework.security.oauth2.jwt.NimbusReactiveJwtDecoder;
+import org.springframework.security.oauth2.jwt.ReactiveJwtDecoder;
+
+import org.springframework.security.oauth2.server.resource.authentication.ReactiveJwtAuthenticationConverter;
+
+@Configuration
+@EnableWebFluxSecurity
+public class SecurityConfig {
+
+    @Value("${spring.security.oauth2.resourceserver.jwt.secret-key}")
+    private String secret;
+
+    @Bean
+    public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
+
+        return http
+                .csrf(csrf -> csrf.disable())
+
+                .authorizeExchange(exchanges -> exchanges
+
+                // AUTH
+                .pathMatchers("/auth/**").permitAll()
+
+                // SWAGGER Y OPENAPI
+                .pathMatchers(
+                        "/swagger-ui.html",
+                        "/swagger-ui/**",
+                        "/webjars/**",
+                        "/v3/api-docs/**",
+                        "/api-docs/**"
+                ).permitAll()
+
+                // =========================
+                // USUARIOS
+                // =========================
+
+                .pathMatchers(HttpMethod.GET,
+                        "/usuarios",
+                        "/usuarios/*")
+                .hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
+
+                .pathMatchers(HttpMethod.POST,
+                        "/usuarios")
+                .hasAuthority("ROLE_ADMIN")
+
+                .pathMatchers(HttpMethod.PUT,
+                        "/usuarios/*")
+                .hasAuthority("ROLE_ADMIN")
+
+                .pathMatchers(HttpMethod.DELETE,
+                        "/usuarios/*")
+                .hasAuthority("ROLE_ADMIN")
+
+                // =========================
+                // SEDES
+                // =========================
+
+                .pathMatchers(HttpMethod.GET,
+                        "/sedes",
+                        "/sedes/*")
+                .hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
+
+                .pathMatchers(HttpMethod.POST,
+                        "/sedes")
+                .hasAuthority("ROLE_ADMIN")
+
+                .pathMatchers(HttpMethod.PUT,
+                        "/sedes/*")
+                .hasAuthority("ROLE_ADMIN")
+
+                .pathMatchers(HttpMethod.DELETE,
+                        "/sedes/*")
+                .hasAuthority("ROLE_ADMIN")
+
+                // =========================
+                // RESERVAS
+                // =========================
+
+                .pathMatchers(HttpMethod.GET,
+                        "/reservas",
+                        "/reservas/*",
+                        "/reservas/estado/*",
+                        "/reservas/usuario/*",
+                        "/reservas/cancha/*")
+                .hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
+
+                .pathMatchers(HttpMethod.POST,
+                        "/reservas")
+                .hasAuthority("ROLE_ADMIN")
+
+                .pathMatchers(HttpMethod.PUT,
+                        "/reservas/*")
+                .hasAuthority("ROLE_ADMIN")
+
+                .pathMatchers(HttpMethod.DELETE,
+                        "/reservas/*")
+                .hasAuthority("ROLE_ADMIN")
+
+                // =========================
+                // CANCHAS
+                // =========================
+
+                .pathMatchers(HttpMethod.GET,
+                        "/canchas",
+                        "/canchas/*")
+                .hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
+
+                .pathMatchers(HttpMethod.POST,
+                        "/canchas")
+                .hasAuthority("ROLE_ADMIN")
+
+                .pathMatchers(HttpMethod.PUT,
+                        "/canchas/*")
+                .hasAuthority("ROLE_ADMIN")
+
+                .pathMatchers(HttpMethod.DELETE,
+                        "/canchas/*")
+                .hasAuthority("ROLE_ADMIN")
+
+                // =========================
+                // HORARIOS
+                // =========================
+
+                .pathMatchers(HttpMethod.GET,
+                        "/horarios",
+                        "/horarios/*")
+                .hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
+
+                .pathMatchers(HttpMethod.POST,
+                        "/horarios")
+                .hasAuthority("ROLE_ADMIN")
+
+                .pathMatchers(HttpMethod.PUT,
+                        "/horarios/*")
+                .hasAuthority("ROLE_ADMIN")
+
+                .pathMatchers(HttpMethod.DELETE,
+                        "/horarios/*")
+                .hasAuthority("ROLE_ADMIN")
+
+                // =========================
+                // DISPONIBILIDADES
+                // =========================
+
+                .pathMatchers(HttpMethod.GET,
+                        "/disponibilidades",
+                        "/disponibilidades/*")
+                .hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
+
+                .pathMatchers(HttpMethod.POST,
+                        "/disponibilidades")
+                .hasAuthority("ROLE_ADMIN")
+
+                .pathMatchers(HttpMethod.PUT,
+                        "/disponibilidades/*")
+                .hasAuthority("ROLE_ADMIN")
+
+                .pathMatchers(HttpMethod.DELETE,
+                        "/disponibilidades/*")
+                .hasAuthority("ROLE_ADMIN")
+
+                // =========================
+                // RESEÃ‘AS
+                // =========================
+
+                .pathMatchers(HttpMethod.GET,
+                        "/resenas",
+                        "/resenas/*")
+                .hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
+
+                .pathMatchers(HttpMethod.POST,
+                        "/resenas")
+                .hasAuthority("ROLE_ADMIN")
+
+                .pathMatchers(HttpMethod.PUT,
+                        "/resenas/*")
+                .hasAuthority("ROLE_ADMIN")
+
+                .pathMatchers(HttpMethod.DELETE,
+                        "/resenas/*")
+                .hasAuthority("ROLE_ADMIN")
+
+                // =========================
+                // NOTIFICACIONES
+                // =========================
+
+                .pathMatchers(HttpMethod.GET,
+                        "/notificaciones",
+                        "/notificaciones/*")
+                .hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
+
+                .pathMatchers(HttpMethod.POST,
+                        "/notificaciones")
+                .hasAuthority("ROLE_ADMIN")
+
+                .pathMatchers(HttpMethod.PUT,
+                        "/notificaciones/*")
+                .hasAuthority("ROLE_ADMIN")
+
+                .pathMatchers(HttpMethod.DELETE,
+                        "/notificaciones/*")
+                .hasAuthority("ROLE_ADMIN")
+
+                // =========================
+                // MANTENIMIENTOS
+                // =========================
+
+                .pathMatchers("/mantenimientos/**")
+                .hasAuthority("ROLE_ADMIN")
+
+                // =========================
+                // PAGOS
+                // =========================
+
+                .pathMatchers("/pagos/**")
+                .hasAuthority("ROLE_ADMIN")
+        )
+
+                .oauth2ResourceServer(oauth2 -> oauth2
+                        .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter()))
+                )
+
+                .build();
+    }
+
+    @Bean
+    public ReactiveJwtDecoder jwtDecoder() {
+
+        SecretKeySpec key = new SecretKeySpec(
+                secret.getBytes(StandardCharsets.UTF_8),
+                "HmacSHA384"
+        );
+
+        return NimbusReactiveJwtDecoder
+                .withSecretKey(key)
+                .macAlgorithm(MacAlgorithm.HS384)
+                .build();
+    }
+
+    @Bean
+    public ReactiveJwtAuthenticationConverter jwtAuthenticationConverter() {
+
+        ReactiveJwtAuthenticationConverter converter =
+                new ReactiveJwtAuthenticationConverter();
+
+        converter.setJwtGrantedAuthoritiesConverter(jwt -> {
+
+            String role = jwt.getClaimAsString("role");
+
+            if (role == null) {
+                return reactor.core.publisher.Flux.empty();
+            }
+
+            return reactor.core.publisher.Flux.just(
+                    new org.springframework.security.core.authority.SimpleGrantedAuthority(
+                            "ROLE_" + role
+                    )
+            );
+        });
+
+        return converter;
+    }
+}
+
+
+====================================================
+ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\api-gateway\src\main\resources\application.yml
+====================================================
+
+server:
+  port: 7090
+
+spring:
+  main:
+    web-application-type: reactive
+
+  application:
+    name: api-gateway
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          secret-key: esta_es_nuestra_klae_secreta_123456789_viva_el_ping_pong
+
+  cloud:
+    gateway:
+      routes:
+
+        # ==========================
+        # MICROSERVICIOS
+        # ==========================
+
+        - id: usuario-service
+          uri: http://localhost:7091
+          predicates:
+            - Path=/usuarios/**
+
+        - id: cancha-service
+          uri: http://localhost:7092
+          predicates:
+            - Path=/canchas/**
+
+        - id: reserva-service
+          uri: http://localhost:7093
+          predicates:
+            - Path=/reservas/**
+
+        - id: pago-service
+          uri: http://localhost:7094
+          predicates:
+            - Path=/pagos/**
+
+        - id: sede-service
+          uri: http://localhost:7095
+          predicates:
+            - Path=/sedes/**
+
+        - id: horario-service
+          uri: http://localhost:7096
+          predicates:
+            - Path=/horarios/**
+
+        - id: disponibilidad-service
+          uri: http://localhost:7097
+          predicates:
+            - Path=/disponibilidades/**
+
+        - id: notificacion-service
+          uri: http://localhost:7098
+          predicates:
+            - Path=/notificaciones/**
+
+        - id: resena-service
+          uri: http://localhost:7099
+          predicates:
+            - Path=/resenas/**
+
+        - id: mantenimiento-service
+          uri: http://localhost:7100
+          predicates:
+            - Path=/mantenimientos/**
+
+        - id: auth-service
+          uri: http://localhost:7101
+          predicates:
+            - Path=/auth/**
+
+        # ==========================
+        # SWAGGER DOCS
+        # ==========================
+
+        - id: auth-docs
+          uri: http://localhost:7101
+          predicates:
+            - Path=/api-docs/auth
+          filters:
+            - SetPath=/v3/api-docs
+
+        - id: usuario-docs
+          uri: http://localhost:7091
+          predicates:
+            - Path=/api-docs/usuarios
+          filters:
+            - SetPath=/v3/api-docs
+
+        - id: cancha-docs
+          uri: http://localhost:7092
+          predicates:
+            - Path=/api-docs/canchas
+          filters:
+            - SetPath=/v3/api-docs
+
+        - id: reserva-docs
+          uri: http://localhost:7093
+          predicates:
+            - Path=/api-docs/reservas
+          filters:
+            - SetPath=/v3/api-docs
+
+        - id: pago-docs
+          uri: http://localhost:7094
+          predicates:
+            - Path=/api-docs/pagos
+          filters:
+            - SetPath=/v3/api-docs
+
+        - id: sede-docs
+          uri: http://localhost:7095
+          predicates:
+            - Path=/api-docs/sedes
+          filters:
+            - SetPath=/v3/api-docs
+
+        - id: horario-docs
+          uri: http://localhost:7096
+          predicates:
+            - Path=/api-docs/horarios
+          filters:
+            - SetPath=/v3/api-docs
+
+        - id: disponibilidad-docs
+          uri: http://localhost:7097
+          predicates:
+            - Path=/api-docs/disponibilidades
+          filters:
+            - SetPath=/v3/api-docs
+
+        - id: notificacion-docs
+          uri: http://localhost:7098
+          predicates:
+            - Path=/api-docs/notificaciones
+          filters:
+            - SetPath=/v3/api-docs
+
+        - id: resena-docs
+          uri: http://localhost:7099
+          predicates:
+            - Path=/api-docs/resenas
+          filters:
+            - SetPath=/v3/api-docs
+
+        - id: mantenimiento-docs
+          uri: http://localhost:7100
+          predicates:
+            - Path=/api-docs/mantenimientos
+          filters:
+            - SetPath=/v3/api-docs
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    urls:
+
+      - name: Auth Service
+        url: /api-docs/auth
+
+      - name: Usuario Service
+        url: /api-docs/usuarios
+
+      - name: Cancha Service
+        url: /api-docs/canchas
+
+      - name: Reserva Service
+        url: /api-docs/reservas
+
+      - name: Pago Service
+        url: /api-docs/pagos
+
+      - name: Sede Service
+        url: /api-docs/sedes
+
+      - name: Horario Service
+        url: /api-docs/horarios
+
+      - name: Disponibilidad Service
+        url: /api-docs/disponibilidades
+
+      - name: Notificacion Service
+        url: /api-docs/notificaciones
+
+      - name: Resena Service
+        url: /api-docs/resenas
+
+      - name: Mantenimiento Service
+        url: /api-docs/mantenimientos
+
+
+====================================================
+ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\api-gateway\src\test\java\com\reservacanchas\cl\api_gateway\ApiGatewayApplicationTests.java
+====================================================
+
+package com.reservacanchas.cl.api_gateway;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+
+@SpringBootTest
+class ApiGatewayApplicationTests {
+
+	@Test
+	void contextLoads() {
+	}
+
+}
+
+
+====================================================
+ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\api-gateway\target\classes\application.yml
+====================================================
+
+server:
+  port: 7090
+
+spring:
+  main:
+    web-application-type: reactive
+
+  application:
+    name: api-gateway
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          secret-key: esta_es_nuestra_klae_secreta_123456789_viva_el_ping_pong
+
+  cloud:
+    gateway:
+      routes:
+
+        # ==========================
+        # MICROSERVICIOS
+        # ==========================
+
+        - id: usuario-service
+          uri: http://localhost:7091
+          predicates:
+            - Path=/usuarios/**
+
+        - id: cancha-service
+          uri: http://localhost:7092
+          predicates:
+            - Path=/canchas/**
+
+        - id: reserva-service
+          uri: http://localhost:7093
+          predicates:
+            - Path=/reservas/**
+
+        - id: pago-service
+          uri: http://localhost:7094
+          predicates:
+            - Path=/pagos/**
+
+        - id: sede-service
+          uri: http://localhost:7095
+          predicates:
+            - Path=/sedes/**
+
+        - id: horario-service
+          uri: http://localhost:7096
+          predicates:
+            - Path=/horarios/**
+
+        - id: disponibilidad-service
+          uri: http://localhost:7097
+          predicates:
+            - Path=/disponibilidades/**
+
+        - id: notificacion-service
+          uri: http://localhost:7098
+          predicates:
+            - Path=/notificaciones/**
+
+        - id: resena-service
+          uri: http://localhost:7099
+          predicates:
+            - Path=/resenas/**
+
+        - id: mantenimiento-service
+          uri: http://localhost:7100
+          predicates:
+            - Path=/mantenimientos/**
+
+        - id: auth-service
+          uri: http://localhost:7101
+          predicates:
+            - Path=/auth/**
+
+        # ==========================
+        # SWAGGER DOCS
+        # ==========================
+
+        - id: auth-docs
+          uri: http://localhost:7101
+          predicates:
+            - Path=/api-docs/auth
+          filters:
+            - SetPath=/v3/api-docs
+
+        - id: usuario-docs
+          uri: http://localhost:7091
+          predicates:
+            - Path=/api-docs/usuarios
+          filters:
+            - SetPath=/v3/api-docs
+
+        - id: cancha-docs
+          uri: http://localhost:7092
+          predicates:
+            - Path=/api-docs/canchas
+          filters:
+            - SetPath=/v3/api-docs
+
+        - id: reserva-docs
+          uri: http://localhost:7093
+          predicates:
+            - Path=/api-docs/reservas
+          filters:
+            - SetPath=/v3/api-docs
+
+        - id: pago-docs
+          uri: http://localhost:7094
+          predicates:
+            - Path=/api-docs/pagos
+          filters:
+            - SetPath=/v3/api-docs
+
+        - id: sede-docs
+          uri: http://localhost:7095
+          predicates:
+            - Path=/api-docs/sedes
+          filters:
+            - SetPath=/v3/api-docs
+
+        - id: horario-docs
+          uri: http://localhost:7096
+          predicates:
+            - Path=/api-docs/horarios
+          filters:
+            - SetPath=/v3/api-docs
+
+        - id: disponibilidad-docs
+          uri: http://localhost:7097
+          predicates:
+            - Path=/api-docs/disponibilidades
+          filters:
+            - SetPath=/v3/api-docs
+
+        - id: notificacion-docs
+          uri: http://localhost:7098
+          predicates:
+            - Path=/api-docs/notificaciones
+          filters:
+            - SetPath=/v3/api-docs
+
+        - id: resena-docs
+          uri: http://localhost:7099
+          predicates:
+            - Path=/api-docs/resenas
+          filters:
+            - SetPath=/v3/api-docs
+
+        - id: mantenimiento-docs
+          uri: http://localhost:7100
+          predicates:
+            - Path=/api-docs/mantenimientos
+          filters:
+            - SetPath=/v3/api-docs
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    urls:
+
+      - name: Auth Service
+        url: /api-docs/auth
+
+      - name: Usuario Service
+        url: /api-docs/usuarios
+
+      - name: Cancha Service
+        url: /api-docs/canchas
+
+      - name: Reserva Service
+        url: /api-docs/reservas
+
+      - name: Pago Service
+        url: /api-docs/pagos
+
+      - name: Sede Service
+        url: /api-docs/sedes
+
+      - name: Horario Service
+        url: /api-docs/horarios
+
+      - name: Disponibilidad Service
+        url: /api-docs/disponibilidades
+
+      - name: Notificacion Service
+        url: /api-docs/notificaciones
+
+      - name: Resena Service
+        url: /api-docs/resenas
+
+      - name: Mantenimiento Service
+        url: /api-docs/mantenimientos
+
+
+====================================================
+ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\api-gateway\target\classes\com\reservacanchas\cl\api_gateway\ApiGatewayApplication.class
+====================================================
+
+Êþº¾   =   7com/reservacanchas/cl/api_gateway/ApiGatewayApplication  java/lang/Object <init> ()V Code
+  	   LineNumberTable LocalVariableTable this 9Lcom/reservacanchas/cl/api_gateway/ApiGatewayApplication; main ([Ljava/lang/String;)V
+    *org/springframework/boot/SpringApplication   run b(Ljava/lang/Class;[Ljava/lang/String;)Lorg/springframework/context/ConfigurableApplicationContext; args [Ljava/lang/String; MethodParameters 
+SourceFile ApiGatewayApplication.java RuntimeVisibleAnnotations >Lorg/springframework/boot/autoconfigure/SpringBootApplication; !               /     *· ±    
+                 
+   	       6     *¸ W±    
+   
+    
+                                   
+
+
+====================================================
+ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\api-gateway\target\classes\com\reservacanchas\cl\api_gateway\config\SecurityConfig.class
+====================================================
+
+Êþº¾   =J  7com/reservacanchas/cl/api_gateway/config/SecurityConfig  java/lang/Object secret Ljava/lang/String; RuntimeVisibleAnnotations 4Lorg/springframework/beans/factory/annotation/Value; value 7${spring.security.oauth2.resourceserver.jwt.secret-key} <init> ()V Code
+     LineNumberTable LocalVariableTable this 9Lcom/reservacanchas/cl/api_gateway/config/SecurityConfig; securityWebFilterChain …(Lorg/springframework/security/config/web/server/ServerHttpSecurity;)Lorg/springframework/security/web/server/SecurityWebFilterChain; -Lorg/springframework/context/annotation/Bean;      	customize 2()Lorg/springframework/security/config/Customizer;
+    Aorg/springframework/security/config/web/server/ServerHttpSecurity    csrf u(Lorg/springframework/security/config/Customizer;)Lorg/springframework/security/config/web/server/ServerHttpSecurity;  
+  # $   authorizeExchange  &  ' k(Lcom/reservacanchas/cl/api_gateway/config/SecurityConfig;)Lorg/springframework/security/config/Customizer;
+  ) *   oauth2ResourceServer
+  , - . build B()Lorg/springframework/security/web/server/SecurityWebFilterChain; http CLorg/springframework/security/config/web/server/ServerHttpSecurity; MethodParameters 
+jwtDecoder >()Lorg/springframework/security/oauth2/jwt/ReactiveJwtDecoder; 5 javax/crypto/spec/SecretKeySpec	  7  	 9 ; : !java/nio/charset/StandardCharsets < = UTF_8 Ljava/nio/charset/Charset;
+ ? A @ java/lang/String B C getBytes (Ljava/nio/charset/Charset;)[B E 
+HmacSHA384
+ 4 G  H ([BLjava/lang/String;)V
+ J L K @org/springframework/security/oauth2/jwt/NimbusReactiveJwtDecoder M N 
+withSecretKey (Ljavax/crypto/SecretKey;)Lorg/springframework/security/oauth2/jwt/NimbusReactiveJwtDecoder$SecretKeyReactiveJwtDecoderBuilder;	 P R Q 9org/springframework/security/oauth2/jose/jws/MacAlgorithm S T HS384 ;Lorg/springframework/security/oauth2/jose/jws/MacAlgorithm;
+ V X W corg/springframework/security/oauth2/jwt/NimbusReactiveJwtDecoder$SecretKeyReactiveJwtDecoderBuilder Y Z macAlgorithm ¢(Lorg/springframework/security/oauth2/jose/jws/MacAlgorithm;)Lorg/springframework/security/oauth2/jwt/NimbusReactiveJwtDecoder$SecretKeyReactiveJwtDecoderBuilder;
+ V \ - ] D()Lorg/springframework/security/oauth2/jwt/NimbusReactiveJwtDecoder; key !Ljavax/crypto/spec/SecretKeySpec; jwtAuthenticationConverter i()Lorg/springframework/security/oauth2/server/resource/authentication/ReactiveJwtAuthenticationConverter; c eorg/springframework/security/oauth2/server/resource/authentication/ReactiveJwtAuthenticationConverter
+ b   f g h convert 8()Lorg/springframework/core/convert/converter/Converter;
+ b j k l !setJwtGrantedAuthoritiesConverter 9(Lorg/springframework/core/convert/converter/Converter;)V 	converter gLorg/springframework/security/oauth2/server/resource/authentication/ReactiveJwtAuthenticationConverter; lambda$0 O(Lorg/springframework/security/config/web/server/ServerHttpSecurity$CsrfSpec;)V
+ r t s Jorg/springframework/security/config/web/server/ServerHttpSecurity$CsrfSpec u v disable E()Lorg/springframework/security/config/web/server/ServerHttpSecurity; LLorg/springframework/security/config/web/server/ServerHttpSecurity$CsrfSpec; lambda$1 \(Lorg/springframework/security/config/web/server/ServerHttpSecurity$AuthorizeExchangeSpec;)V { /auth/**
+ }  ~ Worg/springframework/security/config/web/server/ServerHttpSecurity$AuthorizeExchangeSpec €  pathMatchers '([Ljava/lang/String;)Ljava/lang/Object; ƒ ^org/springframework/security/config/web/server/ServerHttpSecurity$AuthorizeExchangeSpec$Access
+ ‚ … † ‡ 	permitAll [()Lorg/springframework/security/config/web/server/ServerHttpSecurity$AuthorizeExchangeSpec; ‰ /swagger-ui.html ‹ /swagger-ui/**  /webjars/**  /v3/api-docs/** ‘ /api-docs/**	 “ • ” #org/springframework/http/HttpMethod – — GET %Lorg/springframework/http/HttpMethod; ™ 	/usuarios › /usuarios/*
+ }  € ž L(Lorg/springframework/http/HttpMethod;[Ljava/lang/String;)Ljava/lang/Object;   	ROLE_USER ¢ 
+ROLE_ADMIN
+ ‚ ¤ ¥ ¦ hasAnyAuthority n([Ljava/lang/String;)Lorg/springframework/security/config/web/server/ServerHttpSecurity$AuthorizeExchangeSpec;	 “ ¨ © — POST
+ ‚ « ¬ ­ hasAuthority m(Ljava/lang/String;)Lorg/springframework/security/config/web/server/ServerHttpSecurity$AuthorizeExchangeSpec;	 “ ¯ ° — PUT	 “ ² ³ — DELETE µ /sedes · /sedes/* ¹ 	/reservas » /reservas/* ½ /reservas/estado/* ¿ /reservas/usuario/* Á /reservas/cancha/* Ã /canchas Å 
+/canchas/* Ç 	/horarios É /horarios/* Ë /disponibilidades Í /disponibilidades/* Ï /resenas Ñ 
+/resenas/* Ó /notificaciones Õ /notificaciones/* × /mantenimientos/** Ù 	/pagos/** 	exchanges YLorg/springframework/security/config/web/server/ServerHttpSecurity$AuthorizeExchangeSpec; lambda$2 _(Lorg/springframework/security/config/web/server/ServerHttpSecurity$OAuth2ResourceServerSpec;)V  &
+ à â á Zorg/springframework/security/config/web/server/ServerHttpSecurity$OAuth2ResourceServerSpec ã ä jwt Ž(Lorg/springframework/security/config/Customizer;)Lorg/springframework/security/config/web/server/ServerHttpSecurity$OAuth2ResourceServerSpec; oauth2 \Lorg/springframework/security/config/web/server/ServerHttpSecurity$OAuth2ResourceServerSpec; lambda$4 L(Lorg/springframework/security/oauth2/jwt/Jwt;)Lreactor/core/publisher/Flux; ê role
+ ì î í +org/springframework/security/oauth2/jwt/Jwt ï ð getClaimAsString &(Ljava/lang/String;)Ljava/lang/String;
+ ò ô ó reactor/core/publisher/Flux õ ö empty ()Lreactor/core/publisher/Flux; ø Borg/springframework/security/core/authority/SimpleGrantedAuthority  ú û ð makeConcatWithConstants
+ ÷ ý  þ (Ljava/lang/String;)V
+ ò  just 1(Ljava/lang/Object;)Lreactor/core/publisher/Flux; -Lorg/springframework/security/oauth2/jwt/Jwt; 
+StackMapTable lambda$3 g(Lorg/springframework/security/config/web/server/ServerHttpSecurity$OAuth2ResourceServerSpec$JwtSpec;)V
+  ` a
+
+ borg/springframework/security/config/web/server/ServerHttpSecurity$OAuth2ResourceServerSpec$JwtSpec `
+ œ(Lorg/springframework/core/convert/converter/Converter;)Lorg/springframework/security/config/web/server/ServerHttpSecurity$OAuth2ResourceServerSpec$JwtSpec; dLorg/springframework/security/config/web/server/ServerHttpSecurity$OAuth2ResourceServerSpec$JwtSpec; 
+SourceFile SecurityConfig.java 6Lorg/springframework/context/annotation/Configuration; SLorg/springframework/security/config/annotation/web/reactive/EnableWebFluxSecurity; BootstrapMethods
+ "java/lang/invoke/LambdaMetafactory metafactory Ì(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodHandle;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/CallSite; (Ljava/lang/Object;)V
+  o p p
+ # x y" y
+ ( Ü Ý' Ý &(Ljava/lang/Object;)Ljava/lang/Object;+
+ . ç è- è
+ 32
+798 $java/lang/invoke/StringConcatFactory û: ˜(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/invoke/CallSite;6= ROLE_ InnerClasses@ %java/lang/invoke/MethodHandles$LookupB java/lang/invoke/MethodHandles Lookup AuthorizeExchangeSpec Access CsrfSpec OAuth2ResourceServerSpec JwtSpec "SecretKeyReactiveJwtDecoderBuilder !                 	s 
+ 	     
+   /     *· ±                                    
+   f     +º   ¶ º !  ¶ "*º %  ¶ (¶ +°              ! 	 #  ë  ï                   / 0  1    /    2 3          
+   r     "» 4Y*´ 6² 8¶ >D· FL+¸ I² O¶ U¶ [°       "    õ  ö  ÷  õ  û  ü  ý ! ú        "       ^ _   ` a          
+   S     » bY· dL+º e  ¶ i+°                            m n 
+ o p  
+   /     *¶ q±           !          w  
+ x y  
+  _    Ù*½ ?YzS¶ |À ‚¶ „½ ?YˆSYŠSYŒSYŽSYS¶ |À ‚¶ „² ’½ ?Y˜SYšS¶ œÀ ‚½ ?YŸSY¡S¶ £² §½ ?Y˜S¶ œÀ ‚¡¶ ª² ®½ ?YšS¶ œÀ ‚¡¶ ª² ±½ ?YšS¶ œÀ ‚¡¶ ª² ’½ ?Y´SY¶S¶ œÀ ‚½ ?YŸSY¡S¶ £² §½ ?Y´S¶ œÀ ‚¡¶ ª² ®½ ?Y¶S¶ œÀ ‚¡¶ ª² ±½ ?Y¶S¶ œÀ ‚¡¶ ª² ’½ ?Y¸SYºSY¼SY¾SYÀS¶ œÀ ‚½ ?YŸSY¡S¶ £² §½ ?Y¸S¶ œÀ ‚¡¶ ª² ®½ ?YºS¶ œÀ ‚¡¶ ª² ±½ ?YºS¶ œÀ ‚¡¶ ª² ’½ ?YÂSYÄS¶ œÀ ‚½ ?YŸSY¡S¶ £² §½ ?YÂS¶ œÀ ‚¡¶ ª² ®½ ?YÄS¶ œÀ ‚¡¶ ª² ±½ ?YÄS¶ œÀ ‚¡¶ ª² ’½ ?YÆSYÈS¶ œÀ ‚½ ?YŸSY¡S¶ £² §½ ?YÆS¶ œÀ ‚¡¶ ª² ®½ ?YÈS¶ œÀ ‚¡¶ ª² ±½ ?YÈS¶ œÀ ‚¡¶ ª² ’½ ?YÊSYÌS¶ œÀ ‚½ ?YŸSY¡S¶ £² §½ ?YÊS¶ œÀ ‚¡¶ ª² ®½ ?YÌS¶ œÀ ‚¡¶ ª² ±½ ?YÌS¶ œÀ ‚¡¶ ª² ’½ ?YÎSYÐS¶ œÀ ‚½ ?YŸSY¡S¶ £² §½ ?YÎS¶ œÀ ‚¡¶ ª² ®½ ?YÐS¶ œÀ ‚¡¶ ª² ±½ ?YÐS¶ œÀ ‚¡¶ ª² ’½ ?YÒSYÔS¶ œÀ ‚½ ?YŸSY¡S¶ £² §½ ?YÒS¶ œÀ ‚¡¶ ª² ®½ ?YÔS¶ œÀ ‚¡¶ ª² ±½ ?YÔS¶ œÀ ‚¡¶ ª½ ?YÖS¶ |À ‚¡¶ ª½ ?YØS¶ |À ‚¡¶ ª±      b ˜   #  &  *  + # , ( - - . 0 ) 6 / 9 5 B 6 G 7 J 5 V 8 a : j ; m : s < x >  ? „ > Š @  B ˜ C › B ¡ D ¦ J ¯ K ´ L · J Ã M Î O × P Ú O à Q å S î T ñ S ÷ U ü W X W Y _ `! a& b+ c0 d3 _? eJ gS hV g\ ia kj lm ks mx o p„ oŠ q w˜ x y  w¬ z· |À }Ã |É ~Î €× Ú €à ‚å „î …ñ „÷ †ü Œ 
+ Ž
+ Œ $ ‘- ’0 ‘6 “; •D –G •M —R ™[ š^ ™d ›i ¡r ¢w £z ¡† ¤‘ ¦š § ¦£ ¨¨ ª± «´ ªº ¬¿ ®È ¯Ë ®Ñ °Ö ¶ß ·ä ¸ç ¶ó ¹þ » ¼
+ » ½ ¿ À! ¿' Á, Ã5 Ä8 Ã> ÅC ËL ÌQ ÍT Ë` Îk Ðt Ñw Ð} Ò‚ Ô‹ ÕŽ Ô” Ö™ Ø¢ Ù¥ Ø« Ú¶ à¿ áÊ çÓ è       Ù Ú Û   Ü Ý  
+   C     +*º Þ  ¶ ß±       
+    ë  ì                å æ 
+ ç è  
+   z      *é¶ ëL+Ç ¸ ñ°» ÷Y+º ù  · ü¸ ÿ°           
+               ã     ê      ü  ?  
+   =     	+*¶¶	±           ì        	       	 ã         
+        :    !$% &)* ,/0 145; <>   : ?AC  } D  ‚ }E  r F  à G 
+ àH  V JI 
+
+
+====================================================
+ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\api-gateway\target\test-classes\com\reservacanchas\cl\api_gateway\ApiGatewayApplicationTests.class
+====================================================
+
+Êþº¾   =   <com/reservacanchas/cl/api_gateway/ApiGatewayApplicationTests  java/lang/Object <init> ()V Code
+  	   LineNumberTable LocalVariableTable this >Lcom/reservacanchas/cl/api_gateway/ApiGatewayApplicationTests; contextLoads RuntimeVisibleAnnotations Lorg/junit/jupiter/api/Test; 
+SourceFile ApiGatewayApplicationTests.java 6Lorg/springframework/boot/test/context/SpringBootTest;                  /     *· ±    
+                 
+                   +      ±    
+                 
+                
+
+
+====================================================
+ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\auth-service\src\main\java\com\reservacanchas\cl\auth_service\config\SwaggerConfig.java
+====================================================
+
+package com.reservacanchas.cl.auth_service.config;
+
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.servers.Server;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+import java.util.List;
+
+@Configuration
+public class SwaggerConfig {
+
+    @Bean
+    public OpenAPI customOpenAPI() {
+
+        Server gatewayServer = new Server();
+        gatewayServer.setUrl("http://localhost:7090");
+        gatewayServer.setDescription("API Gateway");
+
+        return new OpenAPI()
+                .servers(List.of(gatewayServer))
+                .info(new Info()
+                        .title("API Auth")
+                        .version("1.0")
+                        .description("DocumentaciÃ³n del microservicio Auth"));
+    }
+}
+
+
+====================================================
+ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\auth-service\src\main\java\com\reservacanchas\cl\auth_service\service\JwtService.java
+====================================================
+
+package com.reservacanchas.cl.auth_service.service;
+
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
+import javax.crypto.SecretKey;
+import java.util.Date;
+
+@Service
+public class JwtService {
+
+    @Value("${jwt.secret}")
+    private String secret;
+
+    private SecretKey getKey() {
+        return Keys.hmacShaKeyFor(secret.getBytes());
+    }
+
+    public String generateToken(String email, String role) {
+        Date ahora = new Date();
+        Date expiracion = new Date(ahora.getTime() + 1000 * 60 * 60);
+
+        return Jwts.builder()
+                .subject(email)
+                .claim("role", role)
+                .issuedAt(ahora)
+                .expiration(expiracion)
+                .signWith(getKey(), Jwts.SIG.HS384)
+                .compact();
+    }
+
+    public String getEmailFromToken(String token) {
+        if (token == null || token.isBlank()) return null;
+
+        String jwt = token.startsWith("Bearer ") ? token.substring(7) : token;
+
+        try {
+            return Jwts.parser()
+                    .verifyWith(getKey())
+                    .build()
+                    .parseSignedClaims(jwt)
+                    .getPayload()
+                    .getSubject();
+        } catch (JwtException | IllegalArgumentException e) {
+            return null;
+        }
+    }
+
+    public boolean isValid(String token) {
+        if (token == null || token.isBlank()) return false;
+
+        String jwt = token.startsWith("Bearer ") ? token.substring(7) : token;
+
+        try {
+            Jwts.parser()
+                    .verifyWith(getKey())
+                    .build()
+                    .parseSignedClaims(jwt);
+            return true;
+        } catch (JwtException | IllegalArgumentException e) {
+            return false;
+        }
+    }
+}
+
+
+====================================================
+ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\auth-service\src\main\resources\application.yml
+====================================================
+
+server:
+  port: 7101
+
+spring:
+  application:
+    name: auth-service
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/db_auth_service?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    username: root
+    password:
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+jwt:
+  secret: esta_es_nuestra_klae_secreta_123456789_viva_el_ping_pong
+
+springdoc:
+  api-docs:
+    enabled: true
+
+  swagger-ui:
+    enabled: true
+    path: /doc/swagger-ui.html
+
+
+====================================================
+ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\auth-service\target\classes\application.yml
+====================================================
+
+server:
+  port: 7101
+
+spring:
+  application:
+    name: auth-service
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/db_auth_service?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    username: root
+    password:
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+jwt:
+  secret: esta_es_nuestra_klae_secreta_123456789_viva_el_ping_pong
+
+springdoc:
+  api-docs:
+    enabled: true
+
+  swagger-ui:
+    enabled: true
+    path: /doc/swagger-ui.html
+
+
+====================================================
+ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\auth-service\target\classes\com\reservacanchas\cl\auth_service\config\SwaggerConfig.class
+====================================================
+
+Êþº¾   = I  7com/reservacanchas/cl/auth_service/config/SwaggerConfig  java/lang/Object <init> ()V Code
+  	   LineNumberTable LocalVariableTable this 9Lcom/reservacanchas/cl/auth_service/config/SwaggerConfig; 
+customOpenAPI $()Lio/swagger/v3/oas/models/OpenAPI; RuntimeVisibleAnnotations -Lorg/springframework/context/annotation/Bean;  'io/swagger/v3/oas/models/servers/Server
+  	  http://localhost:7090
+     setUrl (Ljava/lang/String;)V  API Gateway
+     setDescription !  io/swagger/v3/oas/models/OpenAPI
+   	 $ & % java/util/List ' ( of $(Ljava/lang/Object;)Ljava/util/List;
+   * + , servers 4(Ljava/util/List;)Lio/swagger/v3/oas/models/OpenAPI; . "io/swagger/v3/oas/models/info/Info
+ - 	 1 API Auth
+ - 3 4 5 title 8(Ljava/lang/String;)Lio/swagger/v3/oas/models/info/Info; 7 1.0
+ - 9 : 5 version < %DocumentaciÃ³n del microservicio Auth
+ - > ? 5 description
+   A B C info H(Lio/swagger/v3/oas/models/info/Info;)Lio/swagger/v3/oas/models/OpenAPI; 
+gatewayServer )Lio/swagger/v3/oas/models/servers/Server; 
+SourceFile SwaggerConfig.java 6Lorg/springframework/context/annotation/Configuration; !               /     *· ±    
+       
+          
+                  ˜     <» Y· L+¶ +¶ »  Y· "+¸ #¶ )» -Y· /0¶ 26¶ 8;¶ =¶ @°    
+   .             "  )  .  3  8  ;         <  
+    4 D E   F    G      H  
+
+
+====================================================
+ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\auth-service\target\classes\com\reservacanchas\cl\auth_service\service\JwtService.class
+====================================================
+
+Êþº¾   =    5com/reservacanchas/cl/auth_service/service/JwtService  java/lang/Object secret Ljava/lang/String; RuntimeVisibleAnnotations 4Lorg/springframework/beans/factory/annotation/Value; value 
+${jwt.secret} <init> ()V Code
+     LineNumberTable LocalVariableTable this 7Lcom/reservacanchas/cl/auth_service/service/JwtService; getKey ()Ljavax/crypto/SecretKey;	    
+    java/lang/String   getBytes ()[B
+  !   io/jsonwebtoken/security/Keys " # 
+hmacShaKeyFor ([B)Ljavax/crypto/SecretKey; 
+generateToken 8(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String; ' java/util/Date
+ & 
+ & * + , getTime ()J     6î€
+ & 0  1 (J)V
+ 3 5 4 io/jsonwebtoken/Jwts 6 7 builder ()Lio/jsonwebtoken/JwtBuilder; 9 ; : io/jsonwebtoken/JwtBuilder < = subject 0(Ljava/lang/String;)Lio/jsonwebtoken/JwtBuilder; ? role 9 A B C claim B(Ljava/lang/String;Ljava/lang/Object;)Lio/jsonwebtoken/JwtBuilder; 9 E F G issuedAt .(Ljava/util/Date;)Lio/jsonwebtoken/JwtBuilder; 9 I J G 
+expiration
+  L  	 N P O io/jsonwebtoken/Jwts$SIG Q R HS384 'Lio/jsonwebtoken/security/MacAlgorithm; 9 T U V signWith a(Ljava/security/Key;Lio/jsonwebtoken/security/SecureDigestAlgorithm;)Lio/jsonwebtoken/JwtBuilder; 9 X Y Z compact ()Ljava/lang/String; email ahora Ljava/util/Date; 
+expiracion MethodParameters getEmailFromToken &(Ljava/lang/String;)Ljava/lang/String;
+  c d e isBlank ()Z g Bearer 
+  i j k 
+startsWith (Ljava/lang/String;)Z
+  m n o 	substring (I)Ljava/lang/String;
+ 3 q r s parser $()Lio/jsonwebtoken/JwtParserBuilder; u w v  io/jsonwebtoken/JwtParserBuilder x y 
+verifyWith <(Ljavax/crypto/SecretKey;)Lio/jsonwebtoken/JwtParserBuilder; u { | } build ()Lio/jsonwebtoken/JwtParser;   € io/jsonwebtoken/JwtParser ‚ ƒ parseSignedClaims /(Ljava/lang/CharSequence;)Lio/jsonwebtoken/Jws; … ‡ † io/jsonwebtoken/Jws ˆ ‰ 
+getPayload ()Ljava/lang/Object; ‹ io/jsonwebtoken/Claims Š  Ž Z 
+getSubject  io/jsonwebtoken/JwtException ’ "java/lang/IllegalArgumentException token jwt e Ljava/lang/RuntimeException; 
+StackMapTable ™ java/lang/RuntimeException isValid 
+SourceFile JwtService.java (Lorg/springframework/stereotype/Service; InnerClasses SIG !                 	s 
+      
+   /     *· ±           
+                 
+   5     *´ ¶ ¸ °                         $ %  
+   ¿     I» &Y· (N» &Y-¶ ) -a· /:¸ 2+¹ 8 >,¹ @ -¹ D ¹ H *¶ K² M¹ S ¹ W °       * 
+          "  *  0  7  C   H     4    I       I [     I ?    A \ ]   0 ^ ]  _   	 [   ?    ` a  
+   ë     I+Æ 
++¶ b™ °+f¶ h™ +¶ l§ +M¸ p*¶ K¹ t ¹ z ,¹ ~ ¹ „ À Š¹ Œ °N°  ! E F  ! E F ‘     .    $ 
+ & ! ) $ * - + 2 , 8 - @ . E ) F / G 0    *    I       I “   ! ( ”   G  • –  —    @ ÿ %      ˜ _    “    š k  
+   Ø     >+Æ 
++¶ b™ ¬+f¶ h™ +¶ l§ +M¸ p*¶ K¹ t ¹ z ,¹ ~ W¬N¬  ! 9 ;  ! 9 ; ‘     & 	   5 
+ 7 ! : $ ; - < 2 = 9 > ; ? < @    *    >       > “   !  ”   <  • –  —    @ ÿ       ˜ _    “    ›    œ         ž   
+  N 3 Ÿ 
+
+
+====================================================
+ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\cancha-service\src\main\java\com\reservacanchas\cl\cancha_service\config\SwaggerConfig.java
+====================================================
+
+package com.reservacanchas.cl.cancha_service.config;
+
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.servers.Server;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+import java.util.List;
+
+@Configuration
+@SecurityScheme(
+        name = "bearerAuth",
+        type = SecuritySchemeType.HTTP,
+        scheme = "bearer",
+        bearerFormat = "JWT"
+)
+public class SwaggerConfig {
+
+    @Bean
+    public OpenAPI customOpenAPI() {
+
+        Server gatewayServer = new Server();
+        gatewayServer.setUrl("http://localhost:7090");
+        gatewayServer.setDescription("API Gateway");
+
+        return new OpenAPI()
+                .servers(List.of(gatewayServer))
+                .info(new Info()
+                        .title("API Reserva Canchas")
+                        .version("1.0")
+                        .description("DocumentaciÃ³n del microservicio Cancha"));
+    }
+}
+
+
+====================================================
+ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\cancha-service\src\main\resources\application.yml
+====================================================
+
+server:
+  port: 7092
+
+spring:
+  application:
+    name: cancha-service
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/db_cancha_service?createDatabaseIfNotExist=true
+    username: root
+    password:
+
+  liquibase:
+    enabled: true
+    change-log: classpath:/db/changelog/db.changelog-master.yaml
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+
+springdoc:
+  api-docs:
+    enabled: true
+
+  swagger-ui:
+    enabled: true
+    path: /doc/swagger-ui.html
+
+
+====================================================
+ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\cancha-service\target\classes\application.yml
+====================================================
+
+server:
+  port: 7092
+
+spring:
+  application:
+    name: cancha-service
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/db_cancha_service?createDatabaseIfNotExist=true
+    username: root
+    password:
+
+  liquibase:
+    enabled: true
+    change-log: classpath:/db/changelog/db.changelog-master.yaml
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+
+springdoc:
+  api-docs:
+    enabled: true
+
+  swagger-ui:
+    enabled: true
+    path: /doc/swagger-ui.html
+
+
+====================================================
+ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\cancha-service\target\classes\com\reservacanchas\cl\cancha_service\config\SwaggerConfig.class
+====================================================
+
+Êþº¾   = S  9com/reservacanchas/cl/cancha_service/config/SwaggerConfig  java/lang/Object <init> ()V Code
+  	   LineNumberTable LocalVariableTable this ;Lcom/reservacanchas/cl/cancha_service/config/SwaggerConfig; 
+customOpenAPI $()Lio/swagger/v3/oas/models/OpenAPI; RuntimeVisibleAnnotations -Lorg/springframework/context/annotation/Bean;  'io/swagger/v3/oas/models/servers/Server
+  	  http://localhost:7090
+     setUrl (Ljava/lang/String;)V  API Gateway
+     setDescription !  io/swagger/v3/oas/models/OpenAPI
+   	 $ & % java/util/List ' ( of $(Ljava/lang/Object;)Ljava/util/List;
+   * + , servers 4(Ljava/util/List;)Lio/swagger/v3/oas/models/OpenAPI; . "io/swagger/v3/oas/models/info/Info
+ - 	 1 API Reserva Canchas
+ - 3 4 5 title 8(Ljava/lang/String;)Lio/swagger/v3/oas/models/info/Info; 7 1.0
+ - 9 : 5 version < 'DocumentaciÃ³n del microservicio Cancha
+ - > ? 5 description
+   A B C info H(Lio/swagger/v3/oas/models/info/Info;)Lio/swagger/v3/oas/models/OpenAPI; 
+gatewayServer )Lio/swagger/v3/oas/models/servers/Server; 
+SourceFile SwaggerConfig.java 6Lorg/springframework/context/annotation/Configuration; 7Lio/swagger/v3/oas/annotations/security/SecurityScheme; name 
+bearerAuth type 8Lio/swagger/v3/oas/annotations/enums/SecuritySchemeType; HTTP scheme bearer bearerFormat JWT !               /     *· ±    
+                 
+                  ˜     <» Y· L+¶ +¶ »  Y· "+¸ #¶ )» -Y· /0¶ 26¶ 8;¶ =¶ @°    
+   .             "   ) ! . " 3 # 8   ;         <  
+    4 D E   F    G       H   I  Js K Le M N Os P Qs R
+
+
+====================================================
+ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\disponibilidad-service\src\main\java\com\reservacanchas\cl\disponibilidad_service\config\SwaggerConfig.java
+====================================================
+
+package com.reservacanchas.cl.disponibilidad_service.config;
+
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.servers.Server;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+import java.util.List;
+
+@Configuration
+@SecurityScheme(
+        name = "bearerAuth",
+        type = SecuritySchemeType.HTTP,
+        scheme = "bearer",
+        bearerFormat = "JWT"
+)
+public class SwaggerConfig {
+
+    @Bean
+    public OpenAPI customOpenAPI() {
+
+        Server gatewayServer = new Server();
+        gatewayServer.setUrl("http://localhost:7090");
+        gatewayServer.setDescription("API Gateway");
+
+        return new OpenAPI()
+                .servers(List.of(gatewayServer))
+                .info(new Info()
+                        .title("API Disponibilidad")
+                        .version("1.0")
+                        .description("DocumentaciÃ³n del microservicio Disponibilidad"));
+    }
+}
+
+
+====================================================
+ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\disponibilidad-service\src\main\resources\application.yml
+====================================================
+
+server:
+  port: 7097
+
+spring:
+  application:
+    name: disponibilidad-service
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/db_disponibilidad_service?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    username: root
+    password:
+
+  liquibase:
+    enabled: true
+    change-log: classpath:/db/changelog/db.changelog-master.yaml
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+
+springdoc:
+  api-docs:
+    enabled: true
+
+  swagger-ui:
+    enabled: true
+    path: /doc/swagger-ui.html
+
+
+====================================================
+ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\disponibilidad-service\target\classes\application.yml
+====================================================
+
+server:
+  port: 7097
+
+spring:
+  application:
+    name: disponibilidad-service
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/db_disponibilidad_service?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    username: root
+    password:
+
+  liquibase:
+    enabled: true
+    change-log: classpath:/db/changelog/db.changelog-master.yaml
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+
+springdoc:
+  api-docs:
+    enabled: true
+
+  swagger-ui:
+    enabled: true
+    path: /doc/swagger-ui.html
+
+
+====================================================
+ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\disponibilidad-service\target\classes\com\reservacanchas\cl\disponibilidad_service\config\SwaggerConfig.class
+====================================================
+
+Êþº¾   = S  Acom/reservacanchas/cl/disponibilidad_service/config/SwaggerConfig  java/lang/Object <init> ()V Code
+  	   LineNumberTable LocalVariableTable this CLcom/reservacanchas/cl/disponibilidad_service/config/SwaggerConfig; 
+customOpenAPI $()Lio/swagger/v3/oas/models/OpenAPI; RuntimeVisibleAnnotations -Lorg/springframework/context/annotation/Bean;  'io/swagger/v3/oas/models/servers/Server
+  	  http://localhost:7090
+     setUrl (Ljava/lang/String;)V  API Gateway
+     setDescription !  io/swagger/v3/oas/models/OpenAPI
+   	 $ & % java/util/List ' ( of $(Ljava/lang/Object;)Ljava/util/List;
+   * + , servers 4(Ljava/util/List;)Lio/swagger/v3/oas/models/OpenAPI; . "io/swagger/v3/oas/models/info/Info
+ - 	 1 API Disponibilidad
+ - 3 4 5 title 8(Ljava/lang/String;)Lio/swagger/v3/oas/models/info/Info; 7 1.0
+ - 9 : 5 version < /DocumentaciÃ³n del microservicio Disponibilidad
+ - > ? 5 description
+   A B C info H(Lio/swagger/v3/oas/models/info/Info;)Lio/swagger/v3/oas/models/OpenAPI; 
+gatewayServer )Lio/swagger/v3/oas/models/servers/Server; 
+SourceFile SwaggerConfig.java 6Lorg/springframework/context/annotation/Configuration; 7Lio/swagger/v3/oas/annotations/security/SecurityScheme; name 
+bearerAuth type 8Lio/swagger/v3/oas/annotations/enums/SecuritySchemeType; HTTP scheme bearer bearerFormat JWT !               /     *· ±    
+                 
+                  ˜     <» Y· L+¶ +¶ »  Y· "+¸ #¶ )» -Y· /0¶ 26¶ 8;¶ =¶ @°    
+   .             "   ) ! . " 3 # 8   ;         <  
+    4 D E   F    G       H   I  Js K Le M N Os P Qs R
+
+
+====================================================
+ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\horario-service\src\main\java\com\reservacanchas\cl\horario_service\config\SwaggerConfig.java
+====================================================
+
+package com.reservacanchas.cl.horario_service.config;
+
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.servers.Server;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+import java.util.List;
+
+@Configuration
+@SecurityScheme(
+        name = "bearerAuth",
+        type = SecuritySchemeType.HTTP,
+        scheme = "bearer",
+        bearerFormat = "JWT"
+)
+public class SwaggerConfig {
+
+    @Bean
+    public OpenAPI customOpenAPI() {
+
+        Server gatewayServer = new Server();
+        gatewayServer.setUrl("http://localhost:7090");
+        gatewayServer.setDescription("API Gateway");
+
+        return new OpenAPI()
+                .servers(List.of(gatewayServer))
+                .info(new Info()
+                        .title("API Horario")
+                        .version("1.0")
+                        .description("DocumentaciÃ³n del microservicio Horario"));
+    }
+}
+
+
+====================================================
+ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\horario-service\src\main\resources\application.yml
+====================================================
+
+server:
+  port: 7096
+
+spring:
+  application:
+    name: horario-service
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/db_horario_service?createDatabaseIfNotExist=true
+    username: root
+    password:
+
+  liquibase:
+    enabled: true
+    change-log: classpath:/db/changelog/db.changelog-master.yaml
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+
+springdoc:
+  api-docs:
+    enabled: true
+
+  swagger-ui:
+    enabled: true
+    path: /doc/swagger-ui.html
+
+
+====================================================
+ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\horario-service\target\classes\application.yml
+====================================================
+
+server:
+  port: 7096
+
+spring:
+  application:
+    name: horario-service
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/db_horario_service?createDatabaseIfNotExist=true
+    username: root
+    password:
+
+  liquibase:
+    enabled: true
+    change-log: classpath:/db/changelog/db.changelog-master.yaml
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+
+springdoc:
+  api-docs:
+    enabled: true
+
+  swagger-ui:
+    enabled: true
+    path: /doc/swagger-ui.html
+
+
+====================================================
+ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\horario-service\target\classes\com\reservacanchas\cl\horario_service\config\SwaggerConfig.class
+====================================================
+
+Êþº¾   = S  :com/reservacanchas/cl/horario_service/config/SwaggerConfig  java/lang/Object <init> ()V Code
+  	   LineNumberTable LocalVariableTable this <Lcom/reservacanchas/cl/horario_service/config/SwaggerConfig; 
+customOpenAPI $()Lio/swagger/v3/oas/models/OpenAPI; RuntimeVisibleAnnotations -Lorg/springframework/context/annotation/Bean;  'io/swagger/v3/oas/models/servers/Server
+  	  http://localhost:7090
+     setUrl (Ljava/lang/String;)V  API Gateway
+     setDescription !  io/swagger/v3/oas/models/OpenAPI
+   	 $ & % java/util/List ' ( of $(Ljava/lang/Object;)Ljava/util/List;
+   * + , servers 4(Ljava/util/List;)Lio/swagger/v3/oas/models/OpenAPI; . "io/swagger/v3/oas/models/info/Info
+ - 	 1 API Horario
+ - 3 4 5 title 8(Ljava/lang/String;)Lio/swagger/v3/oas/models/info/Info; 7 1.0
+ - 9 : 5 version < (DocumentaciÃ³n del microservicio Horario
+ - > ? 5 description
+   A B C info H(Lio/swagger/v3/oas/models/info/Info;)Lio/swagger/v3/oas/models/OpenAPI; 
+gatewayServer )Lio/swagger/v3/oas/models/servers/Server; 
+SourceFile SwaggerConfig.java 6Lorg/springframework/context/annotation/Configuration; 7Lio/swagger/v3/oas/annotations/security/SecurityScheme; name 
+bearerAuth type 8Lio/swagger/v3/oas/annotations/enums/SecuritySchemeType; HTTP scheme bearer bearerFormat JWT !               /     *· ±    
+                 
+                  ˜     <» Y· L+¶ +¶ »  Y· "+¸ #¶ )» -Y· /0¶ 26¶ 8;¶ =¶ @°    
+   .             "   ) ! . " 3 # 8   ;         <  
+    4 D E   F    G       H   I  Js K Le M N Os P Qs R
+
+
+====================================================
+ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\mantenimiento-service\src\main\java\com\reservacanchas\cl\mantenimiento_service\config\SwaggerConfig.java
+====================================================
+
+package com.reservacanchas.cl.mantenimiento_service.config;
+
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.servers.Server;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+import java.util.List;
+
+@Configuration
+@SecurityScheme(
+        name = "bearerAuth",
+        type = SecuritySchemeType.HTTP,
+        scheme = "bearer",
+        bearerFormat = "JWT"
+)
+public class SwaggerConfig {
+
+    @Bean
+    public OpenAPI customOpenAPI() {
+
+        Server gatewayServer = new Server();
+        gatewayServer.setUrl("http://localhost:7090");
+        gatewayServer.setDescription("API Gateway");
+
+        return new OpenAPI()
+                .servers(List.of(gatewayServer))
+                .info(new Info()
+                        .title("API Mantenimiento")
+                        .version("1.0")
+                        .description("DocumentaciÃ³n del microservicio Mantenimiento"));
+    }
+}
+
+
+====================================================
+ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\mantenimiento-service\src\main\resources\application.yml
+====================================================
+
+server:
+  port: 7100
+
+spring:
+  application:
+    name: mantenimiento-service
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/db_mantenimiento_service?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    username: root
+    password:
+
+  liquibase:
+    enabled: true
+    change-log: classpath:/db/changelog/db.changelog-master.yaml
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+
+springdoc:
+  api-docs:
+    enabled: true
+
+  swagger-ui:
+    enabled: true
+    path: /doc/swagger-ui.html
+
+
+====================================================
+ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\mantenimiento-service\target\classes\application.yml
+====================================================
+
+server:
+  port: 7100
+
+spring:
+  application:
+    name: mantenimiento-service
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/db_mantenimiento_service?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    username: root
+    password:
+
+  liquibase:
+    enabled: true
+    change-log: classpath:/db/changelog/db.changelog-master.yaml
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+
+springdoc:
+  api-docs:
+    enabled: true
+
+  swagger-ui:
+    enabled: true
+    path: /doc/swagger-ui.html
+
+
+====================================================
+ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\mantenimiento-service\target\classes\com\reservacanchas\cl\mantenimiento_service\config\SwaggerConfig.class
+====================================================
+
+Êþº¾   = S  @com/reservacanchas/cl/mantenimiento_service/config/SwaggerConfig  java/lang/Object <init> ()V Code
+  	   LineNumberTable LocalVariableTable this BLcom/reservacanchas/cl/mantenimiento_service/config/SwaggerConfig; 
+customOpenAPI $()Lio/swagger/v3/oas/models/OpenAPI; RuntimeVisibleAnnotations -Lorg/springframework/context/annotation/Bean;  'io/swagger/v3/oas/models/servers/Server
+  	  http://localhost:7090
+     setUrl (Ljava/lang/String;)V  API Gateway
+     setDescription !  io/swagger/v3/oas/models/OpenAPI
+   	 $ & % java/util/List ' ( of $(Ljava/lang/Object;)Ljava/util/List;
+   * + , servers 4(Ljava/util/List;)Lio/swagger/v3/oas/models/OpenAPI; . "io/swagger/v3/oas/models/info/Info
+ - 	 1 API Mantenimiento
+ - 3 4 5 title 8(Ljava/lang/String;)Lio/swagger/v3/oas/models/info/Info; 7 1.0
+ - 9 : 5 version < .DocumentaciÃ³n del microservicio Mantenimiento
+ - > ? 5 description
+   A B C info H(Lio/swagger/v3/oas/models/info/Info;)Lio/swagger/v3/oas/models/OpenAPI; 
+gatewayServer )Lio/swagger/v3/oas/models/servers/Server; 
+SourceFile SwaggerConfig.java 6Lorg/springframework/context/annotation/Configuration; 7Lio/swagger/v3/oas/annotations/security/SecurityScheme; name 
+bearerAuth type 8Lio/swagger/v3/oas/annotations/enums/SecuritySchemeType; HTTP scheme bearer bearerFormat JWT !               /     *· ±    
+                 
+                  ˜     <» Y· L+¶ +¶ »  Y· "+¸ #¶ )» -Y· /0¶ 26¶ 8;¶ =¶ @°    
+   .             "   ) ! . " 3 # 8   ;         <  
+    4 D E   F    G       H   I  Js K Le M N Os P Qs R
+
+
+====================================================
+ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\notificacion-service\src\main\java\com\reservacanchas\cl\notificacion_service\config\SwaggerConfig.java
+====================================================
+
+package com.reservacanchas.cl.notificacion_service.config;
+
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.servers.Server;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+import java.util.List;
+
+@Configuration
+@SecurityScheme(
+        name = "bearerAuth",
+        type = SecuritySchemeType.HTTP,
+        scheme = "bearer",
+        bearerFormat = "JWT"
+)
+public class SwaggerConfig {
+
+    @Bean
+    public OpenAPI customOpenAPI() {
+
+        Server gatewayServer = new Server();
+        gatewayServer.setUrl("http://localhost:7090");
+        gatewayServer.setDescription("API Gateway");
+
+        return new OpenAPI()
+                .servers(List.of(gatewayServer))
+                .info(new Info()
+                        .title("API NotificaciÃ³n")
+                        .version("1.0")
+                        .description("DocumentaciÃ³n del microservicio NotificaciÃ³n"));
+    }
+}
+
+
+====================================================
+ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\notificacion-service\src\main\resources\application.yml
+====================================================
+
+server:
+  port: 7098
+
+spring:
+  application:
+    name: notificacion-service
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/db_notificacion_service?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    username: root
+    password:
+
+  liquibase:
+    enabled: true
+    change-log: classpath:/db/changelog/db.changelog-master.yaml
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+
+springdoc:
+  api-docs:
+    enabled: true
+
+  swagger-ui:
+    enabled: true
+    path: /doc/swagger-ui.html
+
+
+====================================================
+ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\notificacion-service\target\classes\application.yml
+====================================================
+
+server:
+  port: 7098
+
+spring:
+  application:
+    name: notificacion-service
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/db_notificacion_service?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    username: root
+    password:
+
+  liquibase:
+    enabled: true
+    change-log: classpath:/db/changelog/db.changelog-master.yaml
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+
+springdoc:
+  api-docs:
+    enabled: true
+
+  swagger-ui:
+    enabled: true
+    path: /doc/swagger-ui.html
+
+
+====================================================
+ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\notificacion-service\target\classes\com\reservacanchas\cl\notificacion_service\config\SwaggerConfig.class
+====================================================
+
+Êþº¾   = S  ?com/reservacanchas/cl/notificacion_service/config/SwaggerConfig  java/lang/Object <init> ()V Code
+  	   LineNumberTable LocalVariableTable this ALcom/reservacanchas/cl/notificacion_service/config/SwaggerConfig; 
+customOpenAPI $()Lio/swagger/v3/oas/models/OpenAPI; RuntimeVisibleAnnotations -Lorg/springframework/context/annotation/Bean;  'io/swagger/v3/oas/models/servers/Server
+  	  http://localhost:7090
+     setUrl (Ljava/lang/String;)V  API Gateway
+     setDescription !  io/swagger/v3/oas/models/OpenAPI
+   	 $ & % java/util/List ' ( of $(Ljava/lang/Object;)Ljava/util/List;
+   * + , servers 4(Ljava/util/List;)Lio/swagger/v3/oas/models/OpenAPI; . "io/swagger/v3/oas/models/info/Info
+ - 	 1 API NotificaciÃ³n
+ - 3 4 5 title 8(Ljava/lang/String;)Lio/swagger/v3/oas/models/info/Info; 7 1.0
+ - 9 : 5 version < .DocumentaciÃ³n del microservicio NotificaciÃ³n
+ - > ? 5 description
+   A B C info H(Lio/swagger/v3/oas/models/info/Info;)Lio/swagger/v3/oas/models/OpenAPI; 
+gatewayServer )Lio/swagger/v3/oas/models/servers/Server; 
+SourceFile SwaggerConfig.java 6Lorg/springframework/context/annotation/Configuration; 7Lio/swagger/v3/oas/annotations/security/SecurityScheme; name 
+bearerAuth type 8Lio/swagger/v3/oas/annotations/enums/SecuritySchemeType; HTTP scheme bearer bearerFormat JWT !               /     *· ±    
+                 
+                  ˜     <» Y· L+¶ +¶ »  Y· "+¸ #¶ )» -Y· /0¶ 26¶ 8;¶ =¶ @°    
+   .             "   ) ! . " 3 # 8   ;         <  
+    4 D E   F    G       H   I  Js K Le M N Os P Qs R
+
+
+====================================================
+ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\pago-service\src\main\java\com\reservacanchas\cl\pago_service\config\SwaggerConfig.java
+====================================================
+
+package com.reservacanchas.cl.pago_service.config;
+
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.servers.Server;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+import java.util.List;
+
+@Configuration
+@SecurityScheme(
+        name = "bearerAuth",
+        type = SecuritySchemeType.HTTP,
+        scheme = "bearer",
+        bearerFormat = "JWT"
+)
+public class SwaggerConfig {
+
+    @Bean
+    public OpenAPI customOpenAPI() {
+
+        Server gatewayServer = new Server();
+        gatewayServer.setUrl("http://localhost:7090");
+        gatewayServer.setDescription("API Gateway");
+
+        return new OpenAPI()
+                .servers(List.of(gatewayServer))
+                .info(new Info()
+                        .title("API Pago")
+                        .version("1.0")
+                        .description("DocumentaciÃ³n del microservicio Pago"));
+    }
+}
+
+
+====================================================
+ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\pago-service\src\main\resources\application.yml
+====================================================
+
+server:
+  port: 7094
+
+spring:
+  application:
+    name: pago-service
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/db_pago_service?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    username: root
+    password:
+
+  liquibase:
+    enabled: true
+    change-log: classpath:/db/changelog/db.changelog-master.yaml
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+
+springdoc:
+  api-docs:
+    enabled: true
+
+  swagger-ui:
+    enabled: true
+    path: /doc/swagger-ui.html
+
+
+====================================================
+ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\pago-service\target\classes\application.yml
+====================================================
+
+server:
+  port: 7094
+
+spring:
+  application:
+    name: pago-service
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/db_pago_service?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    username: root
+    password:
+
+  liquibase:
+    enabled: true
+    change-log: classpath:/db/changelog/db.changelog-master.yaml
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+
+springdoc:
+  api-docs:
+    enabled: true
+
+  swagger-ui:
+    enabled: true
+    path: /doc/swagger-ui.html
+
+
+====================================================
+ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\pago-service\target\classes\com\reservacanchas\cl\pago_service\config\SwaggerConfig.class
+====================================================
+
+Êþº¾   = S  7com/reservacanchas/cl/pago_service/config/SwaggerConfig  java/lang/Object <init> ()V Code
+  	   LineNumberTable LocalVariableTable this 9Lcom/reservacanchas/cl/pago_service/config/SwaggerConfig; 
+customOpenAPI $()Lio/swagger/v3/oas/models/OpenAPI; RuntimeVisibleAnnotations -Lorg/springframework/context/annotation/Bean;  'io/swagger/v3/oas/models/servers/Server
+  	  http://localhost:7090
+     setUrl (Ljava/lang/String;)V  API Gateway
+     setDescription !  io/swagger/v3/oas/models/OpenAPI
+   	 $ & % java/util/List ' ( of $(Ljava/lang/Object;)Ljava/util/List;
+   * + , servers 4(Ljava/util/List;)Lio/swagger/v3/oas/models/OpenAPI; . "io/swagger/v3/oas/models/info/Info
+ - 	 1 API Pago
+ - 3 4 5 title 8(Ljava/lang/String;)Lio/swagger/v3/oas/models/info/Info; 7 1.0
+ - 9 : 5 version < %DocumentaciÃ³n del microservicio Pago
+ - > ? 5 description
+   A B C info H(Lio/swagger/v3/oas/models/info/Info;)Lio/swagger/v3/oas/models/OpenAPI; 
+gatewayServer )Lio/swagger/v3/oas/models/servers/Server; 
+SourceFile SwaggerConfig.java 6Lorg/springframework/context/annotation/Configuration; 7Lio/swagger/v3/oas/annotations/security/SecurityScheme; name 
+bearerAuth type 8Lio/swagger/v3/oas/annotations/enums/SecuritySchemeType; HTTP scheme bearer bearerFormat JWT !               /     *· ±    
+                 
+                  ˜     <» Y· L+¶ +¶ »  Y· "+¸ #¶ )» -Y· /0¶ 26¶ 8;¶ =¶ @°    
+   .             "   ) ! . " 3 # 8   ;         <  
+    4 D E   F    G       H   I  Js K Le M N Os P Qs R
+
+
+====================================================
+ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\resena-service\src\main\java\com\reservacanchas\cl\resena_service\config\SwaggerConfig.java
+====================================================
+
+package com.reservacanchas.cl.resena_service.config;
+
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.servers.Server;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+import java.util.List;
+
+@Configuration
+@SecurityScheme(
+        name = "bearerAuth",
+        type = SecuritySchemeType.HTTP,
+        scheme = "bearer",
+        bearerFormat = "JWT"
+)
+public class SwaggerConfig {
+
+    @Bean
+    public OpenAPI customOpenAPI() {
+
+        Server gatewayServer = new Server();
+        gatewayServer.setUrl("http://localhost:7090");
+        gatewayServer.setDescription("API Gateway");
+
+        return new OpenAPI()
+                .servers(List.of(gatewayServer))
+                .info(new Info()
+                        .title("API ReseÃ±a")
+                        .version("1.0")
+                        .description("DocumentaciÃ³n del microservicio ReseÃ±a"));
+    }
+}
+
+
+====================================================
+ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\resena-service\src\main\resources\application.yml
+====================================================
+
+server:
+  port: 7099
+
+spring:
+  application:
+    name: resena-service
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/db_resena_service?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    username: root
+    password:
+
+  liquibase:
+    enabled: true
+    change-log: classpath:/db/changelog/db.changelog-master.yaml
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+
+springdoc:
+  api-docs:
+    enabled: true
+
+  swagger-ui:
+    enabled: true
+    path: /doc/swagger-ui.html
+
+
+====================================================
+ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\resena-service\target\classes\application.yml
+====================================================
+
+server:
+  port: 7099
+
+spring:
+  application:
+    name: resena-service
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/db_resena_service?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    username: root
+    password:
+
+  liquibase:
+    enabled: true
+    change-log: classpath:/db/changelog/db.changelog-master.yaml
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+
+springdoc:
+  api-docs:
+    enabled: true
+
+  swagger-ui:
+    enabled: true
+    path: /doc/swagger-ui.html
+
+
+====================================================
+ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\resena-service\target\classes\com\reservacanchas\cl\resena_service\config\SwaggerConfig.class
+====================================================
+
+Êþº¾   = S  9com/reservacanchas/cl/resena_service/config/SwaggerConfig  java/lang/Object <init> ()V Code
+  	   LineNumberTable LocalVariableTable this ;Lcom/reservacanchas/cl/resena_service/config/SwaggerConfig; 
+customOpenAPI $()Lio/swagger/v3/oas/models/OpenAPI; RuntimeVisibleAnnotations -Lorg/springframework/context/annotation/Bean;  'io/swagger/v3/oas/models/servers/Server
+  	  http://localhost:7090
+     setUrl (Ljava/lang/String;)V  API Gateway
+     setDescription !  io/swagger/v3/oas/models/OpenAPI
+   	 $ & % java/util/List ' ( of $(Ljava/lang/Object;)Ljava/util/List;
+   * + , servers 4(Ljava/util/List;)Lio/swagger/v3/oas/models/OpenAPI; . "io/swagger/v3/oas/models/info/Info
+ - 	 1 API ReseÃ±a
+ - 3 4 5 title 8(Ljava/lang/String;)Lio/swagger/v3/oas/models/info/Info; 7 1.0
+ - 9 : 5 version < (DocumentaciÃ³n del microservicio ReseÃ±a
+ - > ? 5 description
+   A B C info H(Lio/swagger/v3/oas/models/info/Info;)Lio/swagger/v3/oas/models/OpenAPI; 
+gatewayServer )Lio/swagger/v3/oas/models/servers/Server; 
+SourceFile SwaggerConfig.java 6Lorg/springframework/context/annotation/Configuration; 7Lio/swagger/v3/oas/annotations/security/SecurityScheme; name 
+bearerAuth type 8Lio/swagger/v3/oas/annotations/enums/SecuritySchemeType; HTTP scheme bearer bearerFormat JWT !               /     *· ±    
+                 
+                  ˜     <» Y· L+¶ +¶ »  Y· "+¸ #¶ )» -Y· /0¶ 26¶ 8;¶ =¶ @°    
+   .             "   ) ! . " 3 # 8   ;         <  
+    4 D E   F    G       H   I  Js K Le M N Os P Qs R
+
+
+====================================================
+ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\reserva-service\src\main\java\com\reservacanchas\cl\reserva_service\config\SecurityConfig.java
+====================================================
+
+package com.reservacanchas.cl.reserva_service.config;
+
+import java.nio.charset.StandardCharsets;
+
+import javax.crypto.spec.SecretKeySpec;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.web.SecurityFilterChain;
+
+import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
+
+@Configuration
+public class SecurityConfig {
+
+    @Value("${spring.security.oauth2.resourceserver.jwt.secret-key}")
+    private String secret;
+
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+
+        http
+                .csrf(csrf -> csrf.disable())
+                .authorizeHttpRequests(auth -> auth
+
+                        // SWAGGER / OPENAPI - pÃºblico
+                        .requestMatchers(
+                                "/v3/api-docs/**",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html",
+                                "/doc/swagger-ui.html",
+                                "/doc/**"
+                        ).permitAll()
+
+                        // Endpoint pÃºblico que ya tenÃ­as
+                        .requestMatchers("/reservas/*/exists").permitAll()
+
+                        // Todo lo demÃ¡s requiere JWT
+                        .anyRequest().authenticated()
+                )
+                .oauth2ResourceServer(oauth2 -> oauth2
+                        .jwt(jwt -> {})
+                );
+
+        return http.build();
+    }
+
+    @Bean
+    public JwtDecoder jwtDecoder() {
+
+        SecretKeySpec key = new SecretKeySpec(
+                secret.getBytes(StandardCharsets.UTF_8),
+                "HmacSHA384"
+        );
+
+        return NimbusJwtDecoder
+                .withSecretKey(key)
+                .macAlgorithm(MacAlgorithm.HS384)
+                .build();
+    }
+}
+
+
+====================================================
+ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\reserva-service\src\main\java\com\reservacanchas\cl\reserva_service\config\SwaggerConfig.java
+====================================================
+
+package com.reservacanchas.cl.reserva_service.config;
+
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.servers.Server;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+import java.util.List;
+
+@Configuration
+@SecurityScheme(
+        name = "bearerAuth",
+        type = SecuritySchemeType.HTTP,
+        scheme = "bearer",
+        bearerFormat = "JWT"
+)
+public class SwaggerConfig {
+
+    @Bean
+    public OpenAPI customOpenAPI() {
+
+        Server gatewayServer = new Server();
+        gatewayServer.setUrl("http://localhost:7090");
+        gatewayServer.setDescription("API Gateway");
+
+        return new OpenAPI()
+                .servers(List.of(gatewayServer))
+                .info(new Info()
+                        .title("API Reserva")
+                        .version("1.0")
+                        .description("DocumentaciÃ³n del microservicio Reserva"));
+    }
+}
+
+
+====================================================
+ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\reserva-service\src\main\resources\application.yml
+====================================================
+
+server:
+  port: 7093
+
+spring:
+  application:
+    name: reserva-service
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/db_reserva_service?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    username: root
+    password:
+
+  liquibase:
+    enabled: true
+    change-log: classpath:/db/changelog/db.changelog-master.yaml
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          secret-key: esta_es_nuestra_klae_secreta_123456789_viva_el_ping_pong
+
+springdoc:
+  api-docs:
+    enabled: true
+
+  swagger-ui:
+    enabled: true
+    path: /doc/swagger-ui.html
+
+
+====================================================
+ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\reserva-service\target\classes\application.yml
+====================================================
+
+server:
+  port: 7093
+
+spring:
+  application:
+    name: reserva-service
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/db_reserva_service?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    username: root
+    password:
+
+  liquibase:
+    enabled: true
+    change-log: classpath:/db/changelog/db.changelog-master.yaml
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          secret-key: esta_es_nuestra_klae_secreta_123456789_viva_el_ping_pong
+
+springdoc:
+  api-docs:
+    enabled: true
+
+  swagger-ui:
+    enabled: true
+    path: /doc/swagger-ui.html
+
+
+====================================================
+ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\reserva-service\target\classes\com\reservacanchas\cl\reserva_service\config\SecurityConfig.class
+====================================================
+
+Êþº¾   = Ï  ;com/reservacanchas/cl/reserva_service/config/SecurityConfig  java/lang/Object secret Ljava/lang/String; RuntimeVisibleAnnotations 4Lorg/springframework/beans/factory/annotation/Value; value 7${spring.security.oauth2.resourceserver.jwt.secret-key} <init> ()V Code
+     LineNumberTable LocalVariableTable this =Lcom/reservacanchas/cl/reserva_service/config/SecurityConfig; filterChain ‚(Lorg/springframework/security/config/annotation/web/builders/HttpSecurity;)Lorg/springframework/security/web/SecurityFilterChain; 
+Exceptions  java/lang/Exception -Lorg/springframework/context/annotation/Bean;      	customize 2()Lorg/springframework/security/config/Customizer;
+  !   Horg/springframework/security/config/annotation/web/builders/HttpSecurity " # csrf |(Lorg/springframework/security/config/Customizer;)Lorg/springframework/security/config/annotation/web/builders/HttpSecurity;  
+  & ' # authorizeHttpRequests  
+  * + # oauth2ResourceServer
+  - . / build ()Ljava/lang/Object; 1 4org/springframework/security/web/SecurityFilterChain http JLorg/springframework/security/config/annotation/web/builders/HttpSecurity; MethodParameters 
+jwtDecoder 6()Lorg/springframework/security/oauth2/jwt/JwtDecoder; 8 javax/crypto/spec/SecretKeySpec	  :  	 < > = !java/nio/charset/StandardCharsets ? @ UTF_8 Ljava/nio/charset/Charset;
+ B D C java/lang/String E F getBytes (Ljava/nio/charset/Charset;)[B H 
+HmacSHA384
+ 7 J  K ([BLjava/lang/String;)V
+ M O N 8org/springframework/security/oauth2/jwt/NimbusJwtDecoder P Q 
+withSecretKey o(Ljavax/crypto/SecretKey;)Lorg/springframework/security/oauth2/jwt/NimbusJwtDecoder$SecretKeyJwtDecoderBuilder;	 S U T 9org/springframework/security/oauth2/jose/jws/MacAlgorithm V W HS384 ;Lorg/springframework/security/oauth2/jose/jws/MacAlgorithm;
+ Y [ Z Sorg/springframework/security/oauth2/jwt/NimbusJwtDecoder$SecretKeyJwtDecoderBuilder \ ] macAlgorithm ’(Lorg/springframework/security/oauth2/jose/jws/MacAlgorithm;)Lorg/springframework/security/oauth2/jwt/NimbusJwtDecoder$SecretKeyJwtDecoderBuilder;
+ Y _ . ` <()Lorg/springframework/security/oauth2/jwt/NimbusJwtDecoder; key !Ljavax/crypto/spec/SecretKeySpec; lambda$0 R(Lorg/springframework/security/config/annotation/web/configurers/CsrfConfigurer;)V
+ f h g Morg/springframework/security/config/annotation/web/configurers/CsrfConfigurer i j disable J()Lorg/springframework/security/config/annotation/web/HttpSecurityBuilder; OLorg/springframework/security/config/annotation/web/configurers/CsrfConfigurer; LocalVariableTypeTable ›Lorg/springframework/security/config/annotation/web/configurers/CsrfConfigurer<Lorg/springframework/security/config/annotation/web/builders/HttpSecurity;>; lambda$1 Ž(Lorg/springframework/security/config/annotation/web/configurers/AuthorizeHttpRequestsConfigurer$AuthorizationManagerRequestMatcherRegistry;)V q /v3/api-docs/** s /swagger-ui/** u /swagger-ui.html w /doc/swagger-ui.html y /doc/**
+ { } | ‰org/springframework/security/config/annotation/web/configurers/AuthorizeHttpRequestsConfigurer$AuthorizationManagerRequestMatcherRegistry ~  requestMatchers '([Ljava/lang/String;)Ljava/lang/Object;  lorg/springframework/security/config/annotation/web/configurers/AuthorizeHttpRequestsConfigurer$AuthorizedUrl
+ € ƒ „ … 	permitAll ()Lorg/springframework/security/config/annotation/web/configurers/AuthorizeHttpRequestsConfigurer$AuthorizationManagerRequestMatcherRegistry; ‡ /reservas/*/exists
+ { ‰ Š / 
+anyRequest
+ € Œ  … 
+authenticated auth ‹Lorg/springframework/security/config/annotation/web/configurers/AuthorizeHttpRequestsConfigurer$AuthorizationManagerRequestMatcherRegistry; ×Lorg/springframework/security/config/annotation/web/configurers/AuthorizeHttpRequestsConfigurer<Lorg/springframework/security/config/annotation/web/builders/HttpSecurity;>.AuthorizationManagerRequestMatcherRegistry; lambda$2 y(Lorg/springframework/security/config/annotation/web/configurers/oauth2/server/resource/OAuth2ResourceServerConfigurer;)V  
+ • — – torg/springframework/security/config/annotation/web/configurers/oauth2/server/resource/OAuth2ResourceServerConfigurer ˜ ™ jwt ¨(Lorg/springframework/security/config/Customizer;)Lorg/springframework/security/config/annotation/web/configurers/oauth2/server/resource/OAuth2ResourceServerConfigurer; oauth2 vLorg/springframework/security/config/annotation/web/configurers/oauth2/server/resource/OAuth2ResourceServerConfigurer; ÂLorg/springframework/security/config/annotation/web/configurers/oauth2/server/resource/OAuth2ResourceServerConfigurer<Lorg/springframework/security/config/annotation/web/builders/HttpSecurity;>; lambda$3 ‡(Lorg/springframework/security/config/annotation/web/configurers/oauth2/server/resource/OAuth2ResourceServerConfigurer$JwtConfigurer;)V „Lorg/springframework/security/config/annotation/web/configurers/oauth2/server/resource/OAuth2ResourceServerConfigurer$JwtConfigurer; ÐLorg/springframework/security/config/annotation/web/configurers/oauth2/server/resource/OAuth2ResourceServerConfigurer<Lorg/springframework/security/config/annotation/web/builders/HttpSecurity;>.JwtConfigurer; 
+SourceFile SecurityConfig.java 6Lorg/springframework/context/annotation/Configuration; BootstrapMethods
+ ¦ ¨ § "java/lang/invoke/LambdaMetafactory © ª metafactory Ì(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodHandle;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/CallSite; ¥ (Ljava/lang/Object;)V ¬
+  ¯ c d ® d ¬
+  ´ n o ³ o ¬
+  ¹ ‘ ’ ¸ ’ ¬
+  ¾  ž ½ ž InnerClasses Ã %java/lang/invoke/MethodHandles$Lookup Å java/lang/invoke/MethodHandles Lookup È ^org/springframework/security/config/annotation/web/configurers/AuthorizeHttpRequestsConfigurer *AuthorizationManagerRequestMatcherRegistry 
+AuthorizedUrl Ì ‚org/springframework/security/config/annotation/web/configurers/oauth2/server/resource/OAuth2ResourceServerConfigurer$JwtConfigurer 
+JwtConfigurer SecretKeyJwtDecoderBuilder !                 	s 
+      
+   /     *· ±                                          
+   f     "+º   ¶ º $  ¶ %º (  ¶ )W+¶ ,À 0°              	   .  2        "       " 2 3  4    2    5 6          
+   r     "» 7Y*´ 9² ;¶ AG· IL+¸ L² R¶ X¶ ^°       "    8  9  :  8  >  ?  @ ! =        "       a b 
+ c d  
+   A     *¶ e±                    " k   l        " m  
+ n o  
+   £     C*½ BYpSYrSYtSYvSYxS¶ zÀ €¶ ‚½ BY†S¶ zÀ €¶ ‚¶ ˆÀ €¶ ‹±       * 
+     !  "  #  $  %    $ & - ) 9 ,        C Ž    l       C Ž   
+ ‘ ’  
+   J     
+*º “  ¶ ”±       
+    .  /        
+ š ›   l       
+ š œ  
+  ž  
+   =      ±           /         ˜ Ÿ   l        ˜      ¡    ¢      £   ¤   *  «  ­ ° ± «  ² µ ¶ «  · º » «  ¼ ¿ À Á   *  Â Ä Æ  { Ç É  € Ç Ê  Ë • Í  Y M Î 
+
+
+====================================================
+ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\reserva-service\target\classes\com\reservacanchas\cl\reserva_service\config\SwaggerConfig.class
+====================================================
+
+Êþº¾   = S  :com/reservacanchas/cl/reserva_service/config/SwaggerConfig  java/lang/Object <init> ()V Code
+  	   LineNumberTable LocalVariableTable this <Lcom/reservacanchas/cl/reserva_service/config/SwaggerConfig; 
+customOpenAPI $()Lio/swagger/v3/oas/models/OpenAPI; RuntimeVisibleAnnotations -Lorg/springframework/context/annotation/Bean;  'io/swagger/v3/oas/models/servers/Server
+  	  http://localhost:7090
+     setUrl (Ljava/lang/String;)V  API Gateway
+     setDescription !  io/swagger/v3/oas/models/OpenAPI
+   	 $ & % java/util/List ' ( of $(Ljava/lang/Object;)Ljava/util/List;
+   * + , servers 4(Ljava/util/List;)Lio/swagger/v3/oas/models/OpenAPI; . "io/swagger/v3/oas/models/info/Info
+ - 	 1 API Reserva
+ - 3 4 5 title 8(Ljava/lang/String;)Lio/swagger/v3/oas/models/info/Info; 7 1.0
+ - 9 : 5 version < (DocumentaciÃ³n del microservicio Reserva
+ - > ? 5 description
+   A B C info H(Lio/swagger/v3/oas/models/info/Info;)Lio/swagger/v3/oas/models/OpenAPI; 
+gatewayServer )Lio/swagger/v3/oas/models/servers/Server; 
+SourceFile SwaggerConfig.java 6Lorg/springframework/context/annotation/Configuration; 7Lio/swagger/v3/oas/annotations/security/SecurityScheme; name 
+bearerAuth type 8Lio/swagger/v3/oas/annotations/enums/SecuritySchemeType; HTTP scheme bearer bearerFormat JWT !               /     *· ±    
+                 
+                  ˜     <» Y· L+¶ +¶ »  Y· "+¸ #¶ )» -Y· /0¶ 26¶ 8;¶ =¶ @°    
+   .             "   ) ! . " 3 # 8   ;         <  
+    4 D E   F    G       H   I  Js K Le M N Os P Qs R
+
+
+====================================================
+ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\sede-service\src\main\java\com\reservacanchas\cl\sede_service\config\SwaggerConfig.java
+====================================================
+
+package com.reservacanchas.cl.sede_service.config;
+
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.servers.Server;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+import java.util.List;
+
+@Configuration
+@SecurityScheme(
+        name = "bearerAuth",
+        type = SecuritySchemeType.HTTP,
+        scheme = "bearer",
+        bearerFormat = "JWT"
+)
+public class SwaggerConfig {
+
+    @Bean
+    public OpenAPI customOpenAPI() {
+
+        Server gatewayServer = new Server();
+        gatewayServer.setUrl("http://localhost:7090");
+        gatewayServer.setDescription("API Gateway");
+
+        return new OpenAPI()
+                .servers(List.of(gatewayServer))
+                .info(new Info()
+                        .title("API Sede")
+                        .version("1.0")
+                        .description("DocumentaciÃ³n del microservicio Sede"));
+    }
+}
+
+
+====================================================
+ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\sede-service\src\main\resources\application.yml
+====================================================
+
+server:
+  port: 7095
+
+spring:
+  application:
+    name: sede-service
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/db_sede_service?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    username: root
+    password:
+
+  liquibase:
+    enabled: false
+
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    locations: classpath:db/migration
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+
+springdoc:
+  api-docs:
+    enabled: true
+
+  swagger-ui:
+    enabled: true
+    path: /doc/swagger-ui.html
+
+
+====================================================
+ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\sede-service\target\classes\application.yml
+====================================================
+
+server:
+  port: 7095
+
+spring:
+  application:
+    name: sede-service
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/db_sede_service?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    username: root
+    password:
+
+  liquibase:
+    enabled: false
+
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    locations: classpath:db/migration
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+
+springdoc:
+  api-docs:
+    enabled: true
+
+  swagger-ui:
+    enabled: true
+    path: /doc/swagger-ui.html
+
+
+====================================================
+ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\sede-service\target\classes\com\reservacanchas\cl\sede_service\config\SwaggerConfig.class
+====================================================
+
+Êþº¾   = S  7com/reservacanchas/cl/sede_service/config/SwaggerConfig  java/lang/Object <init> ()V Code
+  	   LineNumberTable LocalVariableTable this 9Lcom/reservacanchas/cl/sede_service/config/SwaggerConfig; 
+customOpenAPI $()Lio/swagger/v3/oas/models/OpenAPI; RuntimeVisibleAnnotations -Lorg/springframework/context/annotation/Bean;  'io/swagger/v3/oas/models/servers/Server
+  	  http://localhost:7090
+     setUrl (Ljava/lang/String;)V  API Gateway
+     setDescription !  io/swagger/v3/oas/models/OpenAPI
+   	 $ & % java/util/List ' ( of $(Ljava/lang/Object;)Ljava/util/List;
+   * + , servers 4(Ljava/util/List;)Lio/swagger/v3/oas/models/OpenAPI; . "io/swagger/v3/oas/models/info/Info
+ - 	 1 API Sede
+ - 3 4 5 title 8(Ljava/lang/String;)Lio/swagger/v3/oas/models/info/Info; 7 1.0
+ - 9 : 5 version < %DocumentaciÃ³n del microservicio Sede
+ - > ? 5 description
+   A B C info H(Lio/swagger/v3/oas/models/info/Info;)Lio/swagger/v3/oas/models/OpenAPI; 
+gatewayServer )Lio/swagger/v3/oas/models/servers/Server; 
+SourceFile SwaggerConfig.java 6Lorg/springframework/context/annotation/Configuration; 7Lio/swagger/v3/oas/annotations/security/SecurityScheme; name 
+bearerAuth type 8Lio/swagger/v3/oas/annotations/enums/SecuritySchemeType; HTTP scheme bearer bearerFormat JWT !               /     *· ±    
+                 
+                  ˜     <» Y· L+¶ +¶ »  Y· "+¸ #¶ )» -Y· /0¶ 26¶ 8;¶ =¶ @°    
+   .             "   ) ! . " 3 # 8   ;         <  
+    4 D E   F    G       H   I  Js K Le M N Os P Qs R
+
+
+====================================================
+ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\usuario-service\src\main\java\com\reservacanchas\cl\usuario_service\config\SecurityConfig.java
+====================================================
+
+package com.reservacanchas.cl.usuario_service.config;
+
+import java.nio.charset.StandardCharsets;
+
+import javax.crypto.spec.SecretKeySpec;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.web.SecurityFilterChain;
+
+import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
+
+@Configuration
+public class SecurityConfig {
+
+    @Value("${spring.security.oauth2.resourceserver.jwt.secret-key}")
+    private String secret;
+
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+
+        http
+                .csrf(csrf -> csrf.disable())
+                .authorizeHttpRequests(auth -> auth
+
+                        // SWAGGER / OPENAPI - pÃºblico
+                        .requestMatchers(
+                                "/v3/api-docs/**",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html",
+                                "/doc/swagger-ui.html",
+                                "/doc/**"
+                        ).permitAll()
+
+                        // Endpoint pÃºblico que ya tenÃ­as
+                        .requestMatchers("/usuarios/*/exists").permitAll()
+
+                        // Todo lo demÃ¡s requiere JWT
+                        .anyRequest().authenticated()
+                )
+                .oauth2ResourceServer(oauth2 -> oauth2
+                        .jwt(jwt -> {})
+                );
+
+        return http.build();
+    }
+
+    @Bean
+    public JwtDecoder jwtDecoder() {
+
+        SecretKeySpec key = new SecretKeySpec(
+                secret.getBytes(StandardCharsets.UTF_8),
+                "HmacSHA384"
+        );
+
+        return NimbusJwtDecoder
+                .withSecretKey(key)
+                .macAlgorithm(MacAlgorithm.HS384)
+                .build();
+    }
+}
+
+
+====================================================
+ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\usuario-service\src\main\java\com\reservacanchas\cl\usuario_service\config\SwaggerConfig.java
+====================================================
+
+package com.reservacanchas.cl.usuario_service.config;
+
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
+
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.servers.Server;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+import java.util.List;
+
+@Configuration
+@SecurityScheme(
+        name = "bearerAuth",
+        type = SecuritySchemeType.HTTP,
+        scheme = "bearer",
+        bearerFormat = "JWT"
+)
+public class SwaggerConfig {
+
+    @Bean
+    public OpenAPI customOpenAPI() {
+
+        Server gatewayServer = new Server();
+        gatewayServer.setUrl("http://localhost:7090");
+        gatewayServer.setDescription("API Gateway");
+
+        return new OpenAPI()
+                .servers(List.of(gatewayServer))
+                .info(new Info()
+                        .title("API Usuario")
+                        .version("1.0")
+                        .description("DocumentaciÃ³n del microservicio Usuario"));
+    }
+}
+
+
+====================================================
+ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\usuario-service\src\main\resources\application.yml
+====================================================
+
+server:
+  port: 7091
+
+spring:
+  application:
+    name: usuario-service
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/db_usuario_service?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    username: root
+    password:
+
+  liquibase:
+    enabled: true
+    change-log: classpath:/db/changelog/db.changelog-master.yaml
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          secret-key: esta_es_nuestra_klae_secreta_123456789_viva_el_ping_pong
+
+springdoc:
+  api-docs:
+    enabled: true
+
+  swagger-ui:
+    enabled: true
+    path: /doc/swagger-ui.html
+
+
+====================================================
+ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\usuario-service\target\classes\application.yml
+====================================================
+
+server:
+  port: 7091
+
+spring:
+  application:
+    name: usuario-service
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/db_usuario_service?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    username: root
+    password:
+
+  liquibase:
+    enabled: true
+    change-log: classpath:/db/changelog/db.changelog-master.yaml
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          secret-key: esta_es_nuestra_klae_secreta_123456789_viva_el_ping_pong
+
+springdoc:
+  api-docs:
+    enabled: true
+
+  swagger-ui:
+    enabled: true
+    path: /doc/swagger-ui.html
+
+
+====================================================
+ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\usuario-service\target\classes\com\reservacanchas\cl\usuario_service\config\SecurityConfig.class
+====================================================
+
+Êþº¾   = Ï  ;com/reservacanchas/cl/usuario_service/config/SecurityConfig  java/lang/Object secret Ljava/lang/String; RuntimeVisibleAnnotations 4Lorg/springframework/beans/factory/annotation/Value; value 7${spring.security.oauth2.resourceserver.jwt.secret-key} <init> ()V Code
+     LineNumberTable LocalVariableTable this =Lcom/reservacanchas/cl/usuario_service/config/SecurityConfig; filterChain ‚(Lorg/springframework/security/config/annotation/web/builders/HttpSecurity;)Lorg/springframework/security/web/SecurityFilterChain; 
+Exceptions  java/lang/Exception -Lorg/springframework/context/annotation/Bean;      	customize 2()Lorg/springframework/security/config/Customizer;
+  !   Horg/springframework/security/config/annotation/web/builders/HttpSecurity " # csrf |(Lorg/springframework/security/config/Customizer;)Lorg/springframework/security/config/annotation/web/builders/HttpSecurity;  
+  & ' # authorizeHttpRequests  
+  * + # oauth2ResourceServer
+  - . / build ()Ljava/lang/Object; 1 4org/springframework/security/web/SecurityFilterChain http JLorg/springframework/security/config/annotation/web/builders/HttpSecurity; MethodParameters 
+jwtDecoder 6()Lorg/springframework/security/oauth2/jwt/JwtDecoder; 8 javax/crypto/spec/SecretKeySpec	  :  	 < > = !java/nio/charset/StandardCharsets ? @ UTF_8 Ljava/nio/charset/Charset;
+ B D C java/lang/String E F getBytes (Ljava/nio/charset/Charset;)[B H 
+HmacSHA384
+ 7 J  K ([BLjava/lang/String;)V
+ M O N 8org/springframework/security/oauth2/jwt/NimbusJwtDecoder P Q 
+withSecretKey o(Ljavax/crypto/SecretKey;)Lorg/springframework/security/oauth2/jwt/NimbusJwtDecoder$SecretKeyJwtDecoderBuilder;	 S U T 9org/springframework/security/oauth2/jose/jws/MacAlgorithm V W HS384 ;Lorg/springframework/security/oauth2/jose/jws/MacAlgorithm;
+ Y [ Z Sorg/springframework/security/oauth2/jwt/NimbusJwtDecoder$SecretKeyJwtDecoderBuilder \ ] macAlgorithm ’(Lorg/springframework/security/oauth2/jose/jws/MacAlgorithm;)Lorg/springframework/security/oauth2/jwt/NimbusJwtDecoder$SecretKeyJwtDecoderBuilder;
+ Y _ . ` <()Lorg/springframework/security/oauth2/jwt/NimbusJwtDecoder; key !Ljavax/crypto/spec/SecretKeySpec; lambda$0 R(Lorg/springframework/security/config/annotation/web/configurers/CsrfConfigurer;)V
+ f h g Morg/springframework/security/config/annotation/web/configurers/CsrfConfigurer i j disable J()Lorg/springframework/security/config/annotation/web/HttpSecurityBuilder; OLorg/springframework/security/config/annotation/web/configurers/CsrfConfigurer; LocalVariableTypeTable ›Lorg/springframework/security/config/annotation/web/configurers/CsrfConfigurer<Lorg/springframework/security/config/annotation/web/builders/HttpSecurity;>; lambda$1 Ž(Lorg/springframework/security/config/annotation/web/configurers/AuthorizeHttpRequestsConfigurer$AuthorizationManagerRequestMatcherRegistry;)V q /v3/api-docs/** s /swagger-ui/** u /swagger-ui.html w /doc/swagger-ui.html y /doc/**
+ { } | ‰org/springframework/security/config/annotation/web/configurers/AuthorizeHttpRequestsConfigurer$AuthorizationManagerRequestMatcherRegistry ~  requestMatchers '([Ljava/lang/String;)Ljava/lang/Object;  lorg/springframework/security/config/annotation/web/configurers/AuthorizeHttpRequestsConfigurer$AuthorizedUrl
+ € ƒ „ … 	permitAll ()Lorg/springframework/security/config/annotation/web/configurers/AuthorizeHttpRequestsConfigurer$AuthorizationManagerRequestMatcherRegistry; ‡ /usuarios/*/exists
+ { ‰ Š / 
+anyRequest
+ € Œ  … 
+authenticated auth ‹Lorg/springframework/security/config/annotation/web/configurers/AuthorizeHttpRequestsConfigurer$AuthorizationManagerRequestMatcherRegistry; ×Lorg/springframework/security/config/annotation/web/configurers/AuthorizeHttpRequestsConfigurer<Lorg/springframework/security/config/annotation/web/builders/HttpSecurity;>.AuthorizationManagerRequestMatcherRegistry; lambda$2 y(Lorg/springframework/security/config/annotation/web/configurers/oauth2/server/resource/OAuth2ResourceServerConfigurer;)V  
+ • — – torg/springframework/security/config/annotation/web/configurers/oauth2/server/resource/OAuth2ResourceServerConfigurer ˜ ™ jwt ¨(Lorg/springframework/security/config/Customizer;)Lorg/springframework/security/config/annotation/web/configurers/oauth2/server/resource/OAuth2ResourceServerConfigurer; oauth2 vLorg/springframework/security/config/annotation/web/configurers/oauth2/server/resource/OAuth2ResourceServerConfigurer; ÂLorg/springframework/security/config/annotation/web/configurers/oauth2/server/resource/OAuth2ResourceServerConfigurer<Lorg/springframework/security/config/annotation/web/builders/HttpSecurity;>; lambda$3 ‡(Lorg/springframework/security/config/annotation/web/configurers/oauth2/server/resource/OAuth2ResourceServerConfigurer$JwtConfigurer;)V „Lorg/springframework/security/config/annotation/web/configurers/oauth2/server/resource/OAuth2ResourceServerConfigurer$JwtConfigurer; ÐLorg/springframework/security/config/annotation/web/configurers/oauth2/server/resource/OAuth2ResourceServerConfigurer<Lorg/springframework/security/config/annotation/web/builders/HttpSecurity;>.JwtConfigurer; 
+SourceFile SecurityConfig.java 6Lorg/springframework/context/annotation/Configuration; BootstrapMethods
+ ¦ ¨ § "java/lang/invoke/LambdaMetafactory © ª metafactory Ì(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodHandle;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/CallSite; ¥ (Ljava/lang/Object;)V ¬
+  ¯ c d ® d ¬
+  ´ n o ³ o ¬
+  ¹ ‘ ’ ¸ ’ ¬
+  ¾  ž ½ ž InnerClasses Ã %java/lang/invoke/MethodHandles$Lookup Å java/lang/invoke/MethodHandles Lookup È ^org/springframework/security/config/annotation/web/configurers/AuthorizeHttpRequestsConfigurer *AuthorizationManagerRequestMatcherRegistry 
+AuthorizedUrl Ì ‚org/springframework/security/config/annotation/web/configurers/oauth2/server/resource/OAuth2ResourceServerConfigurer$JwtConfigurer 
+JwtConfigurer SecretKeyJwtDecoderBuilder !                 	s 
+      
+   /     *· ±                                          
+   f     "+º   ¶ º $  ¶ %º (  ¶ )W+¶ ,À 0°              	   .  2        "       " 2 3  4    2    5 6          
+   r     "» 7Y*´ 9² ;¶ AG· IL+¸ L² R¶ X¶ ^°       "    8  9  :  8  >  ?  @ ! =        "       a b 
+ c d  
+   A     *¶ e±                    " k   l        " m  
+ n o  
+   £     C*½ BYpSYrSYtSYvSYxS¶ zÀ €¶ ‚½ BY†S¶ zÀ €¶ ‚¶ ˆÀ €¶ ‹±       * 
+     !  "  #  $  %    $ & - ) 9 ,        C Ž    l       C Ž   
+ ‘ ’  
+   J     
+*º “  ¶ ”±       
+    .  /        
+ š ›   l       
+ š œ  
+  ž  
+   =      ±           /         ˜ Ÿ   l        ˜      ¡    ¢      £   ¤   *  «  ­ ° ± «  ² µ ¶ «  · º » «  ¼ ¿ À Á   *  Â Ä Æ  { Ç É  € Ç Ê  Ë • Í  Y M Î 
+
+
+====================================================
+ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\usuario-service\target\classes\com\reservacanchas\cl\usuario_service\config\SwaggerConfig.class
+====================================================
+
+Êþº¾   = S  :com/reservacanchas/cl/usuario_service/config/SwaggerConfig  java/lang/Object <init> ()V Code
+  	   LineNumberTable LocalVariableTable this <Lcom/reservacanchas/cl/usuario_service/config/SwaggerConfig; 
+customOpenAPI $()Lio/swagger/v3/oas/models/OpenAPI; RuntimeVisibleAnnotations -Lorg/springframework/context/annotation/Bean;  'io/swagger/v3/oas/models/servers/Server
+  	  http://localhost:7090
+     setUrl (Ljava/lang/String;)V  API Gateway
+     setDescription !  io/swagger/v3/oas/models/OpenAPI
+   	 $ & % java/util/List ' ( of $(Ljava/lang/Object;)Ljava/util/List;
+   * + , servers 4(Ljava/util/List;)Lio/swagger/v3/oas/models/OpenAPI; . "io/swagger/v3/oas/models/info/Info
+ - 	 1 API Usuario
+ - 3 4 5 title 8(Ljava/lang/String;)Lio/swagger/v3/oas/models/info/Info; 7 1.0
+ - 9 : 5 version < (DocumentaciÃ³n del microservicio Usuario
+ - > ? 5 description
+   A B C info H(Lio/swagger/v3/oas/models/info/Info;)Lio/swagger/v3/oas/models/OpenAPI; 
+gatewayServer )Lio/swagger/v3/oas/models/servers/Server; 
+SourceFile SwaggerConfig.java 6Lorg/springframework/context/annotation/Configuration; 7Lio/swagger/v3/oas/annotations/security/SecurityScheme; name 
+bearerAuth type 8Lio/swagger/v3/oas/annotations/enums/SecuritySchemeType; HTTP scheme bearer bearerFormat JWT !               /     *· ±    
+                 
+                  ˜     <» Y· L+¶ +¶ »  Y· "+¸ #¶ )» -Y· /0¶ 26¶ 8;¶ =¶ @°    
+   .              " ! ) " . # 3 $ 8 ! ;         <  
+    4 D E   F    G       H   I  Js K Le M N Os P Qs R

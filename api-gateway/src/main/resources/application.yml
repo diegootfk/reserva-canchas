@@ -16,61 +16,182 @@ spring:
 
   cloud:
     gateway:
-      server:
-        webflux:
-          routes:
+      routes:
 
-            - id: usuario-service
-              uri: http://localhost:7091
-              predicates:
-                - Path=/usuarios/**
+        # ==========================
+        # MICROSERVICIOS
+        # ==========================
 
-            - id: cancha-service
-              uri: http://localhost:7092
-              predicates:
-                - Path=/canchas/**
+        - id: usuario-service
+          uri: http://localhost:7091
+          predicates:
+            - Path=/usuarios/**
 
-            - id: reserva-service
-              uri: http://localhost:7093
-              predicates:
-                - Path=/reservas/**
+        - id: cancha-service
+          uri: http://localhost:7092
+          predicates:
+            - Path=/canchas/**
 
-            - id: pago-service
-              uri: http://localhost:7094
-              predicates:
-                - Path=/pagos/**
+        - id: reserva-service
+          uri: http://localhost:7093
+          predicates:
+            - Path=/reservas/**
 
-            - id: sede-service
-              uri: http://localhost:7095
-              predicates:
-                - Path=/sedes/**
+        - id: pago-service
+          uri: http://localhost:7094
+          predicates:
+            - Path=/pagos/**
 
-            - id: horario-service
-              uri: http://localhost:7096
-              predicates:
-                - Path=/horarios/**
+        - id: sede-service
+          uri: http://localhost:7095
+          predicates:
+            - Path=/sedes/**
 
-            - id: disponibilidad-service
-              uri: http://localhost:7097
-              predicates:
-                - Path=/disponibilidades/**
+        - id: horario-service
+          uri: http://localhost:7096
+          predicates:
+            - Path=/horarios/**
 
-            - id: notificacion-service
-              uri: http://localhost:7098
-              predicates:
-                - Path=/notificaciones/**
+        - id: disponibilidad-service
+          uri: http://localhost:7097
+          predicates:
+            - Path=/disponibilidades/**
 
-            - id: resena-service
-              uri: http://localhost:7099
-              predicates:
-                - Path=/resenas/**
+        - id: notificacion-service
+          uri: http://localhost:7098
+          predicates:
+            - Path=/notificaciones/**
 
-            - id: mantenimiento-service
-              uri: http://localhost:7100
-              predicates:
-                - Path=/mantenimientos/**
+        - id: resena-service
+          uri: http://localhost:7099
+          predicates:
+            - Path=/resenas/**
 
-            - id: auth-service
-              uri: http://localhost:7101
-              predicates:
-                - Path=/auth/**
+        - id: mantenimiento-service
+          uri: http://localhost:7100
+          predicates:
+            - Path=/mantenimientos/**
+
+        - id: auth-service
+          uri: http://localhost:7101
+          predicates:
+            - Path=/auth/**
+
+        # ==========================
+        # SWAGGER DOCS
+        # ==========================
+
+        - id: auth-docs
+          uri: http://localhost:7101
+          predicates:
+            - Path=/api-docs/auth
+          filters:
+            - SetPath=/v3/api-docs
+
+        - id: usuario-docs
+          uri: http://localhost:7091
+          predicates:
+            - Path=/api-docs/usuarios
+          filters:
+            - SetPath=/v3/api-docs
+
+        - id: cancha-docs
+          uri: http://localhost:7092
+          predicates:
+            - Path=/api-docs/canchas
+          filters:
+            - SetPath=/v3/api-docs
+
+        - id: reserva-docs
+          uri: http://localhost:7093
+          predicates:
+            - Path=/api-docs/reservas
+          filters:
+            - SetPath=/v3/api-docs
+
+        - id: pago-docs
+          uri: http://localhost:7094
+          predicates:
+            - Path=/api-docs/pagos
+          filters:
+            - SetPath=/v3/api-docs
+
+        - id: sede-docs
+          uri: http://localhost:7095
+          predicates:
+            - Path=/api-docs/sedes
+          filters:
+            - SetPath=/v3/api-docs
+
+        - id: horario-docs
+          uri: http://localhost:7096
+          predicates:
+            - Path=/api-docs/horarios
+          filters:
+            - SetPath=/v3/api-docs
+
+        - id: disponibilidad-docs
+          uri: http://localhost:7097
+          predicates:
+            - Path=/api-docs/disponibilidades
+          filters:
+            - SetPath=/v3/api-docs
+
+        - id: notificacion-docs
+          uri: http://localhost:7098
+          predicates:
+            - Path=/api-docs/notificaciones
+          filters:
+            - SetPath=/v3/api-docs
+
+        - id: resena-docs
+          uri: http://localhost:7099
+          predicates:
+            - Path=/api-docs/resenas
+          filters:
+            - SetPath=/v3/api-docs
+
+        - id: mantenimiento-docs
+          uri: http://localhost:7100
+          predicates:
+            - Path=/api-docs/mantenimientos
+          filters:
+            - SetPath=/v3/api-docs
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    urls:
+
+      - name: Auth Service
+        url: /api-docs/auth
+
+      - name: Usuario Service
+        url: /api-docs/usuarios
+
+      - name: Cancha Service
+        url: /api-docs/canchas
+
+      - name: Reserva Service
+        url: /api-docs/reservas
+
+      - name: Pago Service
+        url: /api-docs/pagos
+
+      - name: Sede Service
+        url: /api-docs/sedes
+
+      - name: Horario Service
+        url: /api-docs/horarios
+
+      - name: Disponibilidad Service
+        url: /api-docs/disponibilidades
+
+      - name: Notificacion Service
+        url: /api-docs/notificaciones
+
+      - name: Resena Service
+        url: /api-docs/resenas
+
+      - name: Mantenimiento Service
+        url: /api-docs/mantenimientos
