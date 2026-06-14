@@ -32,6 +32,7 @@ import javax.crypto.spec.SecretKeySpec;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
@@ -58,24 +59,203 @@ public class SecurityConfig {
 
                 .authorizeExchange(exchanges -> exchanges
 
-                        // AUTH
-                        .pathMatchers("/auth/**").permitAll()
+                // AUTH
+                .pathMatchers("/auth/**").permitAll()
 
-                        // SWAGGER Y OPENAPI
-                        .pathMatchers(
-                                "/swagger-ui.html",
-                                "/swagger-ui/**",
-                                "/webjars/**",
-                                "/v3/api-docs/**",
-                                "/api-docs/**"
-                        ).permitAll()
+                // SWAGGER Y OPENAPI
+                .pathMatchers(
+                        "/swagger-ui.html",
+                        "/swagger-ui/**",
+                        "/webjars/**",
+                        "/v3/api-docs/**",
+                        "/api-docs/**"
+                ).permitAll()
 
-                        // ADMIN
-                        .pathMatchers("/usuarios/**").hasAuthority("ROLE_ADMIN")
-                        .pathMatchers("/pagos/**").hasAuthority("ROLE_ADMIN")
+                // =========================
+                // USUARIOS
+                // =========================
 
-                        .anyExchange().authenticated()
-                )
+                .pathMatchers(HttpMethod.GET,
+                        "/usuarios",
+                        "/usuarios/*")
+                .hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
+
+                .pathMatchers(HttpMethod.POST,
+                        "/usuarios")
+                .hasAuthority("ROLE_ADMIN")
+
+                .pathMatchers(HttpMethod.PUT,
+                        "/usuarios/*")
+                .hasAuthority("ROLE_ADMIN")
+
+                .pathMatchers(HttpMethod.DELETE,
+                        "/usuarios/*")
+                .hasAuthority("ROLE_ADMIN")
+
+                // =========================
+                // SEDES
+                // =========================
+
+                .pathMatchers(HttpMethod.GET,
+                        "/sedes",
+                        "/sedes/*")
+                .hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
+
+                .pathMatchers(HttpMethod.POST,
+                        "/sedes")
+                .hasAuthority("ROLE_ADMIN")
+
+                .pathMatchers(HttpMethod.PUT,
+                        "/sedes/*")
+                .hasAuthority("ROLE_ADMIN")
+
+                .pathMatchers(HttpMethod.DELETE,
+                        "/sedes/*")
+                .hasAuthority("ROLE_ADMIN")
+
+                // =========================
+                // RESERVAS
+                // =========================
+
+                .pathMatchers(HttpMethod.GET,
+                        "/reservas",
+                        "/reservas/*",
+                        "/reservas/estado/*",
+                        "/reservas/usuario/*",
+                        "/reservas/cancha/*")
+                .hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
+
+                .pathMatchers(HttpMethod.POST,
+                        "/reservas")
+                .hasAuthority("ROLE_ADMIN")
+
+                .pathMatchers(HttpMethod.PUT,
+                        "/reservas/*")
+                .hasAuthority("ROLE_ADMIN")
+
+                .pathMatchers(HttpMethod.DELETE,
+                        "/reservas/*")
+                .hasAuthority("ROLE_ADMIN")
+
+                // =========================
+                // CANCHAS
+                // =========================
+
+                .pathMatchers(HttpMethod.GET,
+                        "/canchas",
+                        "/canchas/*")
+                .hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
+
+                .pathMatchers(HttpMethod.POST,
+                        "/canchas")
+                .hasAuthority("ROLE_ADMIN")
+
+                .pathMatchers(HttpMethod.PUT,
+                        "/canchas/*")
+                .hasAuthority("ROLE_ADMIN")
+
+                .pathMatchers(HttpMethod.DELETE,
+                        "/canchas/*")
+                .hasAuthority("ROLE_ADMIN")
+
+                // =========================
+                // HORARIOS
+                // =========================
+
+                .pathMatchers(HttpMethod.GET,
+                        "/horarios",
+                        "/horarios/*")
+                .hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
+
+                .pathMatchers(HttpMethod.POST,
+                        "/horarios")
+                .hasAuthority("ROLE_ADMIN")
+
+                .pathMatchers(HttpMethod.PUT,
+                        "/horarios/*")
+                .hasAuthority("ROLE_ADMIN")
+
+                .pathMatchers(HttpMethod.DELETE,
+                        "/horarios/*")
+                .hasAuthority("ROLE_ADMIN")
+
+                // =========================
+                // DISPONIBILIDADES
+                // =========================
+
+                .pathMatchers(HttpMethod.GET,
+                        "/disponibilidades",
+                        "/disponibilidades/*")
+                .hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
+
+                .pathMatchers(HttpMethod.POST,
+                        "/disponibilidades")
+                .hasAuthority("ROLE_ADMIN")
+
+                .pathMatchers(HttpMethod.PUT,
+                        "/disponibilidades/*")
+                .hasAuthority("ROLE_ADMIN")
+
+                .pathMatchers(HttpMethod.DELETE,
+                        "/disponibilidades/*")
+                .hasAuthority("ROLE_ADMIN")
+
+                // =========================
+                // RESEÃ‘AS
+                // =========================
+
+                .pathMatchers(HttpMethod.GET,
+                        "/resenas",
+                        "/resenas/*")
+                .hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
+
+                .pathMatchers(HttpMethod.POST,
+                        "/resenas")
+                .hasAuthority("ROLE_ADMIN")
+
+                .pathMatchers(HttpMethod.PUT,
+                        "/resenas/*")
+                .hasAuthority("ROLE_ADMIN")
+
+                .pathMatchers(HttpMethod.DELETE,
+                        "/resenas/*")
+                .hasAuthority("ROLE_ADMIN")
+
+                // =========================
+                // NOTIFICACIONES
+                // =========================
+
+                .pathMatchers(HttpMethod.GET,
+                        "/notificaciones",
+                        "/notificaciones/*")
+                .hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
+
+                .pathMatchers(HttpMethod.POST,
+                        "/notificaciones")
+                .hasAuthority("ROLE_ADMIN")
+
+                .pathMatchers(HttpMethod.PUT,
+                        "/notificaciones/*")
+                .hasAuthority("ROLE_ADMIN")
+
+                .pathMatchers(HttpMethod.DELETE,
+                        "/notificaciones/*")
+                .hasAuthority("ROLE_ADMIN")
+
+                // =========================
+                // MANTENIMIENTOS
+                // =========================
+
+                .pathMatchers("/mantenimientos/**")
+                .hasAuthority("ROLE_ADMIN")
+
+                // =========================
+                // PAGOS
+                // =========================
+
+                .pathMatchers("/pagos/**")
+                .hasAuthority("ROLE_ADMIN")
+        )
 
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter()))
@@ -568,7 +748,7 @@ SourceFile ApiGatewayApplication.java RuntimeVisibleAnnotations >Lorg/sprin
 ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\api-gateway\target\classes\com\reservacanchas\cl\api_gateway\config\SecurityConfig.class
 ====================================================
 
-Êþº¾   =  7com/reservacanchas/cl/api_gateway/config/SecurityConfig  java/lang/Object secret Ljava/lang/String; RuntimeVisibleAnnotations 4Lorg/springframework/beans/factory/annotation/Value; value 7${spring.security.oauth2.resourceserver.jwt.secret-key} <init> ()V Code
+Êþº¾   =J  7com/reservacanchas/cl/api_gateway/config/SecurityConfig  java/lang/Object secret Ljava/lang/String; RuntimeVisibleAnnotations 4Lorg/springframework/beans/factory/annotation/Value; value 7${spring.security.oauth2.resourceserver.jwt.secret-key} <init> ()V Code
      LineNumberTable LocalVariableTable this 9Lcom/reservacanchas/cl/api_gateway/config/SecurityConfig; securityWebFilterChain …(Lorg/springframework/security/config/web/server/ServerHttpSecurity;)Lorg/springframework/security/web/server/SecurityWebFilterChain; -Lorg/springframework/context/annotation/Bean;      	customize 2()Lorg/springframework/security/config/Customizer;
     Aorg/springframework/security/config/web/server/ServerHttpSecurity    csrf u(Lorg/springframework/security/config/Customizer;)Lorg/springframework/security/config/web/server/ServerHttpSecurity;  
   # $   authorizeExchange  &  ' k(Lcom/reservacanchas/cl/api_gateway/config/SecurityConfig;)Lorg/springframework/security/config/Customizer;
@@ -586,45 +766,51 @@ withSecretKey (Ljavax/crypto/SecretKey;)Lorg/springframework/security/oauth2/j
  b j k l !setJwtGrantedAuthoritiesConverter 9(Lorg/springframework/core/convert/converter/Converter;)V 	converter gLorg/springframework/security/oauth2/server/resource/authentication/ReactiveJwtAuthenticationConverter; lambda$0 O(Lorg/springframework/security/config/web/server/ServerHttpSecurity$CsrfSpec;)V
  r t s Jorg/springframework/security/config/web/server/ServerHttpSecurity$CsrfSpec u v disable E()Lorg/springframework/security/config/web/server/ServerHttpSecurity; LLorg/springframework/security/config/web/server/ServerHttpSecurity$CsrfSpec; lambda$1 \(Lorg/springframework/security/config/web/server/ServerHttpSecurity$AuthorizeExchangeSpec;)V { /auth/**
  }  ~ Worg/springframework/security/config/web/server/ServerHttpSecurity$AuthorizeExchangeSpec €  pathMatchers '([Ljava/lang/String;)Ljava/lang/Object; ƒ ^org/springframework/security/config/web/server/ServerHttpSecurity$AuthorizeExchangeSpec$Access
- ‚ … † ‡ 	permitAll [()Lorg/springframework/security/config/web/server/ServerHttpSecurity$AuthorizeExchangeSpec; ‰ /swagger-ui.html ‹ /swagger-ui/**  /webjars/**  /v3/api-docs/** ‘ /api-docs/** “ /usuarios/** • 
+ ‚ … † ‡ 	permitAll [()Lorg/springframework/security/config/web/server/ServerHttpSecurity$AuthorizeExchangeSpec; ‰ /swagger-ui.html ‹ /swagger-ui/**  /webjars/**  /v3/api-docs/** ‘ /api-docs/**	 “ • ” #org/springframework/http/HttpMethod – — GET %Lorg/springframework/http/HttpMethod; ™ 	/usuarios › /usuarios/*
+ }  € ž L(Lorg/springframework/http/HttpMethod;[Ljava/lang/String;)Ljava/lang/Object;   	ROLE_USER ¢ 
 ROLE_ADMIN
- ‚ — ˜ ™ hasAuthority m(Ljava/lang/String;)Lorg/springframework/security/config/web/server/ServerHttpSecurity$AuthorizeExchangeSpec; › 	/pagos/**
- }  ž Ÿ anyExchange b()Lorg/springframework/security/config/web/server/ServerHttpSecurity$AuthorizeExchangeSpec$Access;
- ‚ ¡ ¢ ‡ 
-authenticated 	exchanges YLorg/springframework/security/config/web/server/ServerHttpSecurity$AuthorizeExchangeSpec; lambda$2 _(Lorg/springframework/security/config/web/server/ServerHttpSecurity$OAuth2ResourceServerSpec;)V  &
- © « ª Zorg/springframework/security/config/web/server/ServerHttpSecurity$OAuth2ResourceServerSpec ¬ ­ jwt Ž(Lorg/springframework/security/config/Customizer;)Lorg/springframework/security/config/web/server/ServerHttpSecurity$OAuth2ResourceServerSpec; oauth2 \Lorg/springframework/security/config/web/server/ServerHttpSecurity$OAuth2ResourceServerSpec; lambda$4 L(Lorg/springframework/security/oauth2/jwt/Jwt;)Lreactor/core/publisher/Flux; ³ role
- µ · ¶ +org/springframework/security/oauth2/jwt/Jwt ¸ ¹ getClaimAsString &(Ljava/lang/String;)Ljava/lang/String;
- » ½ ¼ reactor/core/publisher/Flux ¾ ¿ empty ()Lreactor/core/publisher/Flux; Á Borg/springframework/security/core/authority/SimpleGrantedAuthority  Ã Ä ¹ makeConcatWithConstants
- À Æ  Ç (Ljava/lang/String;)V
- » É Ê Ë just 1(Ljava/lang/Object;)Lreactor/core/publisher/Flux; -Lorg/springframework/security/oauth2/jwt/Jwt; 
+ ‚ ¤ ¥ ¦ hasAnyAuthority n([Ljava/lang/String;)Lorg/springframework/security/config/web/server/ServerHttpSecurity$AuthorizeExchangeSpec;	 “ ¨ © — POST
+ ‚ « ¬ ­ hasAuthority m(Ljava/lang/String;)Lorg/springframework/security/config/web/server/ServerHttpSecurity$AuthorizeExchangeSpec;	 “ ¯ ° — PUT	 “ ² ³ — DELETE µ /sedes · /sedes/* ¹ 	/reservas » /reservas/* ½ /reservas/estado/* ¿ /reservas/usuario/* Á /reservas/cancha/* Ã /canchas Å 
+/canchas/* Ç 	/horarios É /horarios/* Ë /disponibilidades Í /disponibilidades/* Ï /resenas Ñ 
+/resenas/* Ó /notificaciones Õ /notificaciones/* × /mantenimientos/** Ù 	/pagos/** 	exchanges YLorg/springframework/security/config/web/server/ServerHttpSecurity$AuthorizeExchangeSpec; lambda$2 _(Lorg/springframework/security/config/web/server/ServerHttpSecurity$OAuth2ResourceServerSpec;)V  &
+ à â á Zorg/springframework/security/config/web/server/ServerHttpSecurity$OAuth2ResourceServerSpec ã ä jwt Ž(Lorg/springframework/security/config/Customizer;)Lorg/springframework/security/config/web/server/ServerHttpSecurity$OAuth2ResourceServerSpec; oauth2 \Lorg/springframework/security/config/web/server/ServerHttpSecurity$OAuth2ResourceServerSpec; lambda$4 L(Lorg/springframework/security/oauth2/jwt/Jwt;)Lreactor/core/publisher/Flux; ê role
+ ì î í +org/springframework/security/oauth2/jwt/Jwt ï ð getClaimAsString &(Ljava/lang/String;)Ljava/lang/String;
+ ò ô ó reactor/core/publisher/Flux õ ö empty ()Lreactor/core/publisher/Flux; ø Borg/springframework/security/core/authority/SimpleGrantedAuthority  ú û ð makeConcatWithConstants
+ ÷ ý  þ (Ljava/lang/String;)V
+ ò  just 1(Ljava/lang/Object;)Lreactor/core/publisher/Flux; -Lorg/springframework/security/oauth2/jwt/Jwt; 
 StackMapTable lambda$3 g(Lorg/springframework/security/config/web/server/ServerHttpSecurity$OAuth2ResourceServerSpec$JwtSpec;)V
-  Ñ ` a
- Ó Õ Ô borg/springframework/security/config/web/server/ServerHttpSecurity$OAuth2ResourceServerSpec$JwtSpec ` Ö œ(Lorg/springframework/core/convert/converter/Converter;)Lorg/springframework/security/config/web/server/ServerHttpSecurity$OAuth2ResourceServerSpec$JwtSpec; dLorg/springframework/security/config/web/server/ServerHttpSecurity$OAuth2ResourceServerSpec$JwtSpec; 
+  ` a
+
+ borg/springframework/security/config/web/server/ServerHttpSecurity$OAuth2ResourceServerSpec$JwtSpec `
+ œ(Lorg/springframework/core/convert/converter/Converter;)Lorg/springframework/security/config/web/server/ServerHttpSecurity$OAuth2ResourceServerSpec$JwtSpec; dLorg/springframework/security/config/web/server/ServerHttpSecurity$OAuth2ResourceServerSpec$JwtSpec; 
 SourceFile SecurityConfig.java 6Lorg/springframework/context/annotation/Configuration; SLorg/springframework/security/config/annotation/web/reactive/EnableWebFluxSecurity; BootstrapMethods
- Þ à ß "java/lang/invoke/LambdaMetafactory á â metafactory Ì(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodHandle;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/CallSite; Ý (Ljava/lang/Object;)V ä
-  ç o p æ p ä
-  ì x y ë y ä
-  ñ ¥ ¦ ð ¦ &(Ljava/lang/Object;)Ljava/lang/Object; ô
-  ÷ ° ± ö ± ä
-  ü Î Ï û Ï
-  $java/lang/invoke/StringConcatFactory Ä ˜(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/invoke/CallSite; ÿ ROLE_ InnerClasses	 %java/lang/invoke/MethodHandles$Lookup java/lang/invoke/MethodHandles Lookup AuthorizeExchangeSpec Access CsrfSpec OAuth2ResourceServerSpec JwtSpec "SecretKeyReactiveJwtDecoderBuilder !                 	s 
+ "java/lang/invoke/LambdaMetafactory metafactory Ì(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodHandle;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/CallSite; (Ljava/lang/Object;)V
+  o p p
+ # x y" y
+ ( Ü Ý' Ý &(Ljava/lang/Object;)Ljava/lang/Object;+
+ . ç è- è
+ 32
+798 $java/lang/invoke/StringConcatFactory û: ˜(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/invoke/CallSite;6= ROLE_ InnerClasses@ %java/lang/invoke/MethodHandles$LookupB java/lang/invoke/MethodHandles Lookup AuthorizeExchangeSpec Access CsrfSpec OAuth2ResourceServerSpec JwtSpec "SecretKeyReactiveJwtDecoderBuilder !                 	s 
  	     
-   /     *· ±                                    
-   f     +º   ¶ º !  ¶ "*º %  ¶ (¶ +°               	 "  7  ;                  / 0  1    /    2 3          
-   r     "» 4Y*´ 6² 8¶ >D· FL+¸ I² O¶ U¶ [°       "    A  B  C  A  G  H  I ! F        "       ^ _   ` a          
-   S     » bY· dL+º e  ¶ i+°           P  O  R  a               m n 
+   /     *· ±                                    
+   f     +º   ¶ º !  ¶ "*º %  ¶ (¶ +°              ! 	 #  ë  ï                   / 0  1    /    2 3          
+   r     "» 4Y*´ 6² 8¶ >D· FL+¸ I² O¶ U¶ [°       "    õ  ö  ÷  õ  û  ü  ý ! ú        "       ^ _   ` a          
+   S     » bY· dL+º e  ¶ i+°                            m n 
  o p  
-   /     *¶ q±                      w  
+   /     *¶ q±           !          w  
  x y  
-   ¾     h*½ ?YzS¶ |À ‚¶ „½ ?YˆSYŠSYŒSYŽSYS¶ |À ‚¶ „½ ?Y’S¶ |À ‚”¶ –½ ?YšS¶ |À ‚”¶ –¶ œ¶  ±       2    "  %  )  * # + ( , - - 0 ( 6 . ? 1 S 2 a 4        h £ ¤   ¥ ¦  
-   C     +*º §  ¶ ¨±       
-    7  8                ® ¯ 
- ° ±  
-   z      *²¶ ´L+Ç ¸ º°» ÀY+º Â  · Å¸ È°           T  V  W  [  \  [  Z          ¬ Ì     ³   Í    ü  ? Î Ï  
-   =     	+*¶ Ð¶ Ò±           8        	       	 ¬ ×   Ø    Ù    
-  Ú   Û   Ü   :  ã  å è é ã  ê í î ã  ï ò ó ã  õ ø ù ã  ú ý þ    : 
-  } 
-  ‚ }  r   ©   Ó ©  V J 
+  _    Ù*½ ?YzS¶ |À ‚¶ „½ ?YˆSYŠSYŒSYŽSYS¶ |À ‚¶ „² ’½ ?Y˜SYšS¶ œÀ ‚½ ?YŸSY¡S¶ £² §½ ?Y˜S¶ œÀ ‚¡¶ ª² ®½ ?YšS¶ œÀ ‚¡¶ ª² ±½ ?YšS¶ œÀ ‚¡¶ ª² ’½ ?Y´SY¶S¶ œÀ ‚½ ?YŸSY¡S¶ £² §½ ?Y´S¶ œÀ ‚¡¶ ª² ®½ ?Y¶S¶ œÀ ‚¡¶ ª² ±½ ?Y¶S¶ œÀ ‚¡¶ ª² ’½ ?Y¸SYºSY¼SY¾SYÀS¶ œÀ ‚½ ?YŸSY¡S¶ £² §½ ?Y¸S¶ œÀ ‚¡¶ ª² ®½ ?YºS¶ œÀ ‚¡¶ ª² ±½ ?YºS¶ œÀ ‚¡¶ ª² ’½ ?YÂSYÄS¶ œÀ ‚½ ?YŸSY¡S¶ £² §½ ?YÂS¶ œÀ ‚¡¶ ª² ®½ ?YÄS¶ œÀ ‚¡¶ ª² ±½ ?YÄS¶ œÀ ‚¡¶ ª² ’½ ?YÆSYÈS¶ œÀ ‚½ ?YŸSY¡S¶ £² §½ ?YÆS¶ œÀ ‚¡¶ ª² ®½ ?YÈS¶ œÀ ‚¡¶ ª² ±½ ?YÈS¶ œÀ ‚¡¶ ª² ’½ ?YÊSYÌS¶ œÀ ‚½ ?YŸSY¡S¶ £² §½ ?YÊS¶ œÀ ‚¡¶ ª² ®½ ?YÌS¶ œÀ ‚¡¶ ª² ±½ ?YÌS¶ œÀ ‚¡¶ ª² ’½ ?YÎSYÐS¶ œÀ ‚½ ?YŸSY¡S¶ £² §½ ?YÎS¶ œÀ ‚¡¶ ª² ®½ ?YÐS¶ œÀ ‚¡¶ ª² ±½ ?YÐS¶ œÀ ‚¡¶ ª² ’½ ?YÒSYÔS¶ œÀ ‚½ ?YŸSY¡S¶ £² §½ ?YÒS¶ œÀ ‚¡¶ ª² ®½ ?YÔS¶ œÀ ‚¡¶ ª² ±½ ?YÔS¶ œÀ ‚¡¶ ª½ ?YÖS¶ |À ‚¡¶ ª½ ?YØS¶ |À ‚¡¶ ª±      b ˜   #  &  *  + # , ( - - . 0 ) 6 / 9 5 B 6 G 7 J 5 V 8 a : j ; m : s < x >  ? „ > Š @  B ˜ C › B ¡ D ¦ J ¯ K ´ L · J Ã M Î O × P Ú O à Q å S î T ñ S ÷ U ü W X W Y _ `! a& b+ c0 d3 _? eJ gS hV g\ ia kj lm ks mx o p„ oŠ q w˜ x y  w¬ z· |À }Ã |É ~Î €× Ú €à ‚å „î …ñ „÷ †ü Œ 
+ Ž
+ Œ $ ‘- ’0 ‘6 “; •D –G •M —R ™[ š^ ™d ›i ¡r ¢w £z ¡† ¤‘ ¦š § ¦£ ¨¨ ª± «´ ªº ¬¿ ®È ¯Ë ®Ñ °Ö ¶ß ·ä ¸ç ¶ó ¹þ » ¼
+ » ½ ¿ À! ¿' Á, Ã5 Ä8 Ã> ÅC ËL ÌQ ÍT Ë` Îk Ðt Ñw Ð} Ò‚ Ô‹ ÕŽ Ô” Ö™ Ø¢ Ù¥ Ø« Ú¶ à¿ áÊ çÓ è       Ù Ú Û   Ü Ý  
+   C     +*º Þ  ¶ ß±       
+    ë  ì                å æ 
+ ç è  
+   z      *é¶ ëL+Ç ¸ ñ°» ÷Y+º ù  · ü¸ ÿ°           
+               ã     ê      ü  ?  
+   =     	+*¶¶	±           ì        	       	 ã         
+        :    !$% &)* ,/0 145; <>   : ?AC  } D  ‚ }E  r F  à G 
+ àH  V JI 
 
 
 ====================================================
@@ -889,6 +1075,8 @@ ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\cancha-service\src\main\java\c
 
 package com.reservacanchas.cl.cancha_service.config;
 
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.servers.Server;
@@ -899,6 +1087,12 @@ import org.springframework.context.annotation.Configuration;
 import java.util.List;
 
 @Configuration
+@SecurityScheme(
+        name = "bearerAuth",
+        type = SecuritySchemeType.HTTP,
+        scheme = "bearer",
+        bearerFormat = "JWT"
+)
 public class SwaggerConfig {
 
     @Bean
@@ -990,7 +1184,7 @@ springdoc:
 ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\cancha-service\target\classes\com\reservacanchas\cl\cancha_service\config\SwaggerConfig.class
 ====================================================
 
-Êþº¾   = I  9com/reservacanchas/cl/cancha_service/config/SwaggerConfig  java/lang/Object <init> ()V Code
+Êþº¾   = S  9com/reservacanchas/cl/cancha_service/config/SwaggerConfig  java/lang/Object <init> ()V Code
   	   LineNumberTable LocalVariableTable this ;Lcom/reservacanchas/cl/cancha_service/config/SwaggerConfig; 
 customOpenAPI $()Lio/swagger/v3/oas/models/OpenAPI; RuntimeVisibleAnnotations -Lorg/springframework/context/annotation/Bean;  'io/swagger/v3/oas/models/servers/Server
   	  http://localhost:7090
@@ -1004,12 +1198,12 @@ customOpenAPI $()Lio/swagger/v3/oas/models/OpenAPI; RuntimeVisibleAnnotations
  - > ? 5 description
    A B C info H(Lio/swagger/v3/oas/models/info/Info;)Lio/swagger/v3/oas/models/OpenAPI; 
 gatewayServer )Lio/swagger/v3/oas/models/servers/Server; 
-SourceFile SwaggerConfig.java 6Lorg/springframework/context/annotation/Configuration; !               /     *· ±    
-       
-          
+SourceFile SwaggerConfig.java 6Lorg/springframework/context/annotation/Configuration; 7Lio/swagger/v3/oas/annotations/security/SecurityScheme; name 
+bearerAuth type 8Lio/swagger/v3/oas/annotations/enums/SecuritySchemeType; HTTP scheme bearer bearerFormat JWT !               /     *· ±    
+                 
                   ˜     <» Y· L+¶ +¶ »  Y· "+¸ #¶ )» -Y· /0¶ 26¶ 8;¶ =¶ @°    
-   .             "  )  .  3  8  ;         <  
-    4 D E   F    G      H  
+   .             "   ) ! . " 3 # 8   ;         <  
+    4 D E   F    G       H   I  Js K Le M N Os P Qs R
 
 
 ====================================================
@@ -1018,6 +1212,8 @@ ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\disponibilidad-service\src\mai
 
 package com.reservacanchas.cl.disponibilidad_service.config;
 
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.servers.Server;
@@ -1028,6 +1224,12 @@ import org.springframework.context.annotation.Configuration;
 import java.util.List;
 
 @Configuration
+@SecurityScheme(
+        name = "bearerAuth",
+        type = SecuritySchemeType.HTTP,
+        scheme = "bearer",
+        bearerFormat = "JWT"
+)
 public class SwaggerConfig {
 
     @Bean
@@ -1119,7 +1321,7 @@ springdoc:
 ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\disponibilidad-service\target\classes\com\reservacanchas\cl\disponibilidad_service\config\SwaggerConfig.class
 ====================================================
 
-Êþº¾   = I  Acom/reservacanchas/cl/disponibilidad_service/config/SwaggerConfig  java/lang/Object <init> ()V Code
+Êþº¾   = S  Acom/reservacanchas/cl/disponibilidad_service/config/SwaggerConfig  java/lang/Object <init> ()V Code
   	   LineNumberTable LocalVariableTable this CLcom/reservacanchas/cl/disponibilidad_service/config/SwaggerConfig; 
 customOpenAPI $()Lio/swagger/v3/oas/models/OpenAPI; RuntimeVisibleAnnotations -Lorg/springframework/context/annotation/Bean;  'io/swagger/v3/oas/models/servers/Server
   	  http://localhost:7090
@@ -1133,12 +1335,12 @@ customOpenAPI $()Lio/swagger/v3/oas/models/OpenAPI; RuntimeVisibleAnnotations
  - > ? 5 description
    A B C info H(Lio/swagger/v3/oas/models/info/Info;)Lio/swagger/v3/oas/models/OpenAPI; 
 gatewayServer )Lio/swagger/v3/oas/models/servers/Server; 
-SourceFile SwaggerConfig.java 6Lorg/springframework/context/annotation/Configuration; !               /     *· ±    
-       
-          
+SourceFile SwaggerConfig.java 6Lorg/springframework/context/annotation/Configuration; 7Lio/swagger/v3/oas/annotations/security/SecurityScheme; name 
+bearerAuth type 8Lio/swagger/v3/oas/annotations/enums/SecuritySchemeType; HTTP scheme bearer bearerFormat JWT !               /     *· ±    
+                 
                   ˜     <» Y· L+¶ +¶ »  Y· "+¸ #¶ )» -Y· /0¶ 26¶ 8;¶ =¶ @°    
-   .             "  )  .  3  8  ;         <  
-    4 D E   F    G      H  
+   .             "   ) ! . " 3 # 8   ;         <  
+    4 D E   F    G       H   I  Js K Le M N Os P Qs R
 
 
 ====================================================
@@ -1147,6 +1349,8 @@ ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\horario-service\src\main\java\
 
 package com.reservacanchas.cl.horario_service.config;
 
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.servers.Server;
@@ -1157,6 +1361,12 @@ import org.springframework.context.annotation.Configuration;
 import java.util.List;
 
 @Configuration
+@SecurityScheme(
+        name = "bearerAuth",
+        type = SecuritySchemeType.HTTP,
+        scheme = "bearer",
+        bearerFormat = "JWT"
+)
 public class SwaggerConfig {
 
     @Bean
@@ -1248,7 +1458,7 @@ springdoc:
 ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\horario-service\target\classes\com\reservacanchas\cl\horario_service\config\SwaggerConfig.class
 ====================================================
 
-Êþº¾   = I  :com/reservacanchas/cl/horario_service/config/SwaggerConfig  java/lang/Object <init> ()V Code
+Êþº¾   = S  :com/reservacanchas/cl/horario_service/config/SwaggerConfig  java/lang/Object <init> ()V Code
   	   LineNumberTable LocalVariableTable this <Lcom/reservacanchas/cl/horario_service/config/SwaggerConfig; 
 customOpenAPI $()Lio/swagger/v3/oas/models/OpenAPI; RuntimeVisibleAnnotations -Lorg/springframework/context/annotation/Bean;  'io/swagger/v3/oas/models/servers/Server
   	  http://localhost:7090
@@ -1262,12 +1472,12 @@ customOpenAPI $()Lio/swagger/v3/oas/models/OpenAPI; RuntimeVisibleAnnotations
  - > ? 5 description
    A B C info H(Lio/swagger/v3/oas/models/info/Info;)Lio/swagger/v3/oas/models/OpenAPI; 
 gatewayServer )Lio/swagger/v3/oas/models/servers/Server; 
-SourceFile SwaggerConfig.java 6Lorg/springframework/context/annotation/Configuration; !               /     *· ±    
-       
-          
+SourceFile SwaggerConfig.java 6Lorg/springframework/context/annotation/Configuration; 7Lio/swagger/v3/oas/annotations/security/SecurityScheme; name 
+bearerAuth type 8Lio/swagger/v3/oas/annotations/enums/SecuritySchemeType; HTTP scheme bearer bearerFormat JWT !               /     *· ±    
+                 
                   ˜     <» Y· L+¶ +¶ »  Y· "+¸ #¶ )» -Y· /0¶ 26¶ 8;¶ =¶ @°    
-   .             "  )  .  3  8  ;         <  
-    4 D E   F    G      H  
+   .             "   ) ! . " 3 # 8   ;         <  
+    4 D E   F    G       H   I  Js K Le M N Os P Qs R
 
 
 ====================================================
@@ -1276,6 +1486,8 @@ ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\mantenimiento-service\src\main
 
 package com.reservacanchas.cl.mantenimiento_service.config;
 
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.servers.Server;
@@ -1286,6 +1498,12 @@ import org.springframework.context.annotation.Configuration;
 import java.util.List;
 
 @Configuration
+@SecurityScheme(
+        name = "bearerAuth",
+        type = SecuritySchemeType.HTTP,
+        scheme = "bearer",
+        bearerFormat = "JWT"
+)
 public class SwaggerConfig {
 
     @Bean
@@ -1377,7 +1595,7 @@ springdoc:
 ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\mantenimiento-service\target\classes\com\reservacanchas\cl\mantenimiento_service\config\SwaggerConfig.class
 ====================================================
 
-Êþº¾   = I  @com/reservacanchas/cl/mantenimiento_service/config/SwaggerConfig  java/lang/Object <init> ()V Code
+Êþº¾   = S  @com/reservacanchas/cl/mantenimiento_service/config/SwaggerConfig  java/lang/Object <init> ()V Code
   	   LineNumberTable LocalVariableTable this BLcom/reservacanchas/cl/mantenimiento_service/config/SwaggerConfig; 
 customOpenAPI $()Lio/swagger/v3/oas/models/OpenAPI; RuntimeVisibleAnnotations -Lorg/springframework/context/annotation/Bean;  'io/swagger/v3/oas/models/servers/Server
   	  http://localhost:7090
@@ -1391,12 +1609,12 @@ customOpenAPI $()Lio/swagger/v3/oas/models/OpenAPI; RuntimeVisibleAnnotations
  - > ? 5 description
    A B C info H(Lio/swagger/v3/oas/models/info/Info;)Lio/swagger/v3/oas/models/OpenAPI; 
 gatewayServer )Lio/swagger/v3/oas/models/servers/Server; 
-SourceFile SwaggerConfig.java 6Lorg/springframework/context/annotation/Configuration; !               /     *· ±    
-       
-          
+SourceFile SwaggerConfig.java 6Lorg/springframework/context/annotation/Configuration; 7Lio/swagger/v3/oas/annotations/security/SecurityScheme; name 
+bearerAuth type 8Lio/swagger/v3/oas/annotations/enums/SecuritySchemeType; HTTP scheme bearer bearerFormat JWT !               /     *· ±    
+                 
                   ˜     <» Y· L+¶ +¶ »  Y· "+¸ #¶ )» -Y· /0¶ 26¶ 8;¶ =¶ @°    
-   .             "  )  .  3  8  ;         <  
-    4 D E   F    G      H  
+   .             "   ) ! . " 3 # 8   ;         <  
+    4 D E   F    G       H   I  Js K Le M N Os P Qs R
 
 
 ====================================================
@@ -1405,6 +1623,8 @@ ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\notificacion-service\src\main\
 
 package com.reservacanchas.cl.notificacion_service.config;
 
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.servers.Server;
@@ -1415,6 +1635,12 @@ import org.springframework.context.annotation.Configuration;
 import java.util.List;
 
 @Configuration
+@SecurityScheme(
+        name = "bearerAuth",
+        type = SecuritySchemeType.HTTP,
+        scheme = "bearer",
+        bearerFormat = "JWT"
+)
 public class SwaggerConfig {
 
     @Bean
@@ -1506,7 +1732,7 @@ springdoc:
 ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\notificacion-service\target\classes\com\reservacanchas\cl\notificacion_service\config\SwaggerConfig.class
 ====================================================
 
-Êþº¾   = I  ?com/reservacanchas/cl/notificacion_service/config/SwaggerConfig  java/lang/Object <init> ()V Code
+Êþº¾   = S  ?com/reservacanchas/cl/notificacion_service/config/SwaggerConfig  java/lang/Object <init> ()V Code
   	   LineNumberTable LocalVariableTable this ALcom/reservacanchas/cl/notificacion_service/config/SwaggerConfig; 
 customOpenAPI $()Lio/swagger/v3/oas/models/OpenAPI; RuntimeVisibleAnnotations -Lorg/springframework/context/annotation/Bean;  'io/swagger/v3/oas/models/servers/Server
   	  http://localhost:7090
@@ -1520,12 +1746,12 @@ customOpenAPI $()Lio/swagger/v3/oas/models/OpenAPI; RuntimeVisibleAnnotations
  - > ? 5 description
    A B C info H(Lio/swagger/v3/oas/models/info/Info;)Lio/swagger/v3/oas/models/OpenAPI; 
 gatewayServer )Lio/swagger/v3/oas/models/servers/Server; 
-SourceFile SwaggerConfig.java 6Lorg/springframework/context/annotation/Configuration; !               /     *· ±    
-       
-          
+SourceFile SwaggerConfig.java 6Lorg/springframework/context/annotation/Configuration; 7Lio/swagger/v3/oas/annotations/security/SecurityScheme; name 
+bearerAuth type 8Lio/swagger/v3/oas/annotations/enums/SecuritySchemeType; HTTP scheme bearer bearerFormat JWT !               /     *· ±    
+                 
                   ˜     <» Y· L+¶ +¶ »  Y· "+¸ #¶ )» -Y· /0¶ 26¶ 8;¶ =¶ @°    
-   .             "  )  .  3  8  ;         <  
-    4 D E   F    G      H  
+   .             "   ) ! . " 3 # 8   ;         <  
+    4 D E   F    G       H   I  Js K Le M N Os P Qs R
 
 
 ====================================================
@@ -1534,6 +1760,8 @@ ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\pago-service\src\main\java\com
 
 package com.reservacanchas.cl.pago_service.config;
 
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.servers.Server;
@@ -1544,6 +1772,12 @@ import org.springframework.context.annotation.Configuration;
 import java.util.List;
 
 @Configuration
+@SecurityScheme(
+        name = "bearerAuth",
+        type = SecuritySchemeType.HTTP,
+        scheme = "bearer",
+        bearerFormat = "JWT"
+)
 public class SwaggerConfig {
 
     @Bean
@@ -1635,7 +1869,7 @@ springdoc:
 ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\pago-service\target\classes\com\reservacanchas\cl\pago_service\config\SwaggerConfig.class
 ====================================================
 
-Êþº¾   = I  7com/reservacanchas/cl/pago_service/config/SwaggerConfig  java/lang/Object <init> ()V Code
+Êþº¾   = S  7com/reservacanchas/cl/pago_service/config/SwaggerConfig  java/lang/Object <init> ()V Code
   	   LineNumberTable LocalVariableTable this 9Lcom/reservacanchas/cl/pago_service/config/SwaggerConfig; 
 customOpenAPI $()Lio/swagger/v3/oas/models/OpenAPI; RuntimeVisibleAnnotations -Lorg/springframework/context/annotation/Bean;  'io/swagger/v3/oas/models/servers/Server
   	  http://localhost:7090
@@ -1649,12 +1883,12 @@ customOpenAPI $()Lio/swagger/v3/oas/models/OpenAPI; RuntimeVisibleAnnotations
  - > ? 5 description
    A B C info H(Lio/swagger/v3/oas/models/info/Info;)Lio/swagger/v3/oas/models/OpenAPI; 
 gatewayServer )Lio/swagger/v3/oas/models/servers/Server; 
-SourceFile SwaggerConfig.java 6Lorg/springframework/context/annotation/Configuration; !               /     *· ±    
-       
-          
+SourceFile SwaggerConfig.java 6Lorg/springframework/context/annotation/Configuration; 7Lio/swagger/v3/oas/annotations/security/SecurityScheme; name 
+bearerAuth type 8Lio/swagger/v3/oas/annotations/enums/SecuritySchemeType; HTTP scheme bearer bearerFormat JWT !               /     *· ±    
+                 
                   ˜     <» Y· L+¶ +¶ »  Y· "+¸ #¶ )» -Y· /0¶ 26¶ 8;¶ =¶ @°    
-   .             "  )  .  3  8  ;         <  
-    4 D E   F    G      H  
+   .             "   ) ! . " 3 # 8   ;         <  
+    4 D E   F    G       H   I  Js K Le M N Os P Qs R
 
 
 ====================================================
@@ -1663,6 +1897,8 @@ ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\resena-service\src\main\java\c
 
 package com.reservacanchas.cl.resena_service.config;
 
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.servers.Server;
@@ -1673,6 +1909,12 @@ import org.springframework.context.annotation.Configuration;
 import java.util.List;
 
 @Configuration
+@SecurityScheme(
+        name = "bearerAuth",
+        type = SecuritySchemeType.HTTP,
+        scheme = "bearer",
+        bearerFormat = "JWT"
+)
 public class SwaggerConfig {
 
     @Bean
@@ -1764,7 +2006,7 @@ springdoc:
 ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\resena-service\target\classes\com\reservacanchas\cl\resena_service\config\SwaggerConfig.class
 ====================================================
 
-Êþº¾   = I  9com/reservacanchas/cl/resena_service/config/SwaggerConfig  java/lang/Object <init> ()V Code
+Êþº¾   = S  9com/reservacanchas/cl/resena_service/config/SwaggerConfig  java/lang/Object <init> ()V Code
   	   LineNumberTable LocalVariableTable this ;Lcom/reservacanchas/cl/resena_service/config/SwaggerConfig; 
 customOpenAPI $()Lio/swagger/v3/oas/models/OpenAPI; RuntimeVisibleAnnotations -Lorg/springframework/context/annotation/Bean;  'io/swagger/v3/oas/models/servers/Server
   	  http://localhost:7090
@@ -1778,12 +2020,12 @@ customOpenAPI $()Lio/swagger/v3/oas/models/OpenAPI; RuntimeVisibleAnnotations
  - > ? 5 description
    A B C info H(Lio/swagger/v3/oas/models/info/Info;)Lio/swagger/v3/oas/models/OpenAPI; 
 gatewayServer )Lio/swagger/v3/oas/models/servers/Server; 
-SourceFile SwaggerConfig.java 6Lorg/springframework/context/annotation/Configuration; !               /     *· ±    
-       
-          
+SourceFile SwaggerConfig.java 6Lorg/springframework/context/annotation/Configuration; 7Lio/swagger/v3/oas/annotations/security/SecurityScheme; name 
+bearerAuth type 8Lio/swagger/v3/oas/annotations/enums/SecuritySchemeType; HTTP scheme bearer bearerFormat JWT !               /     *· ±    
+                 
                   ˜     <» Y· L+¶ +¶ »  Y· "+¸ #¶ )» -Y· /0¶ 26¶ 8;¶ =¶ @°    
-   .             "  )  .  3  8  ;         <  
-    4 D E   F    G      H  
+   .             "   ) ! . " 3 # 8   ;         <  
+    4 D E   F    G       H   I  Js K Le M N Os P Qs R
 
 
 ====================================================
@@ -1864,6 +2106,8 @@ ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\reserva-service\src\main\java\
 
 package com.reservacanchas.cl.reserva_service.config;
 
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.servers.Server;
@@ -1874,6 +2118,12 @@ import org.springframework.context.annotation.Configuration;
 import java.util.List;
 
 @Configuration
+@SecurityScheme(
+        name = "bearerAuth",
+        type = SecuritySchemeType.HTTP,
+        scheme = "bearer",
+        bearerFormat = "JWT"
+)
 public class SwaggerConfig {
 
     @Bean
@@ -2031,7 +2281,7 @@ JwtConfigurer SecretKeyJwtDecoderBuilder !                 	s 
 ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\reserva-service\target\classes\com\reservacanchas\cl\reserva_service\config\SwaggerConfig.class
 ====================================================
 
-Êþº¾   = I  :com/reservacanchas/cl/reserva_service/config/SwaggerConfig  java/lang/Object <init> ()V Code
+Êþº¾   = S  :com/reservacanchas/cl/reserva_service/config/SwaggerConfig  java/lang/Object <init> ()V Code
   	   LineNumberTable LocalVariableTable this <Lcom/reservacanchas/cl/reserva_service/config/SwaggerConfig; 
 customOpenAPI $()Lio/swagger/v3/oas/models/OpenAPI; RuntimeVisibleAnnotations -Lorg/springframework/context/annotation/Bean;  'io/swagger/v3/oas/models/servers/Server
   	  http://localhost:7090
@@ -2045,12 +2295,12 @@ customOpenAPI $()Lio/swagger/v3/oas/models/OpenAPI; RuntimeVisibleAnnotations
  - > ? 5 description
    A B C info H(Lio/swagger/v3/oas/models/info/Info;)Lio/swagger/v3/oas/models/OpenAPI; 
 gatewayServer )Lio/swagger/v3/oas/models/servers/Server; 
-SourceFile SwaggerConfig.java 6Lorg/springframework/context/annotation/Configuration; !               /     *· ±    
-       
-          
+SourceFile SwaggerConfig.java 6Lorg/springframework/context/annotation/Configuration; 7Lio/swagger/v3/oas/annotations/security/SecurityScheme; name 
+bearerAuth type 8Lio/swagger/v3/oas/annotations/enums/SecuritySchemeType; HTTP scheme bearer bearerFormat JWT !               /     *· ±    
+                 
                   ˜     <» Y· L+¶ +¶ »  Y· "+¸ #¶ )» -Y· /0¶ 26¶ 8;¶ =¶ @°    
-   .             "  )  .  3  8  ;         <  
-    4 D E   F    G      H  
+   .             "   ) ! . " 3 # 8   ;         <  
+    4 D E   F    G       H   I  Js K Le M N Os P Qs R
 
 
 ====================================================
@@ -2059,6 +2309,8 @@ ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\sede-service\src\main\java\com
 
 package com.reservacanchas.cl.sede_service.config;
 
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.servers.Server;
@@ -2069,6 +2321,12 @@ import org.springframework.context.annotation.Configuration;
 import java.util.List;
 
 @Configuration
+@SecurityScheme(
+        name = "bearerAuth",
+        type = SecuritySchemeType.HTTP,
+        scheme = "bearer",
+        bearerFormat = "JWT"
+)
 public class SwaggerConfig {
 
     @Bean
@@ -2168,7 +2426,7 @@ springdoc:
 ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\sede-service\target\classes\com\reservacanchas\cl\sede_service\config\SwaggerConfig.class
 ====================================================
 
-Êþº¾   = I  7com/reservacanchas/cl/sede_service/config/SwaggerConfig  java/lang/Object <init> ()V Code
+Êþº¾   = S  7com/reservacanchas/cl/sede_service/config/SwaggerConfig  java/lang/Object <init> ()V Code
   	   LineNumberTable LocalVariableTable this 9Lcom/reservacanchas/cl/sede_service/config/SwaggerConfig; 
 customOpenAPI $()Lio/swagger/v3/oas/models/OpenAPI; RuntimeVisibleAnnotations -Lorg/springframework/context/annotation/Bean;  'io/swagger/v3/oas/models/servers/Server
   	  http://localhost:7090
@@ -2182,12 +2440,12 @@ customOpenAPI $()Lio/swagger/v3/oas/models/OpenAPI; RuntimeVisibleAnnotations
  - > ? 5 description
    A B C info H(Lio/swagger/v3/oas/models/info/Info;)Lio/swagger/v3/oas/models/OpenAPI; 
 gatewayServer )Lio/swagger/v3/oas/models/servers/Server; 
-SourceFile SwaggerConfig.java 6Lorg/springframework/context/annotation/Configuration; !               /     *· ±    
-       
-          
+SourceFile SwaggerConfig.java 6Lorg/springframework/context/annotation/Configuration; 7Lio/swagger/v3/oas/annotations/security/SecurityScheme; name 
+bearerAuth type 8Lio/swagger/v3/oas/annotations/enums/SecuritySchemeType; HTTP scheme bearer bearerFormat JWT !               /     *· ±    
+                 
                   ˜     <» Y· L+¶ +¶ »  Y· "+¸ #¶ )» -Y· /0¶ 26¶ 8;¶ =¶ @°    
-   .             "  )  .  3  8  ;         <  
-    4 D E   F    G      H  
+   .             "   ) ! . " 3 # 8   ;         <  
+    4 D E   F    G       H   I  Js K Le M N Os P Qs R
 
 
 ====================================================
@@ -2268,15 +2526,25 @@ ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\usuario-service\src\main\java\
 
 package com.reservacanchas.cl.usuario_service.config;
 
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
+
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.servers.Server;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.util.List;
 
 @Configuration
+@SecurityScheme(
+        name = "bearerAuth",
+        type = SecuritySchemeType.HTTP,
+        scheme = "bearer",
+        bearerFormat = "JWT"
+)
 public class SwaggerConfig {
 
     @Bean
@@ -2434,7 +2702,7 @@ JwtConfigurer SecretKeyJwtDecoderBuilder !                 	s 
 ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\usuario-service\target\classes\com\reservacanchas\cl\usuario_service\config\SwaggerConfig.class
 ====================================================
 
-Êþº¾   = I  :com/reservacanchas/cl/usuario_service/config/SwaggerConfig  java/lang/Object <init> ()V Code
+Êþº¾   = S  :com/reservacanchas/cl/usuario_service/config/SwaggerConfig  java/lang/Object <init> ()V Code
   	   LineNumberTable LocalVariableTable this <Lcom/reservacanchas/cl/usuario_service/config/SwaggerConfig; 
 customOpenAPI $()Lio/swagger/v3/oas/models/OpenAPI; RuntimeVisibleAnnotations -Lorg/springframework/context/annotation/Bean;  'io/swagger/v3/oas/models/servers/Server
   	  http://localhost:7090
@@ -2448,8 +2716,9 @@ customOpenAPI $()Lio/swagger/v3/oas/models/OpenAPI; RuntimeVisibleAnnotations
  - > ? 5 description
    A B C info H(Lio/swagger/v3/oas/models/info/Info;)Lio/swagger/v3/oas/models/OpenAPI; 
 gatewayServer )Lio/swagger/v3/oas/models/servers/Server; 
-SourceFile SwaggerConfig.java 6Lorg/springframework/context/annotation/Configuration; !               /     *· ±    
-                 
+SourceFile SwaggerConfig.java 6Lorg/springframework/context/annotation/Configuration; 7Lio/swagger/v3/oas/annotations/security/SecurityScheme; name 
+bearerAuth type 8Lio/swagger/v3/oas/annotations/enums/SecuritySchemeType; HTTP scheme bearer bearerFormat JWT !               /     *· ±    
+                 
                   ˜     <» Y· L+¶ +¶ »  Y· "+¸ #¶ )» -Y· /0¶ 26¶ 8;¶ =¶ @°    
-   .             "  )  .  3  8  ;         <  
-    4 D E   F    G      H  
+   .              " ! ) " . # 3 $ 8 ! ;         <  
+    4 D E   F    G       H   I  Js K Le M N Os P Qs R

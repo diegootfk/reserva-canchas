@@ -63,7 +63,7 @@ public class AuthController {
 
     @Operation(
             summary = "Registrar usuario",
-            description = "Permite registrar un nuevo usuario en el sistema"
+            description = "Permite registrar un nuevo usuario con rol USER"
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Usuario registrado correctamente"),
@@ -76,6 +76,28 @@ public class AuthController {
         String password = request.get("password");
 
         String resultado = userService.register(email, password);
+
+        Map<String, String> response = new HashMap<>();
+        response.put("message", resultado);
+
+        return response;
+    }
+
+    @Operation(
+            summary = "Registrar administrador",
+            description = "Permite registrar un nuevo usuario con rol ADMIN"
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Administrador registrado correctamente"),
+            @ApiResponse(responseCode = "400", description = "Datos invÃ¡lidos")
+    })
+    @PostMapping("/register-admin")
+    public Map<String, String> registerAdmin(@RequestBody Map<String, String> request) {
+
+        String email = request.get("email");
+        String password = request.get("password");
+
+        String resultado = userService.registerAdmin(email, password);
 
         Map<String, String> response = new HashMap<>();
         response.put("message", resultado);
@@ -227,13 +249,17 @@ public class UserService {
     private final JwtService jwtService;
     private final HashService hashService;
 
-    public UserService(UserRepository userRepository, JwtService jwtService, HashService hashService) {
+    public UserService(UserRepository userRepository,
+                       JwtService jwtService,
+                       HashService hashService) {
+
         this.userRepository = userRepository;
         this.jwtService = jwtService;
         this.hashService = hashService;
     }
 
     public String login(String email, String password) {
+
         User user = userRepository.findByEmail(email);
 
         if (user == null) {
@@ -250,6 +276,7 @@ public class UserService {
     }
 
     public String register(String email, String password) {
+
         User existe = userRepository.findByEmail(email);
 
         if (existe != null) {
@@ -257,6 +284,7 @@ public class UserService {
         }
 
         User user = new User();
+
         user.setEmail(email);
         user.setPassword(hashService.sha1(password));
         user.setRole("USER");
@@ -266,7 +294,27 @@ public class UserService {
         return "Usuario creado correctamente";
     }
 
+    public String registerAdmin(String email, String password) {
+
+        User existe = userRepository.findByEmail(email);
+
+        if (existe != null) {
+            return "Usuario ya existe";
+        }
+
+        User user = new User();
+
+        user.setEmail(email);
+        user.setPassword(hashService.sha1(password));
+        user.setRole("ADMIN");
+
+        userRepository.save(user);
+
+        return "Administrador creado correctamente";
+    }
+
     public String getRole(String email) {
+
         User user = userRepository.findByEmail(email);
 
         if (user == null) {
@@ -282,21 +330,24 @@ public class UserService {
 ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\auth-service\target\classes\com\reservacanchas\cl\auth_service\controller\AuthController.class
 ====================================================
 
-Êþº¾   = h  <com/reservacanchas/cl/auth_service/controller/AuthController  java/lang/Object userService 8Lcom/reservacanchas/cl/auth_service/service/UserService; <init> ;(Lcom/reservacanchas/cl/auth_service/service/UserService;)V Code
+Êþº¾   = o  <com/reservacanchas/cl/auth_service/controller/AuthController  java/lang/Object userService 8Lcom/reservacanchas/cl/auth_service/service/UserService; <init> ;(Lcom/reservacanchas/cl/auth_service/service/UserService;)V Code
      ()V	     LineNumberTable LocalVariableTable this >Lcom/reservacanchas/cl/auth_service/controller/AuthController; MethodParameters login  (Ljava/util/Map;)Ljava/util/Map; 	Signature l(Ljava/util/Map<Ljava/lang/String;Ljava/lang/String;>;)Ljava/util/Map<Ljava/lang/String;Ljava/lang/String;>; RuntimeVisibleAnnotations )Lio/swagger/v3/oas/annotations/Operation; summary Iniciar sesiÃ³n description 4Permite autenticar un usuario y obtener un token JWT 6Lio/swagger/v3/oas/annotations/responses/ApiResponses; value 5Lio/swagger/v3/oas/annotations/responses/ApiResponse; responseCode 200 Login realizado correctamente 401 Credenciales invÃ¡lidas 5Lorg/springframework/web/bind/annotation/PostMapping; /login "RuntimeVisibleParameterAnnotations 5Lorg/springframework/web/bind/annotation/RequestBody; + email - / . 
 java/util/Map 0 1 get &(Ljava/lang/Object;)Ljava/lang/Object; 3 java/lang/String 5 password
  7 9 8 6com/reservacanchas/cl/auth_service/service/UserService  : 8(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String; < java/util/HashMap
  ;  ? status A error - C D E put 8(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object; G token I   K ok request Ljava/util/Map; Ljava/lang/String; response LocalVariableTypeTable 5Ljava/util/Map<Ljava/lang/String;Ljava/lang/String;>; 
-StackMapTable register Registrar usuario 0Permite registrar un nuevo usuario en el sistema  Usuario registrado correctamente 400 Datos invÃ¡lidos 	/register
+StackMapTable register Registrar usuario /Permite registrar un nuevo usuario con rol USER  Usuario registrado correctamente 400 Datos invÃ¡lidos 	/register
  7 [ S : ] message 	resultado 
-SourceFile AuthController.java (Lio/swagger/v3/oas/annotations/tags/Tag; name AutenticaciÃ³n :Endpoints para registro e inicio de sesiÃ³n utilizando JWT 8Lorg/springframework/web/bind/annotation/RestController; 8Lorg/springframework/web/bind/annotation/RequestMapping; /auth !                	   F     
+registerAdmin Registrar administrador 0Permite registrar un nuevo usuario con rol ADMIN &Administrador registrado correctamente /register-admin
+ 7 e _ : 
+SourceFile AuthController.java (Lio/swagger/v3/oas/annotations/tags/Tag; name AutenticaciÃ³n :Endpoints para registro e inicio de sesiÃ³n utilizando JWT 8Lorg/springframework/web/bind/annotation/RestController; 8Lorg/springframework/web/bind/annotation/RequestMapping; /auth !                	   F     
 *· 
 *+µ 
 ±              	         
        
                        C    s  s    [ @    !s " s #@    !s $ s % &  [ s ' (     )   	  )     g+*¹ , À 2M+4¹ , À 2N*´ 
 ,-¶ 6:» ;Y· =:Ç >@¹ B WFH¹ B W§ >J¹ B WF¹ B W°       .    (  )  + # - , / 1 0 = 1 I 2 L 3 X 4 d 7    >    g       g L M   [ + N   O 5 N  # D G N  , ; O M  P       g L Q  , ; O Q  R    ÿ L   - 2 2 2 -       L    S           C    s T s U   [ @    !s " s V@    !s W s X &  [ s Y (     )   	   Ç     ;+*¹ , À 2M+4¹ , À 2N*´ 
-,-¶ Z:» ;Y· =:\¹ B W°           E  F  H # J , K 8 M    >    ;       ; L M   / + N   # 5 N  #  ^ N  ,  O M  P       ; L Q  ,  O Q      L    _    `       a  bs c s d e   f  [ s g
+,-¶ Z:» ;Y· =:\¹ B W°           E  F  H # J , K 8 M    >    ;       ; L M   / + N   # 5 N  #  ^ N  ,  O M  P       ; L Q  ,  O Q      L    _           C    s ` s a   [ @    !s " s b@    !s W s X &  [ s c (     )   	   Ç     ;+*¹ , À 2M+4¹ , À 2N*´ 
+,-¶ d:» ;Y· =:\¹ B W°           [  \  ^ # ` , a 8 c    >    ;       ; L M   / + N   # 5 N  #  ^ N  ,  O M  P       ; L Q  ,  O Q      L    f    g       h  is j s k l   m  [ s n
 
 
 ====================================================
@@ -383,7 +434,7 @@ SourceFile JwtService.java (Lorg/springframework/stereotype/Service; InnerC
 ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\auth-service\target\classes\com\reservacanchas\cl\auth_service\service\UserService.class
 ====================================================
 
-Êþº¾   = `  6com/reservacanchas/cl/auth_service/service/UserService  java/lang/Object userRepository >Lcom/reservacanchas/cl/auth_service/repository/UserRepository; 
+Êþº¾   = e  6com/reservacanchas/cl/auth_service/service/UserService  java/lang/Object userRepository >Lcom/reservacanchas/cl/auth_service/repository/UserRepository; 
 jwtService 7Lcom/reservacanchas/cl/auth_service/service/JwtService; hashService 8Lcom/reservacanchas/cl/auth_service/service/HashService; <init> °(Lcom/reservacanchas/cl/auth_service/repository/UserRepository;Lcom/reservacanchas/cl/auth_service/service/JwtService;Lcom/reservacanchas/cl/auth_service/service/HashService;)V Code
      ()V	    	    	   	 
  LineNumberTable LocalVariableTable this 8Lcom/reservacanchas/cl/auth_service/service/UserService; MethodParameters login 8(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;  !   <com/reservacanchas/cl/auth_service/repository/UserRepository " # findByEmail C(Ljava/lang/String;)Lcom/reservacanchas/cl/auth_service/model/User;
@@ -398,14 +449,16 @@ StackMapTable register G Usuario ya existe
  + J K L setEmail (Ljava/lang/String;)V
  + N O L setPassword Q USER
  + S T L setRole  V W X save &(Ljava/lang/Object;)Ljava/lang/Object; Z Usuario creado correctamente existe 
+registerAdmin ^ ADMIN ` "Administrador creado correctamente 
 SourceFile UserService.java RuntimeVisibleAnnotations (Lorg/springframework/stereotype/Service; !                 	 
-        
-   l     *· *+µ *,µ *-µ ±              	         *                        	 
+        
+   l     *· *+µ *,µ *-µ ±              	         *                        	 
      
        	       
-   ´     6*´ +¹  N-Ç °*´ ,¶ $:-¶ *¶ 0š °*´ +-¶ 6¶ 9°                    '  ) !    4    6       6 > ?    6 @ ?   + A B    C ?  D    ü  +ü  1    	 >   @    E   
-   Ä     D*´ +¹  N-Æ F°» +Y· H:+¶ I*´ ,¶ $¶ MP¶ R*´ ¹ U WY°       & 	   %  '  (  +  , ! - . . 5 0 A 2    4    D       D > ?    D @ ?   9 [ B   ) A B  D    ü  +    	 >   @    8 )  
-   n     *´ +¹  M,Ç °,¶ 6°           6  8  9  <                 > ?    A B  D    ü  +     >    \    ] ^     _  
+   ´     6*´ +¹  N-Ç °*´ ,¶ $:-¶ *¶ 0š °*´ +-¶ 6¶ 9°                   ! ' " ) %    4    6       6 > ?    6 @ ?   + A B    C ?  D    ü  +ü  1    	 >   @    E   
+   Ä     D*´ +¹  N-Æ F°» +Y· H:+¶ I*´ ,¶ $¶ MP¶ R*´ ¹ U WY°       & 	   *  ,  -  0  2 ! 3 . 4 5 6 A 8    4    D       D > ?    D @ ?   9 [ B   ) A B  D    ü  +    	 >   @    \   
+   Ä     D*´ +¹  N-Æ F°» +Y· H:+¶ I*´ ,¶ $¶ M]¶ R*´ ¹ U W_°       & 	   =  ?  @  C  E ! F . G 5 I A K    4    D       D > ?    D @ ?   9 [ B   ) A B  D    ü  +    	 >   @    8 )  
+   n     *´ +¹  M,Ç °,¶ 6°           P  R  S  V                 > ?    A B  D    ü  +     >    a    b c     d  
 
 
 ====================================================
@@ -421,6 +474,7 @@ import com.reservacanchas.cl.cancha_service.service.CanchaService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import jakarta.validation.Valid;
@@ -435,6 +489,7 @@ import java.util.List;
         name = "Canchas",
         description = "Operaciones para la gestiÃ³n de canchas deportivas"
 )
+@SecurityRequirement(name = "bearerAuth")
 @RestController
 @RequestMapping("/canchas")
 public class CanchaController {
@@ -628,7 +683,7 @@ public class CanchaService {
 ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\cancha-service\target\classes\com\reservacanchas\cl\cancha_service\controller\CanchaController.class
 ====================================================
 
-Êþº¾   =   @com/reservacanchas/cl/cancha_service/controller/CanchaController  java/lang/Object 
+Êþº¾   = ‘  @com/reservacanchas/cl/cancha_service/controller/CanchaController  java/lang/Object 
 canchaService <Lcom/reservacanchas/cl/cancha_service/service/CanchaService; <init> ?(Lcom/reservacanchas/cl/cancha_service/service/CanchaService;)V Code
      ()V	     LineNumberTable LocalVariableTable this BLcom/reservacanchas/cl/cancha_service/controller/CanchaController; MethodParameters crear _(Lcom/reservacanchas/cl/cancha_service/dto/CanchaDTO;)Lorg/springframework/http/ResponseEntity; 	Signature ”(Lcom/reservacanchas/cl/cancha_service/dto/CanchaDTO;)Lorg/springframework/http/ResponseEntity<Lcom/reservacanchas/cl/cancha_service/model/Cancha;>; RuntimeVisibleAnnotations )Lio/swagger/v3/oas/annotations/Operation; summary Crear cancha description 'Registra una nueva cancha en el sistema 6Lio/swagger/v3/oas/annotations/responses/ApiResponses; value 5Lio/swagger/v3/oas/annotations/responses/ApiResponse; responseCode 201 Cancha creada correctamente 400 Datos invÃ¡lidos 5Lorg/springframework/web/bind/annotation/PostMapping; "RuntimeVisibleParameterAnnotations Ljakarta/validation/Valid; 5Lorg/springframework/web/bind/annotation/RequestBody;
  + - , :com/reservacanchas/cl/cancha_service/service/CanchaService . / guardar i(Lcom/reservacanchas/cl/cancha_service/dto/CanchaDTO;)Lcom/reservacanchas/cl/cancha_service/model/Cancha; 1 'org/springframework/http/ResponseEntity	 3 5 4 #org/springframework/http/HttpStatus 6 7 CREATED %Lorg/springframework/http/HttpStatus;
@@ -641,25 +696,26 @@ actualizar o(Ljava/lang/Long;Lcom/reservacanchas/cl/cancha_service/dto/CanchaDT
  + p h q (Ljava/lang/Long;)V
  0 s t u 	noContent :()Lorg/springframework/http/ResponseEntity$HeadersBuilder; w y x 6org/springframework/http/ResponseEntity$HeadersBuilder z A build existe (Ljava/lang/Long;)Z Verificar existencia de cancha /Indica si una cancha existe en la base de datos %VerificaciÃ³n realizada correctamente /{id}/exists
  + ‚ ƒ | existePorId 
-SourceFile CanchaController.java (Lio/swagger/v3/oas/annotations/tags/Tag; name Canchas 2Operaciones para la gestiÃ³n de canchas deportivas 8Lorg/springframework/web/bind/annotation/RestController; 8Lorg/springframework/web/bind/annotation/RequestMapping; /canchas InnerClasses HeadersBuilder !                	   F     
+SourceFile CanchaController.java (Lio/swagger/v3/oas/annotations/tags/Tag; name Canchas 2Operaciones para la gestiÃ³n de canchas deportivas <Lio/swagger/v3/oas/annotations/security/SecurityRequirement; 
+bearerAuth 8Lorg/springframework/web/bind/annotation/RestController; 8Lorg/springframework/web/bind/annotation/RequestMapping; /canchas InnerClasses HeadersBuilder !                	   F     
 *· 
 *+µ 
-±              	          
+±              ! 	 "        
        
                        ;    s  s    [ @    !s " s #@    !s $ s % &   '     (   )   	   W     *´ 
 +¶ *M» 0Y,² 2· 8°       
-    - 	 /                 ; <  	  = >  ?   	    (       ;    @ A      B    "    s C s D    !s E s F G   	   5     *´ 
-¶ H¸ K°           :              O P      Q    C    s R s S   [ @    !s E s T@    !s U s V G  [ s W '     X   	   @     *´ 
-+¶ Y¸ K°           H                \ ]      \    ^ _      `    R    s a s b   [ @    !s E s c@    !s U s V@    !s $ s % d  [ s W '     X    (   )   	   K     
+    / 	 1                 ; <  	  = >  ?   	    (       ;    @ A      B    "    s C s D    !s E s F G   	   5     *´ 
+¶ H¸ K°           <              O P      Q    C    s R s S   [ @    !s E s T@    !s U s V G  [ s W '     X   	   @     *´ 
++¶ Y¸ K°           J                \ ]      \    ^ _      `    R    s a s b   [ @    !s E s c@    !s U s V@    !s $ s % d  [ s W '     X    (   )   	   K     
 *´ 
-+,¶ e¸ K°           Z         
++,¶ e¸ K°           \         
        
  \ ]    
  ; <  ?   	   (      	 \   ;    h P      i    C    s j s k   [ @    !s l s m@    !s U s V n  [ s W '     X   	   I     *´ 
 +¶ o¸ r¹ v °       
-    h  j                \ ]      \    { |     *    s } s ~    !s E s  G  [ s € '     X   	   =     	*´ 
-+¶ ¬           u        	       	 \ ]      \    „    …       †  ‡s ˆ s ‰ Š   ‹  [ s Œ    
-  w 0 Ž	
+    j  l                \ ]      \    { |     *    s } s ~    !s E s  G  [ s € '     X   	   =     	*´ 
++¶ ¬           w        	       	 \ ]      \    „    …    )  †  ‡s ˆ s ‰ Š  ‡s ‹ Œ     [ s Ž    
+  w 0 	
 
 
 ====================================================
@@ -735,6 +791,7 @@ import com.reservacanchas.cl.disponibilidad_service.service.DisponibilidadServic
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import org.springframework.http.HttpStatus;
@@ -747,6 +804,7 @@ import java.util.List;
         name = "Disponibilidades",
         description = "Operaciones para la gestiÃ³n de disponibilidades de canchas"
 )
+@SecurityRequirement(name = "bearerAuth")
 @RestController
 @RequestMapping("/disponibilidades")
 public class DisponibilidadController {
@@ -938,7 +996,7 @@ public class DisponibilidadService {
 ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\disponibilidad-service\target\classes\com\reservacanchas\cl\disponibilidad_service\controller\DisponibilidadController.class
 ====================================================
 
-Êþº¾   = ‹  Pcom/reservacanchas/cl/disponibilidad_service/controller/DisponibilidadController  java/lang/Object disponibilidadService LLcom/reservacanchas/cl/disponibilidad_service/service/DisponibilidadService; <init> O(Lcom/reservacanchas/cl/disponibilidad_service/service/DisponibilidadService;)V Code
+Êþº¾   =   Pcom/reservacanchas/cl/disponibilidad_service/controller/DisponibilidadController  java/lang/Object disponibilidadService LLcom/reservacanchas/cl/disponibilidad_service/service/DisponibilidadService; <init> O(Lcom/reservacanchas/cl/disponibilidad_service/service/DisponibilidadService;)V Code
      ()V	     LineNumberTable LocalVariableTable this RLcom/reservacanchas/cl/disponibilidad_service/controller/DisponibilidadController; MethodParameters crear n(Lcom/reservacanchas/cl/disponibilidad_service/model/Disponibilidad;)Lorg/springframework/http/ResponseEntity; 	Signature ³(Lcom/reservacanchas/cl/disponibilidad_service/model/Disponibilidad;)Lorg/springframework/http/ResponseEntity<Lcom/reservacanchas/cl/disponibilidad_service/model/Disponibilidad;>; RuntimeVisibleAnnotations )Lio/swagger/v3/oas/annotations/Operation; summary Crear disponibilidad description /Registra una nueva disponibilidad en el sistema 6Lio/swagger/v3/oas/annotations/responses/ApiResponses; value 5Lio/swagger/v3/oas/annotations/responses/ApiResponse; responseCode 201 #Disponibilidad creada correctamente 400 Datos invÃ¡lidos 5Lorg/springframework/web/bind/annotation/PostMapping; "RuntimeVisibleParameterAnnotations 5Lorg/springframework/web/bind/annotation/RequestBody; * 'org/springframework/http/ResponseEntity
  , . - Jcom/reservacanchas/cl/disponibilidad_service/service/DisponibilidadService / 0 guardar ˆ(Lcom/reservacanchas/cl/disponibilidad_service/model/Disponibilidad;)Lcom/reservacanchas/cl/disponibilidad_service/model/Disponibilidad;	 2 4 3 #org/springframework/http/HttpStatus 5 6 CREATED %Lorg/springframework/http/HttpStatus;
  ) 8  9 >(Ljava/lang/Object;Lorg/springframework/http/HttpStatusCode;)V disponibilidad CLcom/reservacanchas/cl/disponibilidad_service/model/Disponibilidad; listar +()Lorg/springframework/http/ResponseEntity; ‚()Lorg/springframework/http/ResponseEntity<Ljava/util/List<Lcom/reservacanchas/cl/disponibilidad_service/model/Disponibilidad;>;>; Listar disponibilidades .Obtiene todas las disponibilidades registradas 200 Listado obtenido correctamente 4Lorg/springframework/web/bind/annotation/GetMapping;
@@ -950,26 +1008,27 @@ actualizar ~(Ljava/lang/Long;Lcom/reservacanchas/cl/disponibilidad_service/mode
  , l d m (Ljava/lang/Long;)V
  ) o p q 	noContent :()Lorg/springframework/http/ResponseEntity$HeadersBuilder; s u t 6org/springframework/http/ResponseEntity$HeadersBuilder v = build existe (Ljava/lang/Long;)Z &Verificar existencia de disponibilidad 7Indica si una disponibilidad existe en la base de datos %VerificaciÃ³n realizada correctamente /{id}/exists
  , ~  x existePorId 
-SourceFile DisponibilidadController.java (Lio/swagger/v3/oas/annotations/tags/Tag; name Disponibilidades ;Operaciones para la gestiÃ³n de disponibilidades de canchas 8Lorg/springframework/web/bind/annotation/RestController; 8Lorg/springframework/web/bind/annotation/RequestMapping; /disponibilidades InnerClasses HeadersBuilder !                	   F     
+SourceFile DisponibilidadController.java (Lio/swagger/v3/oas/annotations/tags/Tag; name Disponibilidades ;Operaciones para la gestiÃ³n de disponibilidades de canchas <Lio/swagger/v3/oas/annotations/security/SecurityRequirement; 
+bearerAuth 8Lorg/springframework/web/bind/annotation/RestController; 8Lorg/springframework/web/bind/annotation/RequestMapping; /disponibilidades InnerClasses HeadersBuilder !                	   F     
 *· 
 *+µ 
-±              	         
+±              	         
        
                        ;    s  s    [ @    !s " s #@    !s $ s % &   '     (   	   S     » )Y*´ 
-+¶ +² 1· 7°           )  *  +  )                : ;      :    < =      >    "    s ? s @    !s A s B C   	   5     *´ 
-¶ D¸ G°           6              K L      M    C    s N s O   [ @    !s A s P@    !s Q s R C  [ s S '     T   	   @     *´ 
-+¶ U¸ G°           C                X Y      X    Z [      \    C    s ] s ^   [ @    !s A s _@    !s Q s R `  [ s S '   
++¶ +² 1· 7°           +  ,  -  +                : ;      :    < =      >    "    s ? s @    !s A s B C   	   5     *´ 
+¶ D¸ G°           8              K L      M    C    s N s O   [ @    !s A s P@    !s Q s R C  [ s S '     T   	   @     *´ 
++¶ U¸ G°           E                X Y      X    Z [      \    C    s ] s ^   [ @    !s A s _@    !s Q s R `  [ s S '   
   T    (   	   O     
 *´ 
 +,¶ a¸ G°       
-    T 	 S         
+    V 	 U         
        
  X Y    
  : ;     	 X   :    d L      e    C    s f s g   [ @    !s h s i@    !s Q s R j  [ s S '     T   	   I     *´ 
 +¶ k¸ n¹ r °       
-    b  c                X Y      X    w x     *    s y s z    !s A s { C  [ s | '     T   	   =     	*´ 
-+¶ }¬           m        	       	 X Y      X    €           ‚  ƒs „ s … †   ‡  [ s ˆ ‰   
-  s ) Š	
+    d  e                X Y      X    w x     *    s y s z    !s A s { C  [ s | '     T   	   =     	*´ 
++¶ }¬           o        	       	 X Y      X    €        )  ‚  ƒs „ s … †  ƒs ‡ ˆ   ‰  [ s Š ‹   
+  s ) Œ	
 
 
 ====================================================
@@ -1042,6 +1101,7 @@ import com.reservacanchas.cl.horario_service.service.HorarioService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import org.springframework.http.HttpStatus;
@@ -1054,6 +1114,7 @@ import java.util.List;
         name = "Horarios",
         description = "Operaciones para la gestiÃ³n de horarios de canchas"
 )
+@SecurityRequirement(name = "bearerAuth")
 @RestController
 @RequestMapping("/horarios")
 public class HorarioController {
@@ -1251,7 +1312,7 @@ public class HorarioService {
 ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\horario-service\target\classes\com\reservacanchas\cl\horario_service\controller\HorarioController.class
 ====================================================
 
-Êþº¾   = ‹  Bcom/reservacanchas/cl/horario_service/controller/HorarioController  java/lang/Object horarioService >Lcom/reservacanchas/cl/horario_service/service/HorarioService; <init> A(Lcom/reservacanchas/cl/horario_service/service/HorarioService;)V Code
+Êþº¾   =   Bcom/reservacanchas/cl/horario_service/controller/HorarioController  java/lang/Object horarioService >Lcom/reservacanchas/cl/horario_service/service/HorarioService; <init> A(Lcom/reservacanchas/cl/horario_service/service/HorarioService;)V Code
      ()V	     LineNumberTable LocalVariableTable this DLcom/reservacanchas/cl/horario_service/controller/HorarioController; MethodParameters crear `(Lcom/reservacanchas/cl/horario_service/model/Horario;)Lorg/springframework/http/ResponseEntity; 	Signature —(Lcom/reservacanchas/cl/horario_service/model/Horario;)Lorg/springframework/http/ResponseEntity<Lcom/reservacanchas/cl/horario_service/model/Horario;>; RuntimeVisibleAnnotations )Lio/swagger/v3/oas/annotations/Operation; summary 
 Crear horario description 'Registra un nuevo horario en el sistema 6Lio/swagger/v3/oas/annotations/responses/ApiResponses; value 5Lio/swagger/v3/oas/annotations/responses/ApiResponse; responseCode 201 Horario creado correctamente 400 Datos invÃ¡lidos 5Lorg/springframework/web/bind/annotation/PostMapping; "RuntimeVisibleParameterAnnotations 5Lorg/springframework/web/bind/annotation/RequestBody; * 'org/springframework/http/ResponseEntity
  , . - <com/reservacanchas/cl/horario_service/service/HorarioService / 0 guardar l(Lcom/reservacanchas/cl/horario_service/model/Horario;)Lcom/reservacanchas/cl/horario_service/model/Horario;	 2 4 3 #org/springframework/http/HttpStatus 5 6 CREATED %Lorg/springframework/http/HttpStatus;
@@ -1264,26 +1325,27 @@ actualizar p(Ljava/lang/Long;Lcom/reservacanchas/cl/horario_service/model/Horar
  , l d m (Ljava/lang/Long;)V
  ) o p q 	noContent :()Lorg/springframework/http/ResponseEntity$HeadersBuilder; s u t 6org/springframework/http/ResponseEntity$HeadersBuilder v = build existe (Ljava/lang/Long;)Z Verificar existencia de horario /Indica si un horario existe en la base de datos %VerificaciÃ³n realizada correctamente /{id}/exists
  , ~  x existePorId 
-SourceFile HorarioController.java (Lio/swagger/v3/oas/annotations/tags/Tag; name Horarios 3Operaciones para la gestiÃ³n de horarios de canchas 8Lorg/springframework/web/bind/annotation/RestController; 8Lorg/springframework/web/bind/annotation/RequestMapping; 	/horarios InnerClasses HeadersBuilder !                	   F     
+SourceFile HorarioController.java (Lio/swagger/v3/oas/annotations/tags/Tag; name Horarios 3Operaciones para la gestiÃ³n de horarios de canchas <Lio/swagger/v3/oas/annotations/security/SecurityRequirement; 
+bearerAuth 8Lorg/springframework/web/bind/annotation/RestController; 8Lorg/springframework/web/bind/annotation/RequestMapping; 	/horarios InnerClasses HeadersBuilder !                	   F     
 *· 
 *+µ 
-±              	         
+±              	         
        
                        ;    s  s    [ @    !s " s #@    !s $ s % &   '     (   	   S     » )Y*´ 
-+¶ +² 1· 7°           *  +  ,  *                : ;      :    < =      >    "    s ? s @    !s A s B C   	   5     *´ 
-¶ D¸ G°           8              K L      M    C    s N s O   [ @    !s A s P@    !s Q s R C  [ s S '     T   	   @     *´ 
-+¶ U¸ G°           F                X Y      X    Z [      \    C    s ] s ^   [ @    !s A s _@    !s Q s R `  [ s S '   
++¶ +² 1· 7°           ,  -  .  ,                : ;      :    < =      >    "    s ? s @    !s A s B C   	   5     *´ 
+¶ D¸ G°           :              K L      M    C    s N s O   [ @    !s A s P@    !s Q s R C  [ s S '     T   	   @     *´ 
++¶ U¸ G°           H                X Y      X    Z [      \    C    s ] s ^   [ @    !s A s _@    !s Q s R `  [ s S '   
   T    (   	   O     
 *´ 
 +,¶ a¸ G°       
-    W 	 V         
+    Y 	 X         
        
  X Y    
  : ;     	 X   :    d L      e    C    s f s g   [ @    !s h s i@    !s Q s R j  [ s S '     T   	   I     *´ 
 +¶ k¸ n¹ r °       
-    f  h                X Y      X    w x     *    s y s z    !s A s { C  [ s | '     T   	   =     	*´ 
-+¶ }¬           s        	       	 X Y      X    €           ‚  ƒs „ s … †   ‡  [ s ˆ ‰   
-  s ) Š	
+    h  j                X Y      X    w x     *    s y s z    !s A s { C  [ s | '     T   	   =     	*´ 
++¶ }¬           u        	       	 X Y      X    €        )  ‚  ƒs „ s … †  ƒs ‡ ˆ   ‰  [ s Š ‹   
+  s ) Œ	
 
 
 ====================================================
@@ -1357,6 +1419,7 @@ import com.reservacanchas.cl.mantenimiento_service.service.MantenimientoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import org.springframework.http.HttpStatus;
@@ -1369,6 +1432,7 @@ import java.util.List;
         name = "Mantenimientos",
         description = "Operaciones para la gestiÃ³n de mantenimientos de canchas"
 )
+@SecurityRequirement(name = "bearerAuth")
 @RestController
 @RequestMapping("/mantenimientos")
 public class MantenimientoController {
@@ -1556,7 +1620,7 @@ public class MantenimientoService {
 ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\mantenimiento-service\target\classes\com\reservacanchas\cl\mantenimiento_service\controller\MantenimientoController.class
 ====================================================
 
-Êþº¾   = ‹  Ncom/reservacanchas/cl/mantenimiento_service/controller/MantenimientoController  java/lang/Object mantenimientoService JLcom/reservacanchas/cl/mantenimiento_service/service/MantenimientoService; <init> M(Lcom/reservacanchas/cl/mantenimiento_service/service/MantenimientoService;)V Code
+Êþº¾   =   Ncom/reservacanchas/cl/mantenimiento_service/controller/MantenimientoController  java/lang/Object mantenimientoService JLcom/reservacanchas/cl/mantenimiento_service/service/MantenimientoService; <init> M(Lcom/reservacanchas/cl/mantenimiento_service/service/MantenimientoService;)V Code
      ()V	     LineNumberTable LocalVariableTable this PLcom/reservacanchas/cl/mantenimiento_service/controller/MantenimientoController; MethodParameters crear l(Lcom/reservacanchas/cl/mantenimiento_service/model/Mantenimiento;)Lorg/springframework/http/ResponseEntity; 	Signature ¯(Lcom/reservacanchas/cl/mantenimiento_service/model/Mantenimiento;)Lorg/springframework/http/ResponseEntity<Lcom/reservacanchas/cl/mantenimiento_service/model/Mantenimiento;>; RuntimeVisibleAnnotations )Lio/swagger/v3/oas/annotations/Operation; summary Crear mantenimiento description -Registra un nuevo mantenimiento en el sistema 6Lio/swagger/v3/oas/annotations/responses/ApiResponses; value 5Lio/swagger/v3/oas/annotations/responses/ApiResponse; responseCode 201 "Mantenimiento creado correctamente 400 Datos invÃ¡lidos 5Lorg/springframework/web/bind/annotation/PostMapping; "RuntimeVisibleParameterAnnotations 5Lorg/springframework/web/bind/annotation/RequestBody; * 'org/springframework/http/ResponseEntity
  , . - Hcom/reservacanchas/cl/mantenimiento_service/service/MantenimientoService / 0 guardar „(Lcom/reservacanchas/cl/mantenimiento_service/model/Mantenimiento;)Lcom/reservacanchas/cl/mantenimiento_service/model/Mantenimiento;	 2 4 3 #org/springframework/http/HttpStatus 5 6 CREATED %Lorg/springframework/http/HttpStatus;
  ) 8  9 >(Ljava/lang/Object;Lorg/springframework/http/HttpStatusCode;)V 
@@ -1569,26 +1633,27 @@ actualizar |(Ljava/lang/Long;Lcom/reservacanchas/cl/mantenimiento_service/model
  , l d m (Ljava/lang/Long;)V
  ) o p q 	noContent :()Lorg/springframework/http/ResponseEntity$HeadersBuilder; s u t 6org/springframework/http/ResponseEntity$HeadersBuilder v = build existe (Ljava/lang/Long;)Z %Verificar existencia de mantenimiento 5Indica si un mantenimiento existe en la base de datos %VerificaciÃ³n realizada correctamente /{id}/exists
  , ~  x existePorId 
-SourceFile MantenimientoController.java (Lio/swagger/v3/oas/annotations/tags/Tag; name Mantenimientos 9Operaciones para la gestiÃ³n de mantenimientos de canchas 8Lorg/springframework/web/bind/annotation/RestController; 8Lorg/springframework/web/bind/annotation/RequestMapping; /mantenimientos InnerClasses HeadersBuilder !                	   F     
+SourceFile MantenimientoController.java (Lio/swagger/v3/oas/annotations/tags/Tag; name Mantenimientos 9Operaciones para la gestiÃ³n de mantenimientos de canchas <Lio/swagger/v3/oas/annotations/security/SecurityRequirement; 
+bearerAuth 8Lorg/springframework/web/bind/annotation/RestController; 8Lorg/springframework/web/bind/annotation/RequestMapping; /mantenimientos InnerClasses HeadersBuilder !                	   F     
 *· 
 *+µ 
-±              	         
+±              	         
        
                        ;    s  s    [ @    !s " s #@    !s $ s % &   '     (   	   S     » )Y*´ 
-+¶ +² 1· 7°           *  +  ,  *                : ;      :    < =      >    "    s ? s @    !s A s B C   	   5     *´ 
-¶ D¸ G°           8              K L      M    C    s N s O   [ @    !s A s P@    !s Q s R C  [ s S '     T   	   @     *´ 
-+¶ U¸ G°           F                X Y      X    Z [      \    C    s ] s ^   [ @    !s A s _@    !s Q s R `  [ s S '   
++¶ +² 1· 7°           ,  -  .  ,                : ;      :    < =      >    "    s ? s @    !s A s B C   	   5     *´ 
+¶ D¸ G°           :              K L      M    C    s N s O   [ @    !s A s P@    !s Q s R C  [ s S '     T   	   @     *´ 
++¶ U¸ G°           H                X Y      X    Z [      \    C    s ] s ^   [ @    !s A s _@    !s Q s R `  [ s S '   
   T    (   	   O     
 *´ 
 +,¶ a¸ G°       
-    W 	 V         
+    Y 	 X         
        
  X Y    
  : ;     	 X   :    d L      e    C    s f s g   [ @    !s h s i@    !s Q s R j  [ s S '     T   	   I     *´ 
 +¶ k¸ n¹ r °       
-    f  h                X Y      X    w x     *    s y s z    !s A s { C  [ s | '     T   	   =     	*´ 
-+¶ }¬           s        	       	 X Y      X    €           ‚  ƒs „ s … †   ‡  [ s ˆ ‰   
-  s ) Š	
+    h  j                X Y      X    w x     *    s y s z    !s A s { C  [ s | '     T   	   =     	*´ 
++¶ }¬           u        	       	 X Y      X    €        )  ‚  ƒs „ s … †  ƒs ‡ ˆ   ‰  [ s Š ‹   
+  s ) Œ	
 
 
 ====================================================
@@ -1655,6 +1720,7 @@ import com.reservacanchas.cl.notificacion_service.service.NotificacionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import org.springframework.http.HttpStatus;
@@ -1667,6 +1733,7 @@ import java.util.List;
         name = "Notificaciones",
         description = "Operaciones para la gestiÃ³n de notificaciones del sistema"
 )
+@SecurityRequirement(name = "bearerAuth")
 @RestController
 @RequestMapping("/notificaciones")
 public class NotificacionController {
@@ -1865,7 +1932,7 @@ public class NotificacionService {
 ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\notificacion-service\target\classes\com\reservacanchas\cl\notificacion_service\controller\NotificacionController.class
 ====================================================
 
-Êþº¾   = ‹  Lcom/reservacanchas/cl/notificacion_service/controller/NotificacionController  java/lang/Object notificacionService HLcom/reservacanchas/cl/notificacion_service/service/NotificacionService; <init> K(Lcom/reservacanchas/cl/notificacion_service/service/NotificacionService;)V Code
+Êþº¾   =   Lcom/reservacanchas/cl/notificacion_service/controller/NotificacionController  java/lang/Object notificacionService HLcom/reservacanchas/cl/notificacion_service/service/NotificacionService; <init> K(Lcom/reservacanchas/cl/notificacion_service/service/NotificacionService;)V Code
      ()V	     LineNumberTable LocalVariableTable this NLcom/reservacanchas/cl/notificacion_service/controller/NotificacionController; MethodParameters crear j(Lcom/reservacanchas/cl/notificacion_service/model/Notificacion;)Lorg/springframework/http/ResponseEntity; 	Signature «(Lcom/reservacanchas/cl/notificacion_service/model/Notificacion;)Lorg/springframework/http/ResponseEntity<Lcom/reservacanchas/cl/notificacion_service/model/Notificacion;>; RuntimeVisibleAnnotations )Lio/swagger/v3/oas/annotations/Operation; summary Crear notificaciÃ³n description .Registra una nueva notificaciÃ³n en el sistema 6Lio/swagger/v3/oas/annotations/responses/ApiResponses; value 5Lio/swagger/v3/oas/annotations/responses/ApiResponse; responseCode 201 "NotificaciÃ³n creada correctamente 400 Datos invÃ¡lidos 5Lorg/springframework/web/bind/annotation/PostMapping; "RuntimeVisibleParameterAnnotations 5Lorg/springframework/web/bind/annotation/RequestBody; * 'org/springframework/http/ResponseEntity
  , . - Fcom/reservacanchas/cl/notificacion_service/service/NotificacionService / 0 guardar €(Lcom/reservacanchas/cl/notificacion_service/model/Notificacion;)Lcom/reservacanchas/cl/notificacion_service/model/Notificacion;	 2 4 3 #org/springframework/http/HttpStatus 5 6 CREATED %Lorg/springframework/http/HttpStatus;
  ) 8  9 >(Ljava/lang/Object;Lorg/springframework/http/HttpStatusCode;)V notificacion ?Lcom/reservacanchas/cl/notificacion_service/model/Notificacion; listar +()Lorg/springframework/http/ResponseEntity; ~()Lorg/springframework/http/ResponseEntity<Ljava/util/List<Lcom/reservacanchas/cl/notificacion_service/model/Notificacion;>;>; Listar notificaciones ,Obtiene todas las notificaciones registradas 200 Listado obtenido correctamente 4Lorg/springframework/web/bind/annotation/GetMapping;
@@ -1877,26 +1944,27 @@ actualizar z(Ljava/lang/Long;Lcom/reservacanchas/cl/notificacion_service/model/
  , l d m (Ljava/lang/Long;)V
  ) o p q 	noContent :()Lorg/springframework/http/ResponseEntity$HeadersBuilder; s u t 6org/springframework/http/ResponseEntity$HeadersBuilder v = build existe (Ljava/lang/Long;)Z %Verificar existencia de notificaciÃ³n 6Indica si una notificaciÃ³n existe en la base de datos %VerificaciÃ³n realizada correctamente /{id}/exists
  , ~  x existePorId 
-SourceFile NotificacionController.java (Lio/swagger/v3/oas/annotations/tags/Tag; name Notificaciones :Operaciones para la gestiÃ³n de notificaciones del sistema 8Lorg/springframework/web/bind/annotation/RestController; 8Lorg/springframework/web/bind/annotation/RequestMapping; /notificaciones InnerClasses HeadersBuilder !                	   F     
+SourceFile NotificacionController.java (Lio/swagger/v3/oas/annotations/tags/Tag; name Notificaciones :Operaciones para la gestiÃ³n de notificaciones del sistema <Lio/swagger/v3/oas/annotations/security/SecurityRequirement; 
+bearerAuth 8Lorg/springframework/web/bind/annotation/RestController; 8Lorg/springframework/web/bind/annotation/RequestMapping; /notificaciones InnerClasses HeadersBuilder !                	   F     
 *· 
 *+µ 
-±              	         
+±              	         
        
                        ;    s  s    [ @    !s " s #@    !s $ s % &   '     (   	   S     » )Y*´ 
-+¶ +² 1· 7°           *  +  ,  *                : ;      :    < =      >    "    s ? s @    !s A s B C   	   5     *´ 
-¶ D¸ G°           8              K L      M    C    s N s O   [ @    !s A s P@    !s Q s R C  [ s S '     T   	   @     *´ 
-+¶ U¸ G°           F                X Y      X    Z [      \    C    s ] s ^   [ @    !s A s _@    !s Q s R `  [ s S '   
++¶ +² 1· 7°           ,  -  .  ,                : ;      :    < =      >    "    s ? s @    !s A s B C   	   5     *´ 
+¶ D¸ G°           :              K L      M    C    s N s O   [ @    !s A s P@    !s Q s R C  [ s S '     T   	   @     *´ 
++¶ U¸ G°           H                X Y      X    Z [      \    C    s ] s ^   [ @    !s A s _@    !s Q s R `  [ s S '   
   T    (   	   O     
 *´ 
 +,¶ a¸ G°       
-    W 	 V         
+    Y 	 X         
        
  X Y    
  : ;     	 X   :    d L      e    C    s f s g   [ @    !s h s i@    !s Q s R j  [ s S '     T   	   I     *´ 
 +¶ k¸ n¹ r °       
-    f  h                X Y      X    w x     *    s y s z    !s A s { C  [ s | '     T   	   =     	*´ 
-+¶ }¬           s        	       	 X Y      X    €           ‚  ƒs „ s … †   ‡  [ s ˆ ‰   
-  s ) Š	
+    h  j                X Y      X    w x     *    s y s z    !s A s { C  [ s | '     T   	   =     	*´ 
++¶ }¬           u        	       	 X Y      X    €        )  ‚  ƒs „ s … †  ƒs ‡ ˆ   ‰  [ s Š ‹   
+  s ) Œ	
 
 
 ====================================================
@@ -1974,6 +2042,7 @@ import com.reservacanchas.cl.pago_service.service.PagoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import jakarta.validation.Valid;
@@ -1988,6 +2057,7 @@ import java.util.List;
         name = "Pagos",
         description = "Operaciones para la gestiÃ³n de pagos asociados a reservas"
 )
+@SecurityRequirement(name = "bearerAuth")
 @RestController
 @RequestMapping("/pagos")
 public class PagoController {
@@ -2277,7 +2347,7 @@ public class PagoService {
 ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\pago-service\target\classes\com\reservacanchas\cl\pago_service\controller\PagoController.class
 ====================================================
 
-Êþº¾   = ¬  <com/reservacanchas/cl/pago_service/controller/PagoController  java/lang/Object pagoService 8Lcom/reservacanchas/cl/pago_service/service/PagoService; <init> ;(Lcom/reservacanchas/cl/pago_service/service/PagoService;)V Code
+Êþº¾   = ®  <com/reservacanchas/cl/pago_service/controller/PagoController  java/lang/Object pagoService 8Lcom/reservacanchas/cl/pago_service/service/PagoService; <init> ;(Lcom/reservacanchas/cl/pago_service/service/PagoService;)V Code
      ()V	     LineNumberTable LocalVariableTable this >Lcom/reservacanchas/cl/pago_service/controller/PagoController; MethodParameters crear [(Lcom/reservacanchas/cl/pago_service/dto/PagoDTO;)Lorg/springframework/http/ResponseEntity; 	Signature Œ(Lcom/reservacanchas/cl/pago_service/dto/PagoDTO;)Lorg/springframework/http/ResponseEntity<Lcom/reservacanchas/cl/pago_service/model/Pago;>; RuntimeVisibleAnnotations )Lio/swagger/v3/oas/annotations/Operation; summary Registrar pago description MCrea un nuevo pago validando previamente la existencia de la reserva asociada 6Lio/swagger/v3/oas/annotations/responses/ApiResponses; value 5Lio/swagger/v3/oas/annotations/responses/ApiResponse; responseCode 201 Pago registrado correctamente 400 Datos invÃ¡lidos 404 Reserva no encontrada 5Lorg/springframework/web/bind/annotation/PostMapping; "RuntimeVisibleParameterAnnotations Ljakarta/validation/Valid; 5Lorg/springframework/web/bind/annotation/RequestBody;
  - / . 6com/reservacanchas/cl/pago_service/service/PagoService 0 1 guardar a(Lcom/reservacanchas/cl/pago_service/dto/PagoDTO;)Lcom/reservacanchas/cl/pago_service/model/Pago; 3 'org/springframework/http/ResponseEntity	 5 7 6 #org/springframework/http/HttpStatus 8 9 CREATED %Lorg/springframework/http/HttpStatus;
  2 ;  < >(Ljava/lang/Object;Lorg/springframework/http/HttpStatusCode;)V pagoDTO 0Lcom/reservacanchas/cl/pago_service/dto/PagoDTO; pago /Lcom/reservacanchas/cl/pago_service/model/Pago; RuntimeVisibleTypeAnnotations listar +()Lorg/springframework/http/ResponseEntity; n()Lorg/springframework/http/ResponseEntity<Ljava/util/List<Lcom/reservacanchas/cl/pago_service/model/Pago;>;>; Listar pagos 1Obtiene todos los pagos registrados en el sistema 200 Listado obtenido correctamente 4Lorg/springframework/web/bind/annotation/GetMapping;
@@ -2295,33 +2365,34 @@ metodoPago Ljava/lang/String; buscarPorEstadoPago Buscar pagos por estado
  - – ‘ Ž 
 estadoPago buscarPorReserva ~(Ljava/lang/Long;)Lorg/springframework/http/ResponseEntity<Ljava/util/List<Lcom/reservacanchas/cl/pago_service/model/Pago;>;>; Buscar pagos por reserva ;Obtiene todos los pagos asociados a una reserva especÃ­fica /reserva/{idReserva}
  - ž ˜ Ÿ "(Ljava/lang/Long;)Ljava/util/List; 	idReserva 
-SourceFile PagoController.java (Lio/swagger/v3/oas/annotations/tags/Tag; name Pagos :Operaciones para la gestiÃ³n de pagos asociados a reservas 8Lorg/springframework/web/bind/annotation/RestController; 8Lorg/springframework/web/bind/annotation/RequestMapping; /pagos InnerClasses HeadersBuilder !           
+SourceFile PagoController.java (Lio/swagger/v3/oas/annotations/tags/Tag; name Pagos :Operaciones para la gestiÃ³n de pagos asociados a reservas <Lio/swagger/v3/oas/annotations/security/SecurityRequirement; 
+bearerAuth 8Lorg/springframework/web/bind/annotation/RestController; 8Lorg/springframework/web/bind/annotation/RequestMapping; /pagos InnerClasses HeadersBuilder !           
      	   F     
 *· 
 *+µ 
-±              	          
+±              ! 	 "        
        
                        J    s  s    [ @    !s " s #@    !s $ s %@    !s & s ' (   )     *   +   	   W     *´ 
 +¶ ,M» 2Y,² 4· :°       
-    . 	 0                 = >  	  ? @  A   	    *       =    B C      D    "    s E s F    !s G s H I   	   5     *´ 
-¶ J¸ M°           ;              Q R      S    C    s T s U   [ @    !s G s V@    !s & s W I  [ s X )     Y   	   @     *´ 
-+¶ Z¸ M°           I                ] ^      ]    _ `      a    R    s b s c   [ @    !s G s d@    !s $ s %@    !s & s W e  [ s X )     Y    *   +   	   O     
+    0 	 2                 = >  	  ? @  A   	    *       =    B C      D    "    s E s F    !s G s H I   	   5     *´ 
+¶ J¸ M°           =              Q R      S    C    s T s U   [ @    !s G s V@    !s & s W I  [ s X )     Y   	   @     *´ 
++¶ Z¸ M°           K                ] ^      ]    _ `      a    R    s b s c   [ @    !s G s d@    !s $ s %@    !s & s W e  [ s X )     Y    *   +   	   O     
 *´ 
 +,¶ f¸ M°       
-    [ 	 Z         
+    ] 	 \         
        
  ] ^    
  = >  A   	   *      	 ]   =    i R      j    C    s k s l   [ @    !s m s n@    !s & s W o  [ s X )     Y   	   I     *´ 
 +¶ p¸ s¹ w °       
-    j  l                ] ^      ]    | }     *    s ~ s     !s G s € I  [ s  )     Y   	   =     	*´ 
-+¶ ‚¬           w        	       	 ] ^      ]    … †      ‡    *    s ˆ s ‰    !s G s Š I  [ s ‹ )     Y   	   D     *´ 
+    l  n                ] ^      ]    | }     *    s ~ s     !s G s € I  [ s  )     Y   	   =     	*´ 
++¶ ‚¬           y        	       	 ] ^      ]    … †      ‡    *    s ˆ s ‰    !s G s Š I  [ s ‹ )     Y   	   D     *´ 
 +¶ Œ¸ M°       
-    „  ƒ                           ‘ †      ‡    *    s ’ s “    !s G s Š I  [ s ” )     Y   	   D     *´ 
+    †  …                           ‘ †      ‡    *    s ’ s “    !s G s Š I  [ s ” )     Y   	   D     *´ 
 +¶ •¸ M°       
-    ’  ‘                —       —    ˜ R      ™    *    s š s ›    !s G s Š I  [ s œ )     Y   	   D     *´ 
+    ”  “                —       —    ˜ R      ™    *    s š s ›    !s G s Š I  [ s œ )     Y   	   D     *´ 
 +¶ ¸ M°       
-       Ÿ                  ^           ¡    ¢       £  ¤s ¥ s ¦ §   ¨  [ s © ª   
-  x 2 «	
+    ¢  ¡                  ^           ¡    ¢    )  £  ¤s ¥ s ¦ §  ¤s ¨ ©   ª  [ s « ¬   
+  x 2 ­	
 
 
 ====================================================
@@ -2411,6 +2482,7 @@ import com.reservacanchas.cl.resena_service.service.ResenaService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import org.springframework.http.HttpStatus;
@@ -2423,6 +2495,7 @@ import java.util.List;
         name = "ReseÃ±as",
         description = "Operaciones para la gestiÃ³n de reseÃ±as de usuarios sobre las canchas"
 )
+@SecurityRequirement(name = "bearerAuth")
 @RestController
 @RequestMapping("/resenas")
 public class ResenaController {
@@ -2629,7 +2702,7 @@ public class ResenaService {
 ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\resena-service\target\classes\com\reservacanchas\cl\resena_service\controller\ResenaController.class
 ====================================================
 
-Êþº¾   = ‹  @com/reservacanchas/cl/resena_service/controller/ResenaController  java/lang/Object 
+Êþº¾   =   @com/reservacanchas/cl/resena_service/controller/ResenaController  java/lang/Object 
 resenaService <Lcom/reservacanchas/cl/resena_service/service/ResenaService; <init> ?(Lcom/reservacanchas/cl/resena_service/service/ResenaService;)V Code
      ()V	     LineNumberTable LocalVariableTable this BLcom/reservacanchas/cl/resena_service/controller/ResenaController; MethodParameters crear ^(Lcom/reservacanchas/cl/resena_service/model/Resena;)Lorg/springframework/http/ResponseEntity; 	Signature “(Lcom/reservacanchas/cl/resena_service/model/Resena;)Lorg/springframework/http/ResponseEntity<Lcom/reservacanchas/cl/resena_service/model/Resena;>; RuntimeVisibleAnnotations )Lio/swagger/v3/oas/annotations/Operation; summary 
 Crear reseÃ±a description (Registra una nueva reseÃ±a en el sistema 6Lio/swagger/v3/oas/annotations/responses/ApiResponses; value 5Lio/swagger/v3/oas/annotations/responses/ApiResponse; responseCode 201 ReseÃ±a creada correctamente 400 Datos invÃ¡lidos 5Lorg/springframework/web/bind/annotation/PostMapping; "RuntimeVisibleParameterAnnotations 5Lorg/springframework/web/bind/annotation/RequestBody; * 'org/springframework/http/ResponseEntity
@@ -2643,26 +2716,27 @@ actualizar n(Ljava/lang/Long;Lcom/reservacanchas/cl/resena_service/model/Resena
  , l d m (Ljava/lang/Long;)V
  ) o p q 	noContent :()Lorg/springframework/http/ResponseEntity$HeadersBuilder; s u t 6org/springframework/http/ResponseEntity$HeadersBuilder v = build existe (Ljava/lang/Long;)Z Verificar existencia de reseÃ±a 0Indica si una reseÃ±a existe en la base de datos %VerificaciÃ³n realizada correctamente /{id}/exists
  , ~  x existePorId 
-SourceFile ResenaController.java (Lio/swagger/v3/oas/annotations/tags/Tag; name ReseÃ±as FOperaciones para la gestiÃ³n de reseÃ±as de usuarios sobre las canchas 8Lorg/springframework/web/bind/annotation/RestController; 8Lorg/springframework/web/bind/annotation/RequestMapping; /resenas InnerClasses HeadersBuilder !                	   F     
+SourceFile ResenaController.java (Lio/swagger/v3/oas/annotations/tags/Tag; name ReseÃ±as FOperaciones para la gestiÃ³n de reseÃ±as de usuarios sobre las canchas <Lio/swagger/v3/oas/annotations/security/SecurityRequirement; 
+bearerAuth 8Lorg/springframework/web/bind/annotation/RestController; 8Lorg/springframework/web/bind/annotation/RequestMapping; /resenas InnerClasses HeadersBuilder !                	   F     
 *· 
 *+µ 
-±              	         
+±              	         
        
                        ;    s  s    [ @    !s " s #@    !s $ s % &   '     (   	   S     » )Y*´ 
-+¶ +² 1· 7°           *  +  ,  *                : ;      :    < =      >    "    s ? s @    !s A s B C   	   5     *´ 
-¶ D¸ G°           8              K L      M    C    s N s O   [ @    !s A s P@    !s Q s R C  [ s S '     T   	   @     *´ 
-+¶ U¸ G°           F                X Y      X    Z [      \    C    s ] s ^   [ @    !s A s _@    !s Q s R `  [ s S '   
++¶ +² 1· 7°           ,  -  .  ,                : ;      :    < =      >    "    s ? s @    !s A s B C   	   5     *´ 
+¶ D¸ G°           :              K L      M    C    s N s O   [ @    !s A s P@    !s Q s R C  [ s S '     T   	   @     *´ 
++¶ U¸ G°           H                X Y      X    Z [      \    C    s ] s ^   [ @    !s A s _@    !s Q s R `  [ s S '   
   T    (   	   O     
 *´ 
 +,¶ a¸ G°       
-    W 	 V         
+    Y 	 X         
        
  X Y    
  : ;     	 X   :    d L      e    C    s f s g   [ @    !s h s i@    !s Q s R j  [ s S '     T   	   I     *´ 
 +¶ k¸ n¹ r °       
-    f  h                X Y      X    w x     *    s y s z    !s A s { C  [ s | '     T   	   =     	*´ 
-+¶ }¬           s        	       	 X Y      X    €           ‚  ƒs „ s … †   ‡  [ s ˆ ‰   
-  s ) Š	
+    h  j                X Y      X    w x     *    s y s z    !s A s { C  [ s | '     T   	   =     	*´ 
++¶ }¬           u        	       	 X Y      X    €        )  ‚  ƒs „ s … †  ƒs ‡ ˆ   ‰  [ s Š ‹   
+  s ) Œ	
 
 
 ====================================================
@@ -2738,6 +2812,7 @@ import com.reservacanchas.cl.reserva_service.service.ReservaService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import jakarta.validation.Valid;
@@ -2752,6 +2827,7 @@ import java.util.List;
         name = "Reservas",
         description = "Operaciones para la gestiÃ³n de reservas de canchas y validaciÃ³n entre microservicios"
 )
+@SecurityRequirement(name = "bearerAuth")
 @RestController
 @RequestMapping("/reservas")
 public class ReservaController {
@@ -3050,7 +3126,7 @@ public class ReservaService {
 ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\reserva-service\target\classes\com\reservacanchas\cl\reserva_service\controller\ReservaController.class
 ====================================================
 
-Êþº¾   = ¬  Bcom/reservacanchas/cl/reserva_service/controller/ReservaController  java/lang/Object reservaService >Lcom/reservacanchas/cl/reserva_service/service/ReservaService; <init> A(Lcom/reservacanchas/cl/reserva_service/service/ReservaService;)V Code
+Êþº¾   = ®  Bcom/reservacanchas/cl/reserva_service/controller/ReservaController  java/lang/Object reservaService >Lcom/reservacanchas/cl/reserva_service/service/ReservaService; <init> A(Lcom/reservacanchas/cl/reserva_service/service/ReservaService;)V Code
      ()V	     LineNumberTable LocalVariableTable this DLcom/reservacanchas/cl/reserva_service/controller/ReservaController; MethodParameters crear a(Lcom/reservacanchas/cl/reserva_service/dto/ReservaDTO;)Lorg/springframework/http/ResponseEntity; 	Signature ˜(Lcom/reservacanchas/cl/reserva_service/dto/ReservaDTO;)Lorg/springframework/http/ResponseEntity<Lcom/reservacanchas/cl/reserva_service/model/Reserva;>; RuntimeVisibleAnnotations )Lio/swagger/v3/oas/annotations/Operation; summary 
 Crear reserva description Registra una reserva validando previamente la existencia del usuario y de la cancha mediante comunicaciÃ³n entre microservicios 6Lio/swagger/v3/oas/annotations/responses/ApiResponses; value 5Lio/swagger/v3/oas/annotations/responses/ApiResponse; responseCode 201 Reserva creada correctamente 400 Datos invÃ¡lidos 404 Usuario o cancha no encontrados 5Lorg/springframework/web/bind/annotation/PostMapping; "RuntimeVisibleParameterAnnotations Ljakarta/validation/Valid; 5Lorg/springframework/web/bind/annotation/RequestBody;
  - / . <com/reservacanchas/cl/reserva_service/service/ReservaService 0 1 guardar m(Lcom/reservacanchas/cl/reserva_service/dto/ReservaDTO;)Lcom/reservacanchas/cl/reserva_service/model/Reserva; 3 'org/springframework/http/ResponseEntity	 5 7 6 #org/springframework/http/HttpStatus 8 9 CREATED %Lorg/springframework/http/HttpStatus;
@@ -3067,33 +3143,34 @@ actualizar q(Ljava/lang/Long;Lcom/reservacanchas/cl/reserva_service/dto/Reserva
  -  … Ž $(Ljava/lang/String;)Ljava/util/List; estado Ljava/lang/String; buscarPorUsuario „(Ljava/lang/Long;)Lorg/springframework/http/ResponseEntity<Ljava/util/List<Lcom/reservacanchas/cl/reserva_service/model/Reserva;>;>; Buscar reservas por usuario =Obtiene todas las reservas asociadas a un usuario especÃ­fico /usuario/{idUsuario}
  - — ‘ ˜ "(Ljava/lang/Long;)Ljava/util/List; 	idUsuario buscarPorCancha Buscar reservas por cancha =Obtiene todas las reservas asociadas a una cancha especÃ­fica /cancha/{idCancha}
  - Ÿ š ˜ idCancha 
-SourceFile ReservaController.java (Lio/swagger/v3/oas/annotations/tags/Tag; name Reservas VOperaciones para la gestiÃ³n de reservas de canchas y validaciÃ³n entre microservicios 8Lorg/springframework/web/bind/annotation/RestController; 8Lorg/springframework/web/bind/annotation/RequestMapping; 	/reservas InnerClasses HeadersBuilder !           
+SourceFile ReservaController.java (Lio/swagger/v3/oas/annotations/tags/Tag; name Reservas VOperaciones para la gestiÃ³n de reservas de canchas y validaciÃ³n entre microservicios <Lio/swagger/v3/oas/annotations/security/SecurityRequirement; 
+bearerAuth 8Lorg/springframework/web/bind/annotation/RestController; 8Lorg/springframework/web/bind/annotation/RequestMapping; 	/reservas InnerClasses HeadersBuilder !           
      	   F     
 *· 
 *+µ 
-±              	          
+±              ! 	 "        
        
                        J    s  s    [ @    !s " s #@    !s $ s %@    !s & s ' (   )     *   +   	   W     *´ 
 +¶ ,M» 2Y,² 4· :°       
-    . 	 0                 = >  	  ? @  A   	    *       =    B C      D    "    s E s F    !s G s H I   	   5     *´ 
-¶ J¸ M°           ;              Q R      S    C    s T s U   [ @    !s G s V@    !s & s W I  [ s X )     Y   	   @     *´ 
-+¶ Z¸ M°           I                ] ^      ]    _ `      a    R    s b s c   [ @    !s G s d@    !s $ s %@    !s & s W e  [ s X )     Y    *   +   	   O     
+    0 	 2                 = >  	  ? @  A   	    *       =    B C      D    "    s E s F    !s G s H I   	   5     *´ 
+¶ J¸ M°           =              Q R      S    C    s T s U   [ @    !s G s V@    !s & s W I  [ s X )     Y   	   @     *´ 
++¶ Z¸ M°           K                ] ^      ]    _ `      a    R    s b s c   [ @    !s G s d@    !s $ s %@    !s & s W e  [ s X )     Y    *   +   	   O     
 *´ 
 +,¶ f¸ M°       
-    \ 	 [         
+    ^ 	 ]         
        
  ] ^    
  = >  A   	   *      	 ]   =    i R      j    C    s k s l   [ @    !s m s n@    !s & s W o  [ s X )     Y   	   I     *´ 
 +¶ p¸ s¹ w °       
-    k  m                ] ^      ]    | }     *    s ~ s     !s G s € I  [ s  )     Y   	   =     	*´ 
-+¶ ‚¬           x        	       	 ] ^      ]    … †      ‡    *    s ˆ s ‰    !s G s Š I  [ s ‹ )     Y   	   D     *´ 
+    m  o                ] ^      ]    | }     *    s ~ s     !s G s € I  [ s  )     Y   	   =     	*´ 
++¶ ‚¬           z        	       	 ] ^      ]    … †      ‡    *    s ˆ s ‰    !s G s Š I  [ s ‹ )     Y   	   D     *´ 
 +¶ Œ¸ M°       
-    „  ƒ                           ‘ R      ’    *    s “ s ”    !s G s Š I  [ s • )     Y   	   D     *´ 
+    †  …                           ‘ R      ’    *    s “ s ”    !s G s Š I  [ s • )     Y   	   D     *´ 
 +¶ –¸ M°       
-    ‘                  ™ ^      ™    š R      ’    *    s › s œ    !s G s Š I  [ s  )     Y   	   D     *´ 
+    “  ’                ™ ^      ™    š R      ’    *    s › s œ    !s G s Š I  [ s  )     Y   	   D     *´ 
 +¶ ž¸ M°       
-    ž                    ^           ¡    ¢       £  ¤s ¥ s ¦ §   ¨  [ s © ª   
-  x 2 «	
+       Ÿ                  ^           ¡    ¢    )  £  ¤s ¥ s ¦ §  ¤s ¨ ©   ª  [ s « ¬   
+  x 2 ­	
 
 
 ====================================================
@@ -3179,6 +3256,7 @@ import com.reservacanchas.cl.sede_service.service.SedeService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import org.springframework.http.HttpStatus;
@@ -3191,6 +3269,7 @@ import java.util.List;
         name = "Sedes",
         description = "Operaciones para la gestiÃ³n de sedes deportivas registradas en el sistema"
 )
+@SecurityRequirement(name = "bearerAuth")
 @RestController
 @RequestMapping("/sedes")
 public class SedeController {
@@ -3376,7 +3455,7 @@ public class SedeService {
 ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\sede-service\target\classes\com\reservacanchas\cl\sede_service\controller\SedeController.class
 ====================================================
 
-Êþº¾   = ‹  <com/reservacanchas/cl/sede_service/controller/SedeController  java/lang/Object sedeService 8Lcom/reservacanchas/cl/sede_service/service/SedeService; <init> ;(Lcom/reservacanchas/cl/sede_service/service/SedeService;)V Code
+Êþº¾   =   <com/reservacanchas/cl/sede_service/controller/SedeController  java/lang/Object sedeService 8Lcom/reservacanchas/cl/sede_service/service/SedeService; <init> ;(Lcom/reservacanchas/cl/sede_service/service/SedeService;)V Code
      ()V	     LineNumberTable LocalVariableTable this >Lcom/reservacanchas/cl/sede_service/controller/SedeController; MethodParameters crear Z(Lcom/reservacanchas/cl/sede_service/model/Sede;)Lorg/springframework/http/ResponseEntity; 	Signature ‹(Lcom/reservacanchas/cl/sede_service/model/Sede;)Lorg/springframework/http/ResponseEntity<Lcom/reservacanchas/cl/sede_service/model/Sede;>; RuntimeVisibleAnnotations )Lio/swagger/v3/oas/annotations/Operation; summary 
 Crear sede description /Registra una nueva sede deportiva en el sistema 6Lio/swagger/v3/oas/annotations/responses/ApiResponses; value 5Lio/swagger/v3/oas/annotations/responses/ApiResponse; responseCode 201 Sede creada correctamente 400 Datos invÃ¡lidos 5Lorg/springframework/web/bind/annotation/PostMapping; "RuntimeVisibleParameterAnnotations 5Lorg/springframework/web/bind/annotation/RequestBody; * 'org/springframework/http/ResponseEntity
  , . - 6com/reservacanchas/cl/sede_service/service/SedeService / 0 guardar `(Lcom/reservacanchas/cl/sede_service/model/Sede;)Lcom/reservacanchas/cl/sede_service/model/Sede;	 2 4 3 #org/springframework/http/HttpStatus 5 6 CREATED %Lorg/springframework/http/HttpStatus;
@@ -3390,26 +3469,27 @@ Eliminar sede (Elimina una sede segÃºn su identificador 204 Sede eliminad
  , l d m (Ljava/lang/Long;)V
  ) o p q 	noContent :()Lorg/springframework/http/ResponseEntity$HeadersBuilder; s u t 6org/springframework/http/ResponseEntity$HeadersBuilder v = build existe (Ljava/lang/Long;)Z Verificar existencia de sede -Indica si una sede existe en la base de datos %VerificaciÃ³n realizada correctamente /{id}/exists
  , ~  x existePorId 
-SourceFile SedeController.java (Lio/swagger/v3/oas/annotations/tags/Tag; name Sedes JOperaciones para la gestiÃ³n de sedes deportivas registradas en el sistema 8Lorg/springframework/web/bind/annotation/RestController; 8Lorg/springframework/web/bind/annotation/RequestMapping; /sedes InnerClasses HeadersBuilder !                	   F     
+SourceFile SedeController.java (Lio/swagger/v3/oas/annotations/tags/Tag; name Sedes JOperaciones para la gestiÃ³n de sedes deportivas registradas en el sistema <Lio/swagger/v3/oas/annotations/security/SecurityRequirement; 
+bearerAuth 8Lorg/springframework/web/bind/annotation/RestController; 8Lorg/springframework/web/bind/annotation/RequestMapping; /sedes InnerClasses HeadersBuilder !                	   F     
 *· 
 *+µ 
-±              	         
+±              	         
        
                        ;    s  s    [ @    !s " s #@    !s $ s % &   '     (   	   S     » )Y*´ 
-+¶ +² 1· 7°           *  +  ,  *                : ;      :    < =      >    "    s ? s @    !s A s B C   	   5     *´ 
-¶ D¸ G°           8              K L      M    C    s N s O   [ @    !s A s P@    !s Q s R C  [ s S '     T   	   @     *´ 
-+¶ U¸ G°           F                X Y      X    Z [      \    C    s ] s ^   [ @    !s A s _@    !s Q s R `  [ s S '   
++¶ +² 1· 7°           ,  -  .  ,                : ;      :    < =      >    "    s ? s @    !s A s B C   	   5     *´ 
+¶ D¸ G°           :              K L      M    C    s N s O   [ @    !s A s P@    !s Q s R C  [ s S '     T   	   @     *´ 
++¶ U¸ G°           H                X Y      X    Z [      \    C    s ] s ^   [ @    !s A s _@    !s Q s R `  [ s S '   
   T    (   	   O     
 *´ 
 +,¶ a¸ G°       
-    W 	 V         
+    Y 	 X         
        
  X Y    
  : ;     	 X   :    d L      e    C    s f s g   [ @    !s h s i@    !s Q s R j  [ s S '     T   	   I     *´ 
 +¶ k¸ n¹ r °       
-    f  h                X Y      X    w x     *    s y s z    !s A s { C  [ s | '     T   	   =     	*´ 
-+¶ }¬           s        	       	 X Y      X    €           ‚  ƒs „ s … †   ‡  [ s ˆ ‰   
-  s ) Š	
+    h  j                X Y      X    w x     *    s y s z    !s A s { C  [ s | '     T   	   =     	*´ 
++¶ }¬           u        	       	 X Y      X    €        )  ‚  ƒs „ s … †  ƒs ‡ ˆ   ‰  [ s Š ‹   
+  s ) Œ	
 
 
 ====================================================
@@ -3482,6 +3562,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 
 import jakarta.validation.Valid;
 
@@ -3495,6 +3576,7 @@ import java.util.List;
         name = "Usuarios",
         description = "Operaciones para la gestiÃ³n de usuarios registrados en el sistema"
 )
+@SecurityRequirement(name = "bearerAuth")
 @RestController
 @RequestMapping("/usuarios")
 public class UsuarioController {
@@ -3734,7 +3816,7 @@ public class UsuarioService {
 ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\usuario-service\target\classes\com\reservacanchas\cl\usuario_service\controller\UsuarioController.class
 ====================================================
 
-Êþº¾   =   Bcom/reservacanchas/cl/usuario_service/controller/UsuarioController  java/lang/Object usuarioService >Lcom/reservacanchas/cl/usuario_service/service/UsuarioService; <init> A(Lcom/reservacanchas/cl/usuario_service/service/UsuarioService;)V Code
+Êþº¾   = ‘  Bcom/reservacanchas/cl/usuario_service/controller/UsuarioController  java/lang/Object usuarioService >Lcom/reservacanchas/cl/usuario_service/service/UsuarioService; <init> A(Lcom/reservacanchas/cl/usuario_service/service/UsuarioService;)V Code
      ()V	     LineNumberTable LocalVariableTable this DLcom/reservacanchas/cl/usuario_service/controller/UsuarioController; MethodParameters crear a(Lcom/reservacanchas/cl/usuario_service/dto/UsuarioDTO;)Lorg/springframework/http/ResponseEntity; 	Signature ˜(Lcom/reservacanchas/cl/usuario_service/dto/UsuarioDTO;)Lorg/springframework/http/ResponseEntity<Lcom/reservacanchas/cl/usuario_service/model/Usuario;>; RuntimeVisibleAnnotations )Lio/swagger/v3/oas/annotations/Operation; summary 
 Crear usuario description 'Registra un nuevo usuario en el sistema 6Lio/swagger/v3/oas/annotations/responses/ApiResponses; value 5Lio/swagger/v3/oas/annotations/responses/ApiResponse; responseCode 201 Usuario creado correctamente 400 Datos invÃ¡lidos 5Lorg/springframework/web/bind/annotation/PostMapping; "RuntimeVisibleParameterAnnotations Ljakarta/validation/Valid; 5Lorg/springframework/web/bind/annotation/RequestBody;
  + - , <com/reservacanchas/cl/usuario_service/service/UsuarioService . / guardar m(Lcom/reservacanchas/cl/usuario_service/dto/UsuarioDTO;)Lcom/reservacanchas/cl/usuario_service/model/Usuario; 1 'org/springframework/http/ResponseEntity	 3 5 4 #org/springframework/http/HttpStatus 6 7 CREATED %Lorg/springframework/http/HttpStatus;
@@ -3748,26 +3830,27 @@ actualizar q(Ljava/lang/Long;Lcom/reservacanchas/cl/usuario_service/dto/Usuario
  + p h q (Ljava/lang/Long;)V
  0 s t u 	noContent :()Lorg/springframework/http/ResponseEntity$HeadersBuilder; w y x 6org/springframework/http/ResponseEntity$HeadersBuilder z A build existe (Ljava/lang/Long;)Z Verificar existencia de usuario /Indica si un usuario existe en la base de datos %VerificaciÃ³n realizada correctamente /{id}/exists
  + ‚ ƒ | existePorId 
-SourceFile UsuarioController.java (Lio/swagger/v3/oas/annotations/tags/Tag; name Usuarios BOperaciones para la gestiÃ³n de usuarios registrados en el sistema 8Lorg/springframework/web/bind/annotation/RestController; 8Lorg/springframework/web/bind/annotation/RequestMapping; 	/usuarios InnerClasses HeadersBuilder !                	   F     
+SourceFile UsuarioController.java (Lio/swagger/v3/oas/annotations/tags/Tag; name Usuarios BOperaciones para la gestiÃ³n de usuarios registrados en el sistema <Lio/swagger/v3/oas/annotations/security/SecurityRequirement; 
+bearerAuth 8Lorg/springframework/web/bind/annotation/RestController; 8Lorg/springframework/web/bind/annotation/RequestMapping; 	/usuarios InnerClasses HeadersBuilder !                	   F     
 *· 
 *+µ 
-±              	          
+±              ! 	 "        
        
                        ;    s  s    [ @    !s " s #@    !s $ s % &   '     (   )   	   W     *´ 
 +¶ *M» 0Y,² 2· 8°       
-    - 	 /                 ; <  	  = >  ?   	    (       ;    @ A      B    "    s C s D    !s E s F G   	   5     *´ 
-¶ H¸ K°           :              O P      Q    C    s R s S   [ @    !s E s T@    !s U s V G  [ s W '     X   	   @     *´ 
-+¶ Y¸ K°           H                \ ]      \    ^ _      `    R    s a s b   [ @    !s E s c@    !s $ s %@    !s U s V d  [ s W '     X    (   )   	   O     
+    / 	 1                 ; <  	  = >  ?   	    (       ;    @ A      B    "    s C s D    !s E s F G   	   5     *´ 
+¶ H¸ K°           <              O P      Q    C    s R s S   [ @    !s E s T@    !s U s V G  [ s W '     X   	   @     *´ 
++¶ Y¸ K°           J                \ ]      \    ^ _      `    R    s a s b   [ @    !s E s c@    !s $ s %@    !s U s V d  [ s W '     X    (   )   	   O     
 *´ 
 +,¶ e¸ K°       
-    Z 	 Y         
+    \ 	 [         
        
  \ ]    
  ; <  ?   	   (      	 \   ;    h P      i    C    s j s k   [ @    !s l s m@    !s U s V n  [ s W '     X   	   I     *´ 
 +¶ o¸ r¹ v °       
-    i  k                \ ]      \    { |     *    s } s ~    !s E s  G  [ s € '     X   	   =     	*´ 
-+¶ ¬           v        	       	 \ ]      \    „    …       †  ‡s ˆ s ‰ Š   ‹  [ s Œ    
-  w 0 Ž	
+    k  m                \ ]      \    { |     *    s } s ~    !s E s  G  [ s € '     X   	   =     	*´ 
++¶ ¬           x        	       	 \ ]      \    „    …    )  †  ‡s ˆ s ‰ Š  ‡s ‹ Œ     [ s Ž    
+  w 0 	
 
 
 ====================================================
