@@ -6,6 +6,7 @@ import com.reservacanchas.cl.mantenimiento_service.service.MantenimientoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import org.springframework.http.HttpStatus;
@@ -18,6 +19,7 @@ import java.util.List;
         name = "Mantenimientos",
         description = "Operaciones para la gestión de mantenimientos de canchas"
 )
+@SecurityRequirement(name = "bearerAuth")
 @RestController
 @RequestMapping("/mantenimientos")
 public class MantenimientoController {
