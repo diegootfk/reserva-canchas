@@ -1,0 +1,49 @@
+services:
+
+  mysql-usuario:
+    image: mysql:8.0
+    container_name: mysql-usuario
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: db_usuario_service
+    ports:
+      - "3307:3306"
+    restart: always
+
+  mysql-auth:
+    image: mysql:8.0
+    container_name: mysql-auth
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: db_auth_service
+    ports:
+      - "3308:3306"
+    restart: always
+
+  usuario-service:
+    build: ./usuario-service
+    container_name: usuario-service
+    ports:
+      - "7091:7091"
+    depends_on:
+      - mysql-usuario
+    restart: always
+
+  auth-service:
+    build: ./auth-service
+    container_name: auth-service
+    ports:
+      - "7101:7101"
+    depends_on:
+      - mysql-auth
+    restart: always
+
+  api-gateway:
+    build: ./api-gateway
+    container_name: api-gateway
+    ports:
+      - "7090:7090"
+    depends_on:
+      - usuario-service
+      - auth-service
+    restart: always
