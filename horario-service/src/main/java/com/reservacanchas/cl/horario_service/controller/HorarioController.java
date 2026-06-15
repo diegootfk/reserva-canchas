@@ -9,11 +9,19 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.Link;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 
 @Tag(
         name = "Horarios",
@@ -49,27 +57,39 @@ public class HorarioController {
 
     @Operation(
             summary = "Listar horarios",
-            description = "Obtiene todos los horarios registrados"
+            description = "Obtiene todos los horarios registrados con enlaces HATEOAS"
     )
     @ApiResponse(responseCode = "200", description = "Listado obtenido correctamente")
     @GetMapping
-    public ResponseEntity<List<Horario>> listar() {
+    public ResponseEntity<CollectionModel<EntityModel<Horario>>> listar() {
 
-        return ResponseEntity.ok(horarioService.listar());
+        List<EntityModel<Horario>> horarios = horarioService.listar()
+                .stream()
+                .map(this::agregarLinks)
+                .collect(Collectors.toList());
+
+        CollectionModel<EntityModel<Horario>> respuesta = CollectionModel.of(
+                horarios,
+                linkTo(HorarioController.class).withSelfRel()
+        );
+
+        return ResponseEntity.ok(respuesta);
     }
 
     @Operation(
             summary = "Buscar horario por ID",
-            description = "Obtiene un horario específico mediante su identificador"
+            description = "Obtiene un horario específico mediante su identificador con enlaces HATEOAS"
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Horario encontrado"),
             @ApiResponse(responseCode = "404", description = "Horario no encontrado")
     })
     @GetMapping("/{id}")
-    public ResponseEntity<Horario> buscarPorId(@PathVariable Long id) {
+    public ResponseEntity<EntityModel<Horario>> buscarPorId(@PathVariable Long id) {
 
-        return ResponseEntity.ok(horarioService.buscarPorId(id));
+        Horario horario = horarioService.buscarPorId(id);
+
+        return ResponseEntity.ok(agregarLinks(horario));
     }
 
     @Operation(
@@ -115,5 +135,16 @@ public class HorarioController {
     public boolean existe(@PathVariable Long id) {
 
         return horarioService.existePorId(id);
+    }
+
+    private EntityModel<Horario> agregarLinks(Horario horario) {
+
+        return EntityModel.of(
+                horario,
+                linkTo(HorarioController.class).slash(horario.getId()).withSelfRel(),
+                linkTo(HorarioController.class).withRel("horarios"),
+                linkTo(HorarioController.class).slash(horario.getId()).slash("exists").withRel("existe"),
+                Link.of("http://localhost:7092/canchas/" + horario.getIdCancha()).withRel("cancha")
+        );
     }
 }
