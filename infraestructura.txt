@@ -1207,6 +1207,69 @@ bearerAuth type 8Lio/swagger/v3/oas/annotations/enums/SecuritySchemeType; H
 
 
 ====================================================
+ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\disponibilidad-service\src\main\java\com\reservacanchas\cl\disponibilidad_service\config\DataLoaderConfig.java
+====================================================
+
+package com.reservacanchas.cl.disponibilidad_service.config;
+
+import com.reservacanchas.cl.disponibilidad_service.model.Disponibilidad;
+import com.reservacanchas.cl.disponibilidad_service.repository.DisponibilidadRepository;
+
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+public class DataLoaderConfig {
+
+    @Bean
+    CommandLineRunner cargarDisponibilidades(
+            DisponibilidadRepository disponibilidadRepository) {
+
+        return args -> {
+
+            // Si ya existen 10 o mÃ¡s registros no carga nada
+            if (disponibilidadRepository.count() >= 10) {
+                return;
+            }
+
+            disponibilidadRepository.save(new Disponibilidad(
+                    null, 1L, "2026-06-20", "08:00", "09:00", "DISPONIBLE"));
+
+            disponibilidadRepository.save(new Disponibilidad(
+                    null, 2L, "2026-06-20", "09:00", "10:00", "DISPONIBLE"));
+
+            disponibilidadRepository.save(new Disponibilidad(
+                    null, 3L, "2026-06-20", "10:00", "11:00", "RESERVADA"));
+
+            disponibilidadRepository.save(new Disponibilidad(
+                    null, 4L, "2026-06-21", "11:00", "12:00", "DISPONIBLE"));
+
+            disponibilidadRepository.save(new Disponibilidad(
+                    null, 5L, "2026-06-21", "12:00", "13:00", "MANTENIMIENTO"));
+
+            disponibilidadRepository.save(new Disponibilidad(
+                    null, 6L, "2026-06-22", "13:00", "14:00", "DISPONIBLE"));
+
+            disponibilidadRepository.save(new Disponibilidad(
+                    null, 7L, "2026-06-22", "14:00", "15:00", "RESERVADA"));
+
+            disponibilidadRepository.save(new Disponibilidad(
+                    null, 8L, "2026-06-23", "15:00", "16:00", "DISPONIBLE"));
+
+            disponibilidadRepository.save(new Disponibilidad(
+                    null, 9L, "2026-06-23", "16:00", "17:00", "DISPONIBLE"));
+
+            disponibilidadRepository.save(new Disponibilidad(
+                    null, 10L, "2026-06-24", "17:00", "18:00", "MANTENIMIENTO"));
+
+            System.out.println("Disponibilidades cargadas correctamente");
+        };
+    }
+}
+
+
+====================================================
 ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\disponibilidad-service\src\main\java\com\reservacanchas\cl\disponibilidad_service\config\SwaggerConfig.java
 ====================================================
 
@@ -1318,6 +1381,39 @@ springdoc:
 
 
 ====================================================
+ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\disponibilidad-service\target\classes\com\reservacanchas\cl\disponibilidad_service\config\DataLoaderConfig.class
+====================================================
+
+Êþº¾   = ’  Dcom/reservacanchas/cl/disponibilidad_service/config/DataLoaderConfig  java/lang/Object <init> ()V Code
+  	   LineNumberTable LocalVariableTable this FLcom/reservacanchas/cl/disponibilidad_service/config/DataLoaderConfig; cargarDisponibilidades €(Lcom/reservacanchas/cl/disponibilidad_service/repository/DisponibilidadRepository;)Lorg/springframework/boot/CommandLineRunner; RuntimeVisibleAnnotations -Lorg/springframework/context/annotation/Bean;      run disponibilidadRepository RLcom/reservacanchas/cl/disponibilidad_service/repository/DisponibilidadRepository; MethodParameters lambda$0 h(Lcom/reservacanchas/cl/disponibilidad_service/repository/DisponibilidadRepository;[Ljava/lang/String;)V 
+Exceptions  java/lang/Exception     Pcom/reservacanchas/cl/disponibilidad_service/repository/DisponibilidadRepository ! " count ()J       
+ & Acom/reservacanchas/cl/disponibilidad_service/model/Disponibilidad
+ ( * ) java/lang/Long + , valueOf (J)Ljava/lang/Long; . 
+2026-06-20 0 08:00 2 09:00 4 
+DISPONIBLE
+ % 6  7 k(Ljava/lang/Long;Ljava/lang/Long;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V  9 : ; save &(Ljava/lang/Object;)Ljava/lang/Object;        ? 10:00        C 11:00 E 	RESERVADA        I 
+2026-06-21 K 12:00        O 13:00 Q 
+MANTENIMIENTO        U 
+2026-06-22 W 14:00        [ 15:00        _ 
+2026-06-23 a 16:00       	 e 17:00 g 
+2026-06-24 i 18:00	 k m l java/lang/System n o out Ljava/io/PrintStream; q 'Disponibilidades cargadas correctamente
+ s u t java/io/PrintStream v w println (Ljava/lang/String;)V args [Ljava/lang/String; 
+StackMapTable 
+SourceFile DataLoaderConfig.java 6Lorg/springframework/context/annotation/Configuration; BootstrapMethods
+ € ‚  "java/lang/invoke/LambdaMetafactory ƒ „ metafactory Ì(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodHandle;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/CallSite;  ([Ljava/lang/String;)V †
+  ‰   ˆ † InnerClasses Ž %java/lang/invoke/MethodHandles$Lookup  java/lang/invoke/MethodHandles Lookup !               /     *· ±    
+                 
+                   ;     +º   °    
+                 
+               
+            î 	   7*¹   #”› ±*» %Y
+¸ '-/13· 5¹ 8 W*» %Y <¸ '-1>3· 5¹ 8 W*» %Y @¸ '->BD· 5¹ 8 W*» %Y F¸ 'HBJ3· 5¹ 8 W*» %Y L¸ 'HJNP· 5¹ 8 W*» %Y R¸ 'TNV3· 5¹ 8 W*» %Y X¸ 'TVZD· 5¹ 8 W*» %Y \¸ '^Z`3· 5¹ 8 W*» %Y b¸ '^`d3· 5¹ 8 W*» %Y #¸ 'fdhP· 5¹ 8 W² jp¶ r±    
+   Š "    
+      #  )  .  @  F  K  ]  c ! h " z ! € $ … % — $  ' ¢ ( ´ ' º * ¿ + Ñ * × - Ü . î - ô 0 ù 1 0 3 4( 3. 66 7       7 x y  z      {    |      }   ~     …  ‡ Š ‹ Œ   
+    ‘ 
+
+
+====================================================
 ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\disponibilidad-service\target\classes\com\reservacanchas\cl\disponibilidad_service\config\SwaggerConfig.class
 ====================================================
 
@@ -1341,6 +1437,67 @@ bearerAuth type 8Lio/swagger/v3/oas/annotations/enums/SecuritySchemeType; H
                   ˜     <» Y· L+¶ +¶ »  Y· "+¸ #¶ )» -Y· /0¶ 26¶ 8;¶ =¶ @°    
    .             "   ) ! . " 3 # 8   ;         <  
     4 D E   F    G       H   I  Js K Le M N Os P Qs R
+
+
+====================================================
+ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\horario-service\src\main\java\com\reservacanchas\cl\horario_service\config\DataLoaderConfig.java
+====================================================
+
+package com.reservacanchas.cl.horario_service.config;
+
+import com.reservacanchas.cl.horario_service.model.Horario;
+import com.reservacanchas.cl.horario_service.repository.HorarioRepository;
+
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+public class DataLoaderConfig {
+
+    @Bean
+    CommandLineRunner cargarHorarios(
+            HorarioRepository horarioRepository) {
+
+        return args -> {
+            if (horarioRepository.count() >= 10) {
+                return;
+            }
+
+            horarioRepository.save(new Horario(
+                    null, 1L, "LUNES", "08:00", "10:00", "ACTIVO"));
+
+            horarioRepository.save(new Horario(
+                    null, 2L, "MARTES", "09:00", "11:00", "ACTIVO"));
+
+            horarioRepository.save(new Horario(
+                    null, 3L, "MIERCOLES", "10:00", "12:00", "ACTIVO"));
+
+            horarioRepository.save(new Horario(
+                    null, 4L, "JUEVES", "11:00", "13:00", "ACTIVO"));
+
+            horarioRepository.save(new Horario(
+                    null, 5L, "VIERNES", "12:00", "14:00", "ACTIVO"));
+
+            horarioRepository.save(new Horario(
+                    null, 6L, "SABADO", "08:00", "10:00", "ACTIVO"));
+
+            horarioRepository.save(new Horario(
+                    null, 7L, "DOMINGO", "09:00", "11:00", "ACTIVO"));
+
+            horarioRepository.save(new Horario(
+                    null, 8L, "LUNES", "14:00", "16:00", "ACTIVO"));
+
+            horarioRepository.save(new Horario(
+                    null, 9L, "MIERCOLES", "16:00", "18:00", "ACTIVO"));
+
+            horarioRepository.save(new Horario(
+                    null, 10L, "VIERNES", "18:00", "20:00", "ACTIVO"));
+
+            System.out.println("Horarios cargados correctamente");
+        };
+    }
+}
 
 
 ====================================================
@@ -1455,6 +1612,32 @@ springdoc:
 
 
 ====================================================
+ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\horario-service\target\classes\com\reservacanchas\cl\horario_service\config\DataLoaderConfig.class
+====================================================
+
+Êþº¾   =   =com/reservacanchas/cl/horario_service/config/DataLoaderConfig  java/lang/Object <init> ()V Code
+  	   LineNumberTable LocalVariableTable this ?Lcom/reservacanchas/cl/horario_service/config/DataLoaderConfig; cargarHorarios r(Lcom/reservacanchas/cl/horario_service/repository/HorarioRepository;)Lorg/springframework/boot/CommandLineRunner; RuntimeVisibleAnnotations -Lorg/springframework/context/annotation/Bean;      run horarioRepository DLcom/reservacanchas/cl/horario_service/repository/HorarioRepository; MethodParameters lambda$0 Z(Lcom/reservacanchas/cl/horario_service/repository/HorarioRepository;[Ljava/lang/String;)V 
+Exceptions  java/lang/Exception     Bcom/reservacanchas/cl/horario_service/repository/HorarioRepository ! " count ()J       
+ & 3com/reservacanchas/cl/horario_service/model/Horario
+ ( * ) java/lang/Long + , valueOf (J)Ljava/lang/Long; . LUNES 0 08:00 2 10:00 4 ACTIVO
+ % 6  7 k(Ljava/lang/Long;Ljava/lang/Long;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V  9 : ; save &(Ljava/lang/Object;)Ljava/lang/Object;        ? MARTES A 09:00 C 11:00        G 	MIERCOLES I 12:00        M JUEVES O 13:00        S VIERNES U 14:00        Y SABADO        ] DOMINGO        a 16:00       	 e 18:00 g 20:00	 i k j java/lang/System l m out Ljava/io/PrintStream; o Horarios cargados correctamente
+ q s r java/io/PrintStream t u println (Ljava/lang/String;)V args [Ljava/lang/String; 
+StackMapTable 
+SourceFile DataLoaderConfig.java 6Lorg/springframework/context/annotation/Configuration; BootstrapMethods
+ ~ €  "java/lang/invoke/LambdaMetafactory  ‚ metafactory Ì(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodHandle;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/CallSite; } ([Ljava/lang/String;)V „
+  ‡   † „ InnerClasses Œ %java/lang/invoke/MethodHandles$Lookup Ž java/lang/invoke/MethodHandles Lookup !               /     *· ±    
+                 
+                   ;     +º   °    
+                 
+               
+            î 	   7*¹   #”› ±*» %Y
+¸ '-/13· 5¹ 8 W*» %Y <¸ '>@B3· 5¹ 8 W*» %Y D¸ 'F1H3· 5¹ 8 W*» %Y J¸ 'LBN3· 5¹ 8 W*» %Y P¸ 'RHT3· 5¹ 8 W*» %Y V¸ 'X/13· 5¹ 8 W*» %Y Z¸ '\@B3· 5¹ 8 W*» %Y ^¸ '-T`3· 5¹ 8 W*» %Y b¸ 'F`d3· 5¹ 8 W*» %Y #¸ 'Rdf3· 5¹ 8 W² hn¶ p±    
+   Š "    
+      #  )  .  @  F  K  ]  c  h   z  € " … # — "  % ¢ & ´ % º ( ¿ ) Ñ ( × + Ü , î + ô . ù / . 1 2( 1. 46 5       7 v w  x      y    z      {   |     ƒ  … ˆ ‰ Š   
+  ‹   
+
+
+====================================================
 ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\horario-service\target\classes\com\reservacanchas\cl\horario_service\config\SwaggerConfig.class
 ====================================================
 
@@ -1478,6 +1661,110 @@ bearerAuth type 8Lio/swagger/v3/oas/annotations/enums/SecuritySchemeType; H
                   ˜     <» Y· L+¶ +¶ »  Y· "+¸ #¶ )» -Y· /0¶ 26¶ 8;¶ =¶ @°    
    .             "   ) ! . " 3 # 8   ;         <  
     4 D E   F    G       H   I  Js K Le M N Os P Qs R
+
+
+====================================================
+ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\mantenimiento-service\src\main\java\com\reservacanchas\cl\mantenimiento_service\config\DataLoaderConfig.java
+====================================================
+
+package com.reservacanchas.cl.mantenimiento_service.config;
+
+import com.reservacanchas.cl.mantenimiento_service.model.Mantenimiento;
+import com.reservacanchas.cl.mantenimiento_service.repository.MantenimientoRepository;
+
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+public class DataLoaderConfig {
+
+    @Bean
+    CommandLineRunner cargarMantenimientos(
+            MantenimientoRepository mantenimientoRepository) {
+
+        return args -> {
+
+            if (mantenimientoRepository.count() >= 10) {
+                return;
+            }
+
+            mantenimientoRepository.save(new Mantenimiento(
+                    null, 1L,
+                    "2026-06-01",
+                    "2026-06-02",
+                    "Cambio de malla perimetral",
+                    "FINALIZADO"
+            ));
+
+            mantenimientoRepository.save(new Mantenimiento(
+                    null, 2L,
+                    "2026-06-03",
+                    "2026-06-04",
+                    "Pintura de lÃ­neas",
+                    "FINALIZADO"
+            ));
+
+            mantenimientoRepository.save(new Mantenimiento(
+                    null, 3L,
+                    "2026-06-05",
+                    "2026-06-06",
+                    "ReparaciÃ³n de iluminaciÃ³n",
+                    "FINALIZADO"
+            ));
+
+            mantenimientoRepository.save(new Mantenimiento(
+                    null, 4L,
+                    "2026-06-07",
+                    "2026-06-08",
+                    "MantenciÃ³n de camarines",
+                    "FINALIZADO"
+            ));
+
+            mantenimientoRepository.save(new Mantenimiento(
+                    null, 5L,
+                    "2026-06-09",
+                    "2026-06-10",
+                    "Cambio de cÃ©sped sintÃ©tico",
+                    "EN_PROCESO"
+            ));
+
+            mantenimientoRepository.save(new Mantenimiento(
+                    null, 6L,
+                    "2026-06-11",
+                    "2026-06-12",
+                    "RevisiÃ³n de drenaje",
+                    "PROGRAMADO"
+            ));
+
+            mantenimientoRepository.save(new Mantenimiento(
+                    null, 7L,
+                    "2026-06-13",
+                    "2026-06-14",
+                    "Cambio de arcos",
+                    "PROGRAMADO"
+            ));
+
+            mantenimientoRepository.save(new Mantenimiento(
+                    null, 8L,
+                    "2026-06-15",
+                    "2026-06-16",
+                    "ReparaciÃ³n de cierre perimetral",
+                    "PROGRAMADO"
+            ));
+
+            mantenimientoRepository.save(new Mantenimiento(
+                    null, 9L,
+                    "2026-06-17",
+                    "2026-06-18",
+                    "Limpieza profunda",
+                    "PROGRAMADO"
+            ));
+
+            System.out.println("Mantenimientos cargados correctamente");
+        };
+    }
+}
 
 
 ====================================================
@@ -1592,6 +1879,53 @@ springdoc:
 
 
 ====================================================
+ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\mantenimiento-service\target\classes\com\reservacanchas\cl\mantenimiento_service\config\DataLoaderConfig.class
+====================================================
+
+Êþº¾   = ¨  Ccom/reservacanchas/cl/mantenimiento_service/config/DataLoaderConfig  java/lang/Object <init> ()V Code
+  	   LineNumberTable LocalVariableTable this ELcom/reservacanchas/cl/mantenimiento_service/config/DataLoaderConfig; cargarMantenimientos ~(Lcom/reservacanchas/cl/mantenimiento_service/repository/MantenimientoRepository;)Lorg/springframework/boot/CommandLineRunner; RuntimeVisibleAnnotations -Lorg/springframework/context/annotation/Bean;      run mantenimientoRepository PLcom/reservacanchas/cl/mantenimiento_service/repository/MantenimientoRepository; MethodParameters lambda$0 f(Lcom/reservacanchas/cl/mantenimiento_service/repository/MantenimientoRepository;[Ljava/lang/String;)V 
+Exceptions  java/lang/Exception     Ncom/reservacanchas/cl/mantenimiento_service/repository/MantenimientoRepository ! " count ()J       
+ & ?com/reservacanchas/cl/mantenimiento_service/model/Mantenimiento
+ ( * ) java/lang/Long + , valueOf (J)Ljava/lang/Long; . 
+2026-06-01 0 
+2026-06-02 2 Cambio de malla perimetral 4 
+FINALIZADO
+ % 6  7 k(Ljava/lang/Long;Ljava/lang/Long;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V  9 : ; save &(Ljava/lang/Object;)Ljava/lang/Object;        ? 
+2026-06-03 A 
+2026-06-04 C Pintura de lÃ­neas        G 
+2026-06-05 I 
+2026-06-06 K ReparaciÃ³n de iluminaciÃ³n        O 
+2026-06-07 Q 
+2026-06-08 S MantenciÃ³n de camarines        W 
+2026-06-09 Y 
+2026-06-10 [ Cambio de cÃ©sped sintÃ©tico ] 
+EN_PROCESO        a 
+2026-06-11 c 
+2026-06-12 e RevisiÃ³n de drenaje g 
+PROGRAMADO        k 
+2026-06-13 m 
+2026-06-14 o Cambio de arcos        s 
+2026-06-15 u 
+2026-06-16 w  ReparaciÃ³n de cierre perimetral       	 { 
+2026-06-17 } 
+2026-06-18  Limpieza profunda	  ƒ ‚ java/lang/System „ … out Ljava/io/PrintStream; ‡ %Mantenimientos cargados correctamente
+ ‰ ‹ Š java/io/PrintStream Œ  println (Ljava/lang/String;)V args [Ljava/lang/String; 
+StackMapTable 
+SourceFile DataLoaderConfig.java 6Lorg/springframework/context/annotation/Configuration; BootstrapMethods
+ – ˜ — "java/lang/invoke/LambdaMetafactory ™ š metafactory Ì(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodHandle;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/CallSite; • ([Ljava/lang/String;)V œ
+  Ÿ   ž œ InnerClasses ¤ %java/lang/invoke/MethodHandles$Lookup ¦ java/lang/invoke/MethodHandles Lookup !               /     *· ±    
+                 
+                   ;     +º   °    
+                 
+               
+            U 	   *¹   #”› ±*» %Y
+¸ '-/13· 5¹ 8 W*» %Y <¸ '>@B3· 5¹ 8 W*» %Y D¸ 'FHJ3· 5¹ 8 W*» %Y L¸ 'NPR3· 5¹ 8 W*» %Y T¸ 'VXZ\· 5¹ 8 W*» %Y ^¸ '`bdf· 5¹ 8 W*» %Y h¸ 'jlnf· 5¹ 8 W*» %Y p¸ 'rtvf· 5¹ 8 W*» %Y x¸ 'z|~f· 5¹ 8 W² €†¶ ˆ±    
+   C    
+              #  )  .   5 ! 7 " 9 # ; $ @  F ' K ( R ) T * V + X , ] ' c / h 0 o 1 q 2 s 3 u 4 z / € 7 … 8 Œ 9 Ž :  ; ’ < — 7  ? ¢ @ © A « B ­ C ¯ D ´ ? º G ¿ H Æ I È J Ê K Ì L Ñ G × O Ü P ã Q å R ç S é T î O ô W ù X  Y Z [ \ W _ `        Ž         ‘    ’      “   ”     ›     ¡ ¢   
+  £ ¥ § 
+
+
+====================================================
 ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\mantenimiento-service\target\classes\com\reservacanchas\cl\mantenimiento_service\config\SwaggerConfig.class
 ====================================================
 
@@ -1615,6 +1949,110 @@ bearerAuth type 8Lio/swagger/v3/oas/annotations/enums/SecuritySchemeType; H
                   ˜     <» Y· L+¶ +¶ »  Y· "+¸ #¶ )» -Y· /0¶ 26¶ 8;¶ =¶ @°    
    .             "   ) ! . " 3 # 8   ;         <  
     4 D E   F    G       H   I  Js K Le M N Os P Qs R
+
+
+====================================================
+ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\notificacion-service\src\main\java\com\reservacanchas\cl\notificacion_service\config\DataLoaderConfig.java
+====================================================
+
+package com.reservacanchas.cl.notificacion_service.config;
+
+import com.reservacanchas.cl.notificacion_service.model.Notificacion;
+import com.reservacanchas.cl.notificacion_service.repository.NotificacionRepository;
+
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+public class DataLoaderConfig {
+
+    @Bean
+    CommandLineRunner cargarNotificaciones(
+            NotificacionRepository notificacionRepository) {
+
+        return args -> {
+
+            if (notificacionRepository.count() >= 10) {
+                return;
+            }
+
+            notificacionRepository.save(new Notificacion(
+                    null, 1L, 1L,
+                    "Reserva confirmada correctamente",
+                    "EMAIL",
+                    "2026-06-01",
+                    "ENVIADA"
+            ));
+
+            notificacionRepository.save(new Notificacion(
+                    null, 2L, 2L,
+                    "Recordatorio de reserva para maÃ±ana",
+                    "EMAIL",
+                    "2026-06-02",
+                    "ENVIADA"
+            ));
+
+            notificacionRepository.save(new Notificacion(
+                    null, 3L, 3L,
+                    "Pago recibido exitosamente",
+                    "SMS",
+                    "2026-06-03",
+                    "ENVIADA"
+            ));
+
+            notificacionRepository.save(new Notificacion(
+                    null, 4L, 4L,
+                    "Reserva cancelada",
+                    "EMAIL",
+                    "2026-06-04",
+                    "ENVIADA"
+            ));
+
+            notificacionRepository.save(new Notificacion(
+                    null, 5L, 5L,
+                    "Cancha disponible nuevamente",
+                    "PUSH",
+                    "2026-06-05",
+                    "ENVIADA"
+            ));
+
+            notificacionRepository.save(new Notificacion(
+                    null, 6L, 6L,
+                    "Cambio de horario confirmado",
+                    "EMAIL",
+                    "2026-06-06",
+                    "ENVIADA"
+            ));
+
+            notificacionRepository.save(new Notificacion(
+                    null, 7L, 7L,
+                    "Reserva prÃ³xima a vencer",
+                    "SMS",
+                    "2026-06-07",
+                    "ENVIADA"
+            ));
+
+            notificacionRepository.save(new Notificacion(
+                    null, 8L, 8L,
+                    "Nueva promociÃ³n disponible",
+                    "PUSH",
+                    "2026-06-08",
+                    "ENVIADA"
+            ));
+
+            notificacionRepository.save(new Notificacion(
+                    null, 9L, 9L,
+                    "Mantenimiento programado en la cancha",
+                    "EMAIL",
+                    "2026-06-09",
+                    "ENVIADA"
+            ));
+
+            System.out.println("Notificaciones cargadas correctamente");
+        };
+    }
+}
 
 
 ====================================================
@@ -1726,6 +2164,43 @@ springdoc:
   swagger-ui:
     enabled: true
     path: /doc/swagger-ui.html
+
+
+====================================================
+ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\notificacion-service\target\classes\com\reservacanchas\cl\notificacion_service\config\DataLoaderConfig.class
+====================================================
+
+Êþº¾   = ˜  Bcom/reservacanchas/cl/notificacion_service/config/DataLoaderConfig  java/lang/Object <init> ()V Code
+  	   LineNumberTable LocalVariableTable this DLcom/reservacanchas/cl/notificacion_service/config/DataLoaderConfig; cargarNotificaciones |(Lcom/reservacanchas/cl/notificacion_service/repository/NotificacionRepository;)Lorg/springframework/boot/CommandLineRunner; RuntimeVisibleAnnotations -Lorg/springframework/context/annotation/Bean;      run notificacionRepository NLcom/reservacanchas/cl/notificacion_service/repository/NotificacionRepository; MethodParameters lambda$0 d(Lcom/reservacanchas/cl/notificacion_service/repository/NotificacionRepository;[Ljava/lang/String;)V 
+Exceptions  java/lang/Exception     Lcom/reservacanchas/cl/notificacion_service/repository/NotificacionRepository ! " count ()J       
+ & =com/reservacanchas/cl/notificacion_service/model/Notificacion
+ ( * ) java/lang/Long + , valueOf (J)Ljava/lang/Long; .  Reserva confirmada correctamente 0 EMAIL 2 
+2026-06-01 4 ENVIADA
+ % 6  7 {(Ljava/lang/Long;Ljava/lang/Long;Ljava/lang/Long;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V  9 : ; save &(Ljava/lang/Object;)Ljava/lang/Object;        ? $Recordatorio de reserva para maÃ±ana A 
+2026-06-02        E Pago recibido exitosamente G SMS I 
+2026-06-03        M Reserva cancelada O 
+2026-06-04        S Cancha disponible nuevamente U PUSH W 
+2026-06-05        [ Cambio de horario confirmado ] 
+2026-06-06        a Reserva prÃ³xima a vencer c 
+2026-06-07        g Nueva promociÃ³n disponible i 
+2026-06-08       	 m %Mantenimiento programado en la cancha o 
+2026-06-09	 q s r java/lang/System t u out Ljava/io/PrintStream; w %Notificaciones cargadas correctamente
+ y { z java/io/PrintStream | } println (Ljava/lang/String;)V args [Ljava/lang/String; 
+StackMapTable 
+SourceFile DataLoaderConfig.java 6Lorg/springframework/context/annotation/Configuration; BootstrapMethods
+ † ˆ ‡ "java/lang/invoke/LambdaMetafactory ‰ Š metafactory Ì(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodHandle;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/CallSite; … ([Ljava/lang/String;)V Œ
+     Ž Œ InnerClasses ” %java/lang/invoke/MethodHandles$Lookup – java/lang/invoke/MethodHandles Lookup !               /     *· ±    
+                 
+                   ;     +º   °    
+                 
+               
+            ‰ 
+   N*¹   #”› ±*» %Y
+¸ '
+¸ '-/13· 5¹ 8 W*» %Y <¸ ' <¸ '>/@3· 5¹ 8 W*» %Y B¸ ' B¸ 'DFH3· 5¹ 8 W*» %Y J¸ ' J¸ 'L/N3· 5¹ 8 W*» %Y P¸ ' P¸ 'RTV3· 5¹ 8 W*» %Y X¸ ' X¸ 'Z/\3· 5¹ 8 W*» %Y ^¸ ' ^¸ '`Fb3· 5¹ 8 W*» %Y d¸ ' d¸ 'fTh3· 5¹ 8 W*» %Y j¸ ' j¸ 'l/n3· 5¹ 8 W² pv¶ x±    
+   C    
+             "  '  -  2   ? ! A " C # E $ J  P ' U ( b ) d * f + h , m ' s / x 0 … 1 ‡ 2 ‰ 3 ‹ 4  / – 7 › 8 ¨ 9 ª : ¬ ; ® < ³ 7 ¹ ? ¾ @ Ë A Í B Ï C Ñ D Ö ? Ü G á H î I ð J ò K ô L ù G ÿ O P Q R S T O" W' X4 Y6 Z8 [: \? WE _M `       N ~   €          ‚      ƒ   „     ‹    ‘ ’   
+  “ • — 
 
 
 ====================================================
@@ -1892,6 +2367,101 @@ bearerAuth type 8Lio/swagger/v3/oas/annotations/enums/SecuritySchemeType; H
 
 
 ====================================================
+ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\resena-service\src\main\java\com\reservacanchas\cl\resena_service\config\DataLoaderConfig.java
+====================================================
+
+package com.reservacanchas.cl.resena_service.config;
+
+import com.reservacanchas.cl.resena_service.model.Resena;
+import com.reservacanchas.cl.resena_service.repository.ResenaRepository;
+
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+public class DataLoaderConfig {
+
+    @Bean
+    CommandLineRunner cargarResenas(
+            ResenaRepository resenaRepository) {
+
+        return args -> {
+
+            if (resenaRepository.count() >= 10) {
+                return;
+            }
+
+            resenaRepository.save(new Resena(
+                    null, 1L, 1L, 1L,
+                    5,
+                    "Excelente cancha, muy bien mantenida",
+                    "2026-06-01"
+            ));
+
+            resenaRepository.save(new Resena(
+                    null, 2L, 2L, 2L,
+                    4,
+                    "Muy buena experiencia",
+                    "2026-06-02"
+            ));
+
+            resenaRepository.save(new Resena(
+                    null, 3L, 3L, 3L,
+                    5,
+                    "Instalaciones impecables",
+                    "2026-06-03"
+            ));
+
+            resenaRepository.save(new Resena(
+                    null, 4L, 4L, 4L,
+                    3,
+                    "Buen servicio pero faltaba iluminaciÃ³n",
+                    "2026-06-04"
+            ));
+
+            resenaRepository.save(new Resena(
+                    null, 5L, 5L, 5L,
+                    4,
+                    "Cancha en excelente estado",
+                    "2026-06-05"
+            ));
+
+            resenaRepository.save(new Resena(
+                    null, 6L, 6L, 6L,
+                    5,
+                    "La mejor cancha de la zona",
+                    "2026-06-06"
+            ));
+
+            resenaRepository.save(new Resena(
+                    null, 7L, 7L, 7L,
+                    4,
+                    "Buena atenciÃ³n del personal",
+                    "2026-06-07"
+            ));
+
+            resenaRepository.save(new Resena(
+                    null, 8L, 8L, 8L,
+                    5,
+                    "Reserva rÃ¡pida y sencilla",
+                    "2026-06-08"
+            ));
+
+            resenaRepository.save(new Resena(
+                    null, 9L, 9L, 9L,
+                    4,
+                    "VolverÃ­a a reservar sin problemas",
+                    "2026-06-09"
+            ));
+
+            System.out.println("ReseÃ±as cargadas correctamente");
+        };
+    }
+}
+
+
+====================================================
 ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\resena-service\src\main\java\com\reservacanchas\cl\resena_service\config\SwaggerConfig.java
 ====================================================
 
@@ -2000,6 +2570,46 @@ springdoc:
   swagger-ui:
     enabled: true
     path: /doc/swagger-ui.html
+
+
+====================================================
+ARCHIVO: C:\Users\diber\Downloads\reserva-canchas\resena-service\target\classes\com\reservacanchas\cl\resena_service\config\DataLoaderConfig.class
+====================================================
+
+Êþº¾   = •  <com/reservacanchas/cl/resena_service/config/DataLoaderConfig  java/lang/Object <init> ()V Code
+  	   LineNumberTable LocalVariableTable this >Lcom/reservacanchas/cl/resena_service/config/DataLoaderConfig; 
+cargarResenas p(Lcom/reservacanchas/cl/resena_service/repository/ResenaRepository;)Lorg/springframework/boot/CommandLineRunner; RuntimeVisibleAnnotations -Lorg/springframework/context/annotation/Bean;      run resenaRepository BLcom/reservacanchas/cl/resena_service/repository/ResenaRepository; MethodParameters lambda$0 X(Lcom/reservacanchas/cl/resena_service/repository/ResenaRepository;[Ljava/lang/String;)V 
+Exceptions  java/lang/Exception     @com/reservacanchas/cl/resena_service/repository/ResenaRepository ! " count ()J       
+ & 1com/reservacanchas/cl/resena_service/model/Resena
+ ( * ) java/lang/Long + , valueOf (J)Ljava/lang/Long;
+ . 0 / java/lang/Integer + 1 (I)Ljava/lang/Integer; 3 $Excelente cancha, muy bien mantenida 5 
+2026-06-01
+ % 7  8 z(Ljava/lang/Long;Ljava/lang/Long;Ljava/lang/Long;Ljava/lang/Long;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;)V  : ; < save &(Ljava/lang/Object;)Ljava/lang/Object;        @ Muy buena experiencia B 
+2026-06-02        F Instalaciones impecables H 
+2026-06-03        L 'Buen servicio pero faltaba iluminaciÃ³n N 
+2026-06-04        R Cancha en excelente estado T 
+2026-06-05        X La mejor cancha de la zona Z 
+2026-06-06        ^ Buena atenciÃ³n del personal ` 
+2026-06-07        d Reserva rÃ¡pida y sencilla f 
+2026-06-08       	 j "VolverÃ­a a reservar sin problemas l 
+2026-06-09	 n p o java/lang/System q r out Ljava/io/PrintStream; t ReseÃ±as cargadas correctamente
+ v x w java/io/PrintStream y z println (Ljava/lang/String;)V args [Ljava/lang/String; 
+StackMapTable 
+SourceFile DataLoaderConfig.java 6Lorg/springframework/context/annotation/Configuration; BootstrapMethods
+ ƒ … „ "java/lang/invoke/LambdaMetafactory † ‡ metafactory Ì(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodHandle;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/CallSite; ‚ ([Ljava/lang/String;)V ‰
+  Œ   ‹ ‰ InnerClasses ‘ %java/lang/invoke/MethodHandles$Lookup “ java/lang/invoke/MethodHandles Lookup !               /     *· ±    
+                 
+                   ;     +º   °    
+                 
+               
+            ™ 
+   ‚*¹   #”› ±*» %Y
+¸ '
+¸ '
+¸ '¸ -24· 6¹ 9 W*» %Y =¸ ' =¸ ' =¸ '¸ -?A· 6¹ 9 W*» %Y C¸ ' C¸ ' C¸ '¸ -EG· 6¹ 9 W*» %Y I¸ ' I¸ ' I¸ '¸ -KM· 6¹ 9 W*» %Y O¸ ' O¸ ' O¸ '¸ -QS· 6¹ 9 W*» %Y U¸ ' U¸ ' U¸ '¸ -WY· 6¹ 9 W*» %Y [¸ ' [¸ ' [¸ '¸ -]_· 6¹ 9 W*» %Y a¸ ' a¸ ' a¸ '¸ -ce· 6¹ 9 W*» %Y g¸ ' g¸ ' g¸ '¸ -ik· 6¹ 9 W² ms¶ u±    
+   ê :    
+         $  &  +  1  6  I   M ! O " T  Z % _ & r ' v ( x ) } % ƒ , ˆ - › . Ÿ / ¡ 0 ¦ , ¬ 3 ± 4 Ä 5 È 6 Ê 7 Ï 3 Õ : Ú ; í < ñ = ó > ø : þ A B C D E! A' H, I? JC KE LJ HP OU Ph Ql Rn Ss Oy V W       ‚ { |  }      ~          €        ˆ  Š  Ž    
+   ’ ” 
 
 
 ====================================================
