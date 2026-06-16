@@ -20,6 +20,16 @@ services:
       - "3308:3306"
     restart: always
 
+  mysql-cancha:
+    image: mysql:8.0
+    container_name: mysql-cancha
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: db_cancha_service
+    ports:
+      - "3309:3306"
+    restart: always
+
   usuario-service:
     build: ./usuario-service
     container_name: usuario-service
@@ -38,6 +48,15 @@ services:
       - mysql-auth
     restart: always
 
+  cancha-service:
+    build: ./cancha-service
+    container_name: cancha-service
+    ports:
+      - "7092:7092"
+    depends_on:
+      - mysql-cancha
+    restart: always
+
   api-gateway:
     build: ./api-gateway
     container_name: api-gateway
@@ -46,4 +65,5 @@ services:
     depends_on:
       - usuario-service
       - auth-service
+      - cancha-service
     restart: always

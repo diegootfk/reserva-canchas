@@ -230,6 +230,8 @@ public class SecurityConfig {
 
                 .pathMatchers("/pagos/**")
                 .hasAuthority("ROLE_ADMIN")
+
+                .anyExchange().authenticated()
         )
 
                 .oauth2ResourceServer(oauth2 -> oauth2
