@@ -100,6 +100,16 @@ services:
       - "3316:3306"
     restart: always
 
+  mysql-mantenimiento:
+    image: mysql:8.0
+    container_name: mysql-mantenimiento
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: db_mantenimiento_service
+    ports:
+      - "3317:3306"
+    restart: always
+
   usuario-service:
     build: ./usuario-service
     container_name: usuario-service
@@ -190,6 +200,15 @@ services:
       - mysql-resena
     restart: always
 
+  mantenimiento-service:
+    build: ./mantenimiento-service
+    container_name: mantenimiento-service
+    ports:
+      - "7100:7100"
+    depends_on:
+      - mysql-mantenimiento
+    restart: always
+
   api-gateway:
     build: ./api-gateway
     container_name: api-gateway
@@ -206,4 +225,5 @@ services:
       - disponibilidad-service
       - notificacion-service
       - resena-service
+      - mantenimiento-service
     restart: always
