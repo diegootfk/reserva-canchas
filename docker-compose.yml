@@ -70,6 +70,16 @@ services:
       - "3313:3306"
     restart: always
 
+  mysql-disponibilidad:
+    image: mysql:8.0
+    container_name: mysql-disponibilidad
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: db_disponibilidad_service
+    ports:
+      - "3314:3306"
+    restart: always
+
   usuario-service:
     build: ./usuario-service
     container_name: usuario-service
@@ -133,6 +143,15 @@ services:
       - mysql-horario
     restart: always
 
+  disponibilidad-service:
+    build: ./disponibilidad-service
+    container_name: disponibilidad-service
+    ports:
+      - "7097:7097"
+    depends_on:
+      - mysql-disponibilidad
+    restart: always
+
   api-gateway:
     build: ./api-gateway
     container_name: api-gateway
@@ -146,4 +165,5 @@ services:
       - pago-service
       - sede-service
       - horario-service
+      - disponibilidad-service
     restart: always
