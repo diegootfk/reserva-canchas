@@ -60,6 +60,16 @@ services:
       - "3312:3306"
     restart: always
 
+  mysql-horario:
+    image: mysql:8.0
+    container_name: mysql-horario
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: db_horario_service
+    ports:
+      - "3313:3306"
+    restart: always
+
   usuario-service:
     build: ./usuario-service
     container_name: usuario-service
@@ -114,6 +124,15 @@ services:
       - mysql-sede
     restart: always
 
+  horario-service:
+    build: ./horario-service
+    container_name: horario-service
+    ports:
+      - "7096:7096"
+    depends_on:
+      - mysql-horario
+    restart: always
+
   api-gateway:
     build: ./api-gateway
     container_name: api-gateway
@@ -126,4 +145,5 @@ services:
       - reserva-service
       - pago-service
       - sede-service
+      - horario-service
     restart: always
