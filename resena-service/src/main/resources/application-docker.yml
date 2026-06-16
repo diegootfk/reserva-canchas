@@ -1,0 +1,28 @@
+server:
+  port: 7099
+
+spring:
+  application:
+    name: resena-service
+
+  datasource:
+    url: jdbc:mysql://mysql-resena:3306/db_resena_service?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    username: root
+    password: root
+
+  liquibase:
+    enabled: true
+    change-log: classpath:/db/changelog/db.changelog-master.yaml
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+
+springdoc:
+  api-docs:
+    enabled: true
+
+  swagger-ui:
+    enabled: true
+    path: /doc/swagger-ui.html

@@ -90,6 +90,16 @@ services:
       - "3315:3306"
     restart: always
 
+  mysql-resena:
+    image: mysql:8.0
+    container_name: mysql-resena
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: db_resena_service
+    ports:
+      - "3316:3306"
+    restart: always
+
   usuario-service:
     build: ./usuario-service
     container_name: usuario-service
@@ -171,6 +181,15 @@ services:
       - mysql-notificacion
     restart: always
 
+  resena-service:
+    build: ./resena-service
+    container_name: resena-service
+    ports:
+      - "7099:7099"
+    depends_on:
+      - mysql-resena
+    restart: always
+
   api-gateway:
     build: ./api-gateway
     container_name: api-gateway
@@ -186,4 +205,5 @@ services:
       - horario-service
       - disponibilidad-service
       - notificacion-service
+      - resena-service
     restart: always
