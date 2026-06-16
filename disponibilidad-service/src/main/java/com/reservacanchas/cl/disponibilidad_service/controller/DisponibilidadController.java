@@ -9,11 +9,19 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.Link;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 
 @Tag(
         name = "Disponibilidades",
@@ -48,25 +56,39 @@ public class DisponibilidadController {
 
     @Operation(
             summary = "Listar disponibilidades",
-            description = "Obtiene todas las disponibilidades registradas"
+            description = "Obtiene todas las disponibilidades registradas con enlaces HATEOAS"
     )
     @ApiResponse(responseCode = "200", description = "Listado obtenido correctamente")
     @GetMapping
-    public ResponseEntity<List<Disponibilidad>> listar() {
-        return ResponseEntity.ok(disponibilidadService.listar());
+    public ResponseEntity<CollectionModel<EntityModel<Disponibilidad>>> listar() {
+
+        List<EntityModel<Disponibilidad>> disponibilidades = disponibilidadService.listar()
+                .stream()
+                .map(this::agregarLinks)
+                .collect(Collectors.toList());
+
+        CollectionModel<EntityModel<Disponibilidad>> respuesta = CollectionModel.of(
+                disponibilidades,
+                linkTo(DisponibilidadController.class).withSelfRel()
+        );
+
+        return ResponseEntity.ok(respuesta);
     }
 
     @Operation(
             summary = "Buscar disponibilidad por ID",
-            description = "Obtiene una disponibilidad específica mediante su identificador"
+            description = "Obtiene una disponibilidad específica mediante su identificador con enlaces HATEOAS"
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Disponibilidad encontrada"),
             @ApiResponse(responseCode = "404", description = "Disponibilidad no encontrada")
     })
     @GetMapping("/{id}")
-    public ResponseEntity<Disponibilidad> buscarPorId(@PathVariable Long id) {
-        return ResponseEntity.ok(disponibilidadService.buscarPorId(id));
+    public ResponseEntity<EntityModel<Disponibilidad>> buscarPorId(@PathVariable Long id) {
+
+        Disponibilidad disponibilidad = disponibilidadService.buscarPorId(id);
+
+        return ResponseEntity.ok(agregarLinks(disponibilidad));
     }
 
     @Operation(
@@ -109,5 +131,16 @@ public class DisponibilidadController {
     @GetMapping("/{id}/exists")
     public boolean existe(@PathVariable Long id) {
         return disponibilidadService.existePorId(id);
+    }
+
+    private EntityModel<Disponibilidad> agregarLinks(Disponibilidad disponibilidad) {
+
+        return EntityModel.of(
+                disponibilidad,
+                linkTo(DisponibilidadController.class).slash(disponibilidad.getId()).withSelfRel(),
+                linkTo(DisponibilidadController.class).withRel("disponibilidades"),
+                linkTo(DisponibilidadController.class).slash(disponibilidad.getId()).slash("exists").withRel("existe"),
+                Link.of("http://localhost:7092/canchas/" + disponibilidad.getIdCancha()).withRel("cancha")
+        );
     }
 }

@@ -9,11 +9,19 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.Link;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 
 @Tag(
         name = "Reseñas",
@@ -49,27 +57,39 @@ public class ResenaController {
 
     @Operation(
             summary = "Listar reseñas",
-            description = "Obtiene todas las reseñas registradas"
+            description = "Obtiene todas las reseñas registradas con enlaces HATEOAS"
     )
     @ApiResponse(responseCode = "200", description = "Listado obtenido correctamente")
     @GetMapping
-    public ResponseEntity<List<Resena>> listar() {
+    public ResponseEntity<CollectionModel<EntityModel<Resena>>> listar() {
 
-        return ResponseEntity.ok(resenaService.listar());
+        List<EntityModel<Resena>> resenas = resenaService.listar()
+                .stream()
+                .map(this::agregarLinks)
+                .collect(Collectors.toList());
+
+        CollectionModel<EntityModel<Resena>> respuesta = CollectionModel.of(
+                resenas,
+                linkTo(ResenaController.class).withSelfRel()
+        );
+
+        return ResponseEntity.ok(respuesta);
     }
 
     @Operation(
             summary = "Buscar reseña por ID",
-            description = "Obtiene una reseña específica mediante su identificador"
+            description = "Obtiene una reseña específica mediante su identificador con enlaces HATEOAS"
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Reseña encontrada"),
             @ApiResponse(responseCode = "404", description = "Reseña no encontrada")
     })
     @GetMapping("/{id}")
-    public ResponseEntity<Resena> buscarPorId(@PathVariable Long id) {
+    public ResponseEntity<EntityModel<Resena>> buscarPorId(@PathVariable Long id) {
 
-        return ResponseEntity.ok(resenaService.buscarPorId(id));
+        Resena resena = resenaService.buscarPorId(id);
+
+        return ResponseEntity.ok(agregarLinks(resena));
     }
 
     @Operation(
@@ -115,5 +135,18 @@ public class ResenaController {
     public boolean existe(@PathVariable Long id) {
 
         return resenaService.existePorId(id);
+    }
+
+    private EntityModel<Resena> agregarLinks(Resena resena) {
+
+        return EntityModel.of(
+                resena,
+                linkTo(ResenaController.class).slash(resena.getId()).withSelfRel(),
+                linkTo(ResenaController.class).withRel("resenas"),
+                linkTo(ResenaController.class).slash(resena.getId()).slash("exists").withRel("existe"),
+                Link.of("http://localhost:7091/usuarios/" + resena.getIdUsuario()).withRel("usuario"),
+                Link.of("http://localhost:7092/canchas/" + resena.getIdCancha()).withRel("cancha"),
+                Link.of("http://localhost:7093/reservas/" + resena.getIdReserva()).withRel("reserva")
+        );
     }
 }

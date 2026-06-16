@@ -12,11 +12,18 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 
 import jakarta.validation.Valid;
 
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 
 @Tag(
         name = "Canchas",
@@ -51,27 +58,39 @@ public class CanchaController {
 
     @Operation(
             summary = "Listar canchas",
-            description = "Obtiene todas las canchas registradas"
+            description = "Obtiene todas las canchas registradas con enlaces HATEOAS"
     )
     @ApiResponse(responseCode = "200", description = "Listado obtenido correctamente")
     @GetMapping
-    public ResponseEntity<List<Cancha>> listar() {
+    public ResponseEntity<CollectionModel<EntityModel<Cancha>>> listar() {
 
-        return ResponseEntity.ok(canchaService.listar());
+        List<EntityModel<Cancha>> canchas = canchaService.listar()
+                .stream()
+                .map(this::agregarLinks)
+                .collect(Collectors.toList());
+
+        CollectionModel<EntityModel<Cancha>> respuesta = CollectionModel.of(
+                canchas,
+                linkTo(CanchaController.class).withSelfRel()
+        );
+
+        return ResponseEntity.ok(respuesta);
     }
 
     @Operation(
             summary = "Buscar cancha por ID",
-            description = "Obtiene una cancha específica mediante su identificador"
+            description = "Obtiene una cancha específica mediante su identificador con enlaces HATEOAS"
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Cancha encontrada"),
             @ApiResponse(responseCode = "404", description = "Cancha no encontrada")
     })
     @GetMapping("/{id}")
-    public ResponseEntity<Cancha> buscarPorId(@PathVariable Long id) {
+    public ResponseEntity<EntityModel<Cancha>> buscarPorId(@PathVariable Long id) {
 
-        return ResponseEntity.ok(canchaService.buscarPorId(id));
+        Cancha cancha = canchaService.buscarPorId(id);
+
+        return ResponseEntity.ok(agregarLinks(cancha));
     }
 
     @Operation(
@@ -117,5 +136,15 @@ public class CanchaController {
     public boolean existe(@PathVariable Long id) {
 
         return canchaService.existePorId(id);
+    }
+
+    private EntityModel<Cancha> agregarLinks(Cancha cancha) {
+
+        return EntityModel.of(
+                cancha,
+                linkTo(CanchaController.class).slash(cancha.getId()).withSelfRel(),
+                linkTo(CanchaController.class).withRel("canchas"),
+                linkTo(CanchaController.class).slash(cancha.getId()).slash("exists").withRel("existe")
+        );
     }
 }

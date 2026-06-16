@@ -9,11 +9,18 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 
 @Tag(
         name = "Sedes",
@@ -49,27 +56,39 @@ public class SedeController {
 
     @Operation(
             summary = "Listar sedes",
-            description = "Obtiene todas las sedes registradas en el sistema"
+            description = "Obtiene todas las sedes registradas en el sistema con enlaces HATEOAS"
     )
     @ApiResponse(responseCode = "200", description = "Listado obtenido correctamente")
     @GetMapping
-    public ResponseEntity<List<Sede>> listar() {
+    public ResponseEntity<CollectionModel<EntityModel<Sede>>> listar() {
 
-        return ResponseEntity.ok(sedeService.listar());
+        List<EntityModel<Sede>> sedes = sedeService.listar()
+                .stream()
+                .map(this::agregarLinks)
+                .collect(Collectors.toList());
+
+        CollectionModel<EntityModel<Sede>> respuesta = CollectionModel.of(
+                sedes,
+                linkTo(SedeController.class).withSelfRel()
+        );
+
+        return ResponseEntity.ok(respuesta);
     }
 
     @Operation(
             summary = "Buscar sede por ID",
-            description = "Obtiene una sede específica mediante su identificador"
+            description = "Obtiene una sede específica mediante su identificador con enlaces HATEOAS"
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Sede encontrada"),
             @ApiResponse(responseCode = "404", description = "Sede no encontrada")
     })
     @GetMapping("/{id}")
-    public ResponseEntity<Sede> buscarPorId(@PathVariable Long id) {
+    public ResponseEntity<EntityModel<Sede>> buscarPorId(@PathVariable Long id) {
 
-        return ResponseEntity.ok(sedeService.buscarPorId(id));
+        Sede sede = sedeService.buscarPorId(id);
+
+        return ResponseEntity.ok(agregarLinks(sede));
     }
 
     @Operation(
@@ -115,5 +134,15 @@ public class SedeController {
     public boolean existe(@PathVariable Long id) {
 
         return sedeService.existePorId(id);
+    }
+
+    private EntityModel<Sede> agregarLinks(Sede sede) {
+
+        return EntityModel.of(
+                sede,
+                linkTo(SedeController.class).slash(sede.getId()).withSelfRel(),
+                linkTo(SedeController.class).withRel("sedes"),
+                linkTo(SedeController.class).slash(sede.getId()).slash("exists").withRel("existe")
+        );
     }
 }
