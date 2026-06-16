@@ -30,6 +30,26 @@ services:
       - "3309:3306"
     restart: always
 
+  mysql-reserva:
+    image: mysql:8.0
+    container_name: mysql-reserva
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: db_reserva_service
+    ports:
+      - "3310:3306"
+    restart: always
+
+  mysql-pago:
+    image: mysql:8.0
+    container_name: mysql-pago
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: db_pago_service
+    ports:
+      - "3311:3306"
+    restart: always
+
   usuario-service:
     build: ./usuario-service
     container_name: usuario-service
@@ -57,6 +77,24 @@ services:
       - mysql-cancha
     restart: always
 
+  reserva-service:
+    build: ./reserva-service
+    container_name: reserva-service
+    ports:
+      - "7093:7093"
+    depends_on:
+      - mysql-reserva
+    restart: always
+
+  pago-service:
+    build: ./pago-service
+    container_name: pago-service
+    ports:
+      - "7094:7094"
+    depends_on:
+      - mysql-pago
+    restart: always
+
   api-gateway:
     build: ./api-gateway
     container_name: api-gateway
@@ -66,4 +104,6 @@ services:
       - usuario-service
       - auth-service
       - cancha-service
+      - reserva-service
+      - pago-service
     restart: always
