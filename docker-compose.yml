@@ -50,6 +50,16 @@ services:
       - "3311:3306"
     restart: always
 
+  mysql-sede:
+    image: mysql:8.0
+    container_name: mysql-sede
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: db_sede_service
+    ports:
+      - "3312:3306"
+    restart: always
+
   usuario-service:
     build: ./usuario-service
     container_name: usuario-service
@@ -95,6 +105,15 @@ services:
       - mysql-pago
     restart: always
 
+  sede-service:
+    build: ./sede-service
+    container_name: sede-service
+    ports:
+      - "7095:7095"
+    depends_on:
+      - mysql-sede
+    restart: always
+
   api-gateway:
     build: ./api-gateway
     container_name: api-gateway
@@ -106,4 +125,5 @@ services:
       - cancha-service
       - reserva-service
       - pago-service
+      - sede-service
     restart: always
