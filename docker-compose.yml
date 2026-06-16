@@ -80,6 +80,16 @@ services:
       - "3314:3306"
     restart: always
 
+  mysql-notificacion:
+    image: mysql:8.0
+    container_name: mysql-notificacion
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: db_notificacion_service
+    ports:
+      - "3315:3306"
+    restart: always
+
   usuario-service:
     build: ./usuario-service
     container_name: usuario-service
@@ -152,6 +162,15 @@ services:
       - mysql-disponibilidad
     restart: always
 
+  notificacion-service:
+    build: ./notificacion-service
+    container_name: notificacion-service
+    ports:
+      - "7098:7098"
+    depends_on:
+      - mysql-notificacion
+    restart: always
+
   api-gateway:
     build: ./api-gateway
     container_name: api-gateway
@@ -166,4 +185,5 @@ services:
       - sede-service
       - horario-service
       - disponibilidad-service
+      - notificacion-service
     restart: always
