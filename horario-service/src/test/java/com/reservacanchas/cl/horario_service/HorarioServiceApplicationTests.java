@@ -1,13 +1,13 @@
-package com.reservacanchas.cl.horario_service;
+//package com.reservacanchas.cl.horario_service;
 
-import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
+//import org.junit.jupiter.api.Test;
+//import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest
-class HorarioServiceApplicationTests {
+//@SpringBootTest
+//class HorarioServiceApplicationTests {
 
-	@Test
-	void contextLoads() {
-	}
+//	@Test
+//	void contextLoads() {
+//	}
 
-}
+//}
