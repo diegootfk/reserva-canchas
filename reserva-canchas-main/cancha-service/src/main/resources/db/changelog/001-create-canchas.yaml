@@ -1,0 +1,130 @@
+databaseChangeLog:
+  - changeSet:
+      id: 001-create-canchas
+      author: reserva-canchas
+      changes:
+        - createTable:
+            tableName: canchas
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: nombre
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: tipo_cancha
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: precio_hora
+                  type: DOUBLE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: capacidad
+                  type: INT
+              - column:
+                  name: estado
+                  type: VARCHAR(30)
+
+  - changeSet:
+      id: 002-insert-canchas
+      author: reserva-canchas
+      changes:
+        - insert:
+            tableName: canchas
+            columns:
+              - column: { name: nombre, value: "Cancha Futbolito 1" }
+              - column: { name: tipo_cancha, value: "FUTBOLITO" }
+              - column: { name: precio_hora, valueNumeric: 25000 }
+              - column: { name: capacidad, valueNumeric: 10 }
+              - column: { name: estado, value: "DISPONIBLE" }
+
+        - insert:
+            tableName: canchas
+            columns:
+              - column: { name: nombre, value: "Cancha Futbolito 2" }
+              - column: { name: tipo_cancha, value: "FUTBOLITO" }
+              - column: { name: precio_hora, valueNumeric: 26000 }
+              - column: { name: capacidad, valueNumeric: 10 }
+              - column: { name: estado, value: "DISPONIBLE" }
+
+        - insert:
+            tableName: canchas
+            columns:
+              - column: { name: nombre, value: "Cancha Tenis 1" }
+              - column: { name: tipo_cancha, value: "TENIS" }
+              - column: { name: precio_hora, valueNumeric: 18000 }
+              - column: { name: capacidad, valueNumeric: 4 }
+              - column: { name: estado, value: "DISPONIBLE" }
+
+        - insert:
+            tableName: canchas
+            columns:
+              - column: { name: nombre, value: "Cancha Tenis 2" }
+              - column: { name: tipo_cancha, value: "TENIS" }
+              - column: { name: precio_hora, valueNumeric: 18000 }
+              - column: { name: capacidad, valueNumeric: 4 }
+              - column: { name: estado, value: "MANTENIMIENTO" }
+
+        - insert:
+            tableName: canchas
+            columns:
+              - column: { name: nombre, value: "Cancha Pádel 1" }
+              - column: { name: tipo_cancha, value: "PADEL" }
+              - column: { name: precio_hora, valueNumeric: 22000 }
+              - column: { name: capacidad, valueNumeric: 4 }
+              - column: { name: estado, value: "DISPONIBLE" }
+
+        - insert:
+            tableName: canchas
+            columns:
+              - column: { name: nombre, value: "Cancha Pádel 2" }
+              - column: { name: tipo_cancha, value: "PADEL" }
+              - column: { name: precio_hora, valueNumeric: 22000 }
+              - column: { name: capacidad, valueNumeric: 4 }
+              - column: { name: estado, value: "DISPONIBLE" }
+
+        - insert:
+            tableName: canchas
+            columns:
+              - column: { name: nombre, value: "Cancha Básquetbol" }
+              - column: { name: tipo_cancha, value: "BASQUETBOL" }
+              - column: { name: precio_hora, valueNumeric: 20000 }
+              - column: { name: capacidad, valueNumeric: 12 }
+              - column: { name: estado, value: "DISPONIBLE" }
+
+        - insert:
+            tableName: canchas
+            columns:
+              - column: { name: nombre, value: "Cancha Vóleibol" }
+              - column: { name: tipo_cancha, value: "VOLEIBOL" }
+              - column: { name: precio_hora, valueNumeric: 19000 }
+              - column: { name: capacidad, valueNumeric: 12 }
+              - column: { name: estado, value: "DISPONIBLE" }
+
+        - insert:
+            tableName: canchas
+            columns:
+              - column: { name: nombre, value: "Cancha Baby Futbol" }
+              - column: { name: tipo_cancha, value: "BABY_FUTBOL" }
+              - column: { name: precio_hora, valueNumeric: 24000 }
+              - column: { name: capacidad, valueNumeric: 10 }
+              - column: { name: estado, value: "DISPONIBLE" }
+
+        - insert:
+            tableName: canchas
+            columns:
+              - column: { name: nombre, value: "Cancha Multideportiva" }
+              - column: { name: tipo_cancha, value: "MULTIDEPORTIVA" }
+              - column: { name: precio_hora, valueNumeric: 30000 }
+              - column: { name: capacidad, valueNumeric: 20 }
+              - column: { name: estado, value: "DISPONIBLE" }

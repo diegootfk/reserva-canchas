@@ -1,0 +1,34 @@
+server:
+  port: 7093
+
+spring:
+  application:
+    name: reserva-service
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/db_reserva_service?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    username: root
+    password:
+
+  liquibase:
+    enabled: true
+    change-log: classpath:/db/changelog/db.changelog-master.yaml
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          secret-key: esta_es_nuestra_klae_secreta_123456789_viva_el_ping_pong
+
+springdoc:
+  api-docs:
+    enabled: true
+
+  swagger-ui:
+    enabled: true
+    path: /doc/swagger-ui.html

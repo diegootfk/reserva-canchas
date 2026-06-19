@@ -1,0 +1,27 @@
+server:
+  port: 7101
+
+spring:
+  application:
+    name: auth-service
+
+  datasource:
+    url: jdbc:mysql://mysql-auth:3306/db_auth_service?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    username: root
+    password: root
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+jwt:
+  secret: esta_es_nuestra_klae_secreta_123456789_viva_el_ping_pong
+
+springdoc:
+  api-docs:
+    enabled: true
+
+  swagger-ui:
+    enabled: true
+    path: /doc/swagger-ui.html

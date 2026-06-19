@@ -1,0 +1,126 @@
+databaseChangeLog:
+  - changeSet:
+      id: 001-create-sedes
+      author: reserva-canchas
+      changes:
+        - createTable:
+            tableName: sedes
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: nombre
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: direccion
+                  type: VARCHAR(150)
+              - column:
+                  name: comuna
+                  type: VARCHAR(80)
+              - column:
+                  name: telefono
+                  type: VARCHAR(20)
+              - column:
+                  name: estado
+                  type: VARCHAR(30)
+
+  - changeSet:
+      id: 002-insert-sedes
+      author: reserva-canchas
+      changes:
+        - insert:
+            tableName: sedes
+            columns:
+              - column: { name: nombre, value: "Complejo Central" }
+              - column: { name: direccion, value: "Av. Principal 123" }
+              - column: { name: comuna, value: "Santiago" }
+              - column: { name: telefono, value: "987654321" }
+              - column: { name: estado, value: "ACTIVA" }
+
+        - insert:
+            tableName: sedes
+            columns:
+              - column: { name: nombre, value: "Complejo Norte" }
+              - column: { name: direccion, value: "Calle Norte 456" }
+              - column: { name: comuna, value: "Independencia" }
+              - column: { name: telefono, value: "912345678" }
+              - column: { name: estado, value: "ACTIVA" }
+
+        - insert:
+            tableName: sedes
+            columns:
+              - column: { name: nombre, value: "Complejo Sur" }
+              - column: { name: direccion, value: "Av. Sur 789" }
+              - column: { name: comuna, value: "La Florida" }
+              - column: { name: telefono, value: "923456789" }
+              - column: { name: estado, value: "ACTIVA" }
+
+        - insert:
+            tableName: sedes
+            columns:
+              - column: { name: nombre, value: "Complejo Oriente" }
+              - column: { name: direccion, value: "Av. Oriente 111" }
+              - column: { name: comuna, value: "Providencia" }
+              - column: { name: telefono, value: "934567890" }
+              - column: { name: estado, value: "ACTIVA" }
+
+        - insert:
+            tableName: sedes
+            columns:
+              - column: { name: nombre, value: "Complejo Poniente" }
+              - column: { name: direccion, value: "Calle Poniente 222" }
+              - column: { name: comuna, value: "Maipú" }
+              - column: { name: telefono, value: "945678901" }
+              - column: { name: estado, value: "ACTIVA" }
+
+        - insert:
+            tableName: sedes
+            columns:
+              - column: { name: nombre, value: "Cancha Club Centro" }
+              - column: { name: direccion, value: "San Diego 333" }
+              - column: { name: comuna, value: "Santiago" }
+              - column: { name: telefono, value: "956789012" }
+              - column: { name: estado, value: "ACTIVA" }
+
+        - insert:
+            tableName: sedes
+            columns:
+              - column: { name: nombre, value: "Arena Deportiva" }
+              - column: { name: direccion, value: "Av. Estadio 444" }
+              - column: { name: comuna, value: "Ñuñoa" }
+              - column: { name: telefono, value: "967890123" }
+              - column: { name: estado, value: "ACTIVA" }
+
+        - insert:
+            tableName: sedes
+            columns:
+              - column: { name: nombre, value: "Sport Park" }
+              - column: { name: direccion, value: "Camino El Parque 555" }
+              - column: { name: comuna, value: "Las Condes" }
+              - column: { name: telefono, value: "978901234" }
+              - column: { name: estado, value: "ACTIVA" }
+
+        - insert:
+            tableName: sedes
+            columns:
+              - column: { name: nombre, value: "Complejo San Miguel" }
+              - column: { name: direccion, value: "Gran Avenida 666" }
+              - column: { name: comuna, value: "San Miguel" }
+              - column: { name: telefono, value: "989012345" }
+              - column: { name: estado, value: "ACTIVA" }
+
+        - insert:
+            tableName: sedes
+            columns:
+              - column: { name: nombre, value: "Complejo Peñalolén" }
+              - column: { name: direccion, value: "Av. Grecia 777" }
+              - column: { name: comuna, value: "Peñalolén" }
+              - column: { name: telefono, value: "990123456" }
+              - column: { name: estado, value: "ACTIVA" }
