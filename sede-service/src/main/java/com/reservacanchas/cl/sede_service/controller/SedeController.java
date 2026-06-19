@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.Link;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,8 +20,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-
 @Tag(
         name = "Sedes",
         description = "Operaciones para la gestión de sedes deportivas registradas en el sistema"
@@ -28,6 +27,8 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 @RestController
 @RequestMapping("/sedes")
 public class SedeController {
+
+    private static final String API_GATEWAY = "http://localhost:7090";
 
     private final SedeService sedeService;
 
@@ -54,7 +55,7 @@ public class SedeController {
 
     @Operation(
             summary = "Listar sedes",
-            description = "Obtiene todas las sedes registradas en el sistema con enlaces HATEOAS"
+            description = "Obtiene todas las sedes registradas en el sistema con enlaces HATEOAS apuntando al API Gateway"
     )
     @ApiResponse(responseCode = "200", description = "Listado obtenido correctamente")
     @GetMapping
@@ -67,7 +68,7 @@ public class SedeController {
 
         CollectionModel<EntityModel<Sede>> respuesta = CollectionModel.of(
                 sedes,
-                linkTo(SedeController.class).withSelfRel()
+                Link.of(API_GATEWAY + "/sedes").withSelfRel()
         );
 
         return ResponseEntity.ok(respuesta);
@@ -75,7 +76,7 @@ public class SedeController {
 
     @Operation(
             summary = "Buscar sede por ID",
-            description = "Obtiene una sede específica mediante su identificador con enlaces HATEOAS"
+            description = "Obtiene una sede específica mediante su identificador con enlaces HATEOAS apuntando al API Gateway"
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Sede encontrada"),
@@ -138,9 +139,9 @@ public class SedeController {
 
         return EntityModel.of(
                 sede,
-                linkTo(SedeController.class).slash(sede.getId()).withSelfRel(),
-                linkTo(SedeController.class).withRel("sedes"),
-                linkTo(SedeController.class).slash(sede.getId()).slash("exists").withRel("existe")
+                Link.of(API_GATEWAY + "/sedes/" + sede.getId()).withSelfRel(),
+                Link.of(API_GATEWAY + "/sedes").withRel("sedes"),
+                Link.of(API_GATEWAY + "/sedes/" + sede.getId() + "/exists").withRel("existe")
         );
     }
 }
