@@ -23,8 +23,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-
 @Tag(
         name = "Reservas",
         description = "Operaciones para la gestión de reservas de canchas y validación entre microservicios"
@@ -32,6 +30,8 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 @RestController
 @RequestMapping("/reservas")
 public class ReservaController {
+
+    private static final String API_GATEWAY = "http://localhost:7090";
 
     private final ReservaService reservaService;
 
@@ -58,7 +58,7 @@ public class ReservaController {
 
     @Operation(
             summary = "Listar reservas",
-            description = "Obtiene todas las reservas registradas en el sistema con enlaces HATEOAS"
+            description = "Obtiene todas las reservas registradas en el sistema con enlaces HATEOAS apuntando al API Gateway"
     )
     @ApiResponse(responseCode = "200", description = "Listado obtenido correctamente")
     @GetMapping
@@ -71,7 +71,7 @@ public class ReservaController {
 
         CollectionModel<EntityModel<Reserva>> respuesta = CollectionModel.of(
                 reservas,
-                linkTo(ReservaController.class).withSelfRel()
+                Link.of(API_GATEWAY + "/reservas").withSelfRel()
         );
 
         return ResponseEntity.ok(respuesta);
@@ -79,7 +79,7 @@ public class ReservaController {
 
     @Operation(
             summary = "Buscar reserva por ID",
-            description = "Obtiene una reserva específica mediante su identificador con enlaces HATEOAS"
+            description = "Obtiene una reserva específica mediante su identificador con enlaces HATEOAS apuntando al API Gateway"
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Reserva encontrada"),
@@ -142,7 +142,7 @@ public class ReservaController {
 
     @Operation(
             summary = "Buscar reservas por estado",
-            description = "Obtiene todas las reservas según su estado con enlaces HATEOAS"
+            description = "Obtiene todas las reservas según su estado con enlaces HATEOAS apuntando al API Gateway"
     )
     @ApiResponse(responseCode = "200", description = "Reservas encontradas correctamente")
     @GetMapping("/estado/{estado}")
@@ -155,8 +155,8 @@ public class ReservaController {
 
         CollectionModel<EntityModel<Reserva>> respuesta = CollectionModel.of(
                 reservas,
-                linkTo(ReservaController.class).slash("estado").slash(estado).withSelfRel(),
-                linkTo(ReservaController.class).withRel("reservas")
+                Link.of(API_GATEWAY + "/reservas/estado/" + estado).withSelfRel(),
+                Link.of(API_GATEWAY + "/reservas").withRel("reservas")
         );
 
         return ResponseEntity.ok(respuesta);
@@ -164,7 +164,7 @@ public class ReservaController {
 
     @Operation(
             summary = "Buscar reservas por usuario",
-            description = "Obtiene todas las reservas asociadas a un usuario específico con enlaces HATEOAS"
+            description = "Obtiene todas las reservas asociadas a un usuario específico con enlaces HATEOAS apuntando al API Gateway"
     )
     @ApiResponse(responseCode = "200", description = "Reservas encontradas correctamente")
     @GetMapping("/usuario/{idUsuario}")
@@ -177,9 +177,9 @@ public class ReservaController {
 
         CollectionModel<EntityModel<Reserva>> respuesta = CollectionModel.of(
                 reservas,
-                linkTo(ReservaController.class).slash("usuario").slash(idUsuario).withSelfRel(),
-                linkTo(ReservaController.class).withRel("reservas"),
-                Link.of("http://localhost:7091/usuarios/" + idUsuario).withRel("usuario")
+                Link.of(API_GATEWAY + "/reservas/usuario/" + idUsuario).withSelfRel(),
+                Link.of(API_GATEWAY + "/reservas").withRel("reservas"),
+                Link.of(API_GATEWAY + "/usuarios/" + idUsuario).withRel("usuario")
         );
 
         return ResponseEntity.ok(respuesta);
@@ -187,7 +187,7 @@ public class ReservaController {
 
     @Operation(
             summary = "Buscar reservas por cancha",
-            description = "Obtiene todas las reservas asociadas a una cancha específica con enlaces HATEOAS"
+            description = "Obtiene todas las reservas asociadas a una cancha específica con enlaces HATEOAS apuntando al API Gateway"
     )
     @ApiResponse(responseCode = "200", description = "Reservas encontradas correctamente")
     @GetMapping("/cancha/{idCancha}")
@@ -200,9 +200,9 @@ public class ReservaController {
 
         CollectionModel<EntityModel<Reserva>> respuesta = CollectionModel.of(
                 reservas,
-                linkTo(ReservaController.class).slash("cancha").slash(idCancha).withSelfRel(),
-                linkTo(ReservaController.class).withRel("reservas"),
-                Link.of("http://localhost:7092/canchas/" + idCancha).withRel("cancha")
+                Link.of(API_GATEWAY + "/reservas/cancha/" + idCancha).withSelfRel(),
+                Link.of(API_GATEWAY + "/reservas").withRel("reservas"),
+                Link.of(API_GATEWAY + "/canchas/" + idCancha).withRel("cancha")
         );
 
         return ResponseEntity.ok(respuesta);
@@ -212,15 +212,15 @@ public class ReservaController {
 
         return EntityModel.of(
                 reserva,
-                linkTo(ReservaController.class).slash(reserva.getId()).withSelfRel(),
-                linkTo(ReservaController.class).withRel("reservas"),
-                linkTo(ReservaController.class).slash(reserva.getId()).slash("exists").withRel("existe"),
-                linkTo(ReservaController.class).slash("estado").slash(reserva.getEstado()).withRel("reservas-por-estado"),
-                linkTo(ReservaController.class).slash("usuario").slash(reserva.getIdUsuario()).withRel("reservas-por-usuario"),
-                linkTo(ReservaController.class).slash("cancha").slash(reserva.getIdCancha()).withRel("reservas-por-cancha"),
-                Link.of("http://localhost:7091/usuarios/" + reserva.getIdUsuario()).withRel("usuario"),
-                Link.of("http://localhost:7092/canchas/" + reserva.getIdCancha()).withRel("cancha"),
-                Link.of("http://localhost:7094/pagos/reserva/" + reserva.getId()).withRel("pagos")
+                Link.of(API_GATEWAY + "/reservas/" + reserva.getId()).withSelfRel(),
+                Link.of(API_GATEWAY + "/reservas").withRel("reservas"),
+                Link.of(API_GATEWAY + "/reservas/" + reserva.getId() + "/exists").withRel("existe"),
+                Link.of(API_GATEWAY + "/reservas/estado/" + reserva.getEstado()).withRel("reservas-por-estado"),
+                Link.of(API_GATEWAY + "/reservas/usuario/" + reserva.getIdUsuario()).withRel("reservas-por-usuario"),
+                Link.of(API_GATEWAY + "/reservas/cancha/" + reserva.getIdCancha()).withRel("reservas-por-cancha"),
+                Link.of(API_GATEWAY + "/usuarios/" + reserva.getIdUsuario()).withRel("usuario"),
+                Link.of(API_GATEWAY + "/canchas/" + reserva.getIdCancha()).withRel("cancha"),
+                Link.of(API_GATEWAY + "/pagos/reserva/" + reserva.getId()).withRel("pagos")
         );
     }
 }
