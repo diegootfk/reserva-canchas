@@ -21,8 +21,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-
 @Tag(
         name = "Disponibilidades",
         description = "Operaciones para la gestión de disponibilidades de canchas"
@@ -31,6 +29,8 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 @RestController
 @RequestMapping("/disponibilidades")
 public class DisponibilidadController {
+
+    private static final String API_GATEWAY = "http://localhost:7090";
 
     private final DisponibilidadService disponibilidadService;
 
@@ -48,6 +48,7 @@ public class DisponibilidadController {
     })
     @PostMapping
     public ResponseEntity<Disponibilidad> crear(@RequestBody Disponibilidad disponibilidad) {
+
         return new ResponseEntity<>(
                 disponibilidadService.guardar(disponibilidad),
                 HttpStatus.CREATED
@@ -56,7 +57,7 @@ public class DisponibilidadController {
 
     @Operation(
             summary = "Listar disponibilidades",
-            description = "Obtiene todas las disponibilidades registradas con enlaces HATEOAS"
+            description = "Obtiene todas las disponibilidades registradas con enlaces HATEOAS apuntando al API Gateway"
     )
     @ApiResponse(responseCode = "200", description = "Listado obtenido correctamente")
     @GetMapping
@@ -69,7 +70,7 @@ public class DisponibilidadController {
 
         CollectionModel<EntityModel<Disponibilidad>> respuesta = CollectionModel.of(
                 disponibilidades,
-                linkTo(DisponibilidadController.class).withSelfRel()
+                Link.of(API_GATEWAY + "/disponibilidades").withSelfRel()
         );
 
         return ResponseEntity.ok(respuesta);
@@ -77,7 +78,7 @@ public class DisponibilidadController {
 
     @Operation(
             summary = "Buscar disponibilidad por ID",
-            description = "Obtiene una disponibilidad específica mediante su identificador con enlaces HATEOAS"
+            description = "Obtiene una disponibilidad específica mediante su identificador con enlaces HATEOAS apuntando al API Gateway"
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Disponibilidad encontrada"),
@@ -119,7 +120,9 @@ public class DisponibilidadController {
     })
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminar(@PathVariable Long id) {
+
         disponibilidadService.eliminar(id);
+
         return ResponseEntity.noContent().build();
     }
 
@@ -130,6 +133,7 @@ public class DisponibilidadController {
     @ApiResponse(responseCode = "200", description = "Verificación realizada correctamente")
     @GetMapping("/{id}/exists")
     public boolean existe(@PathVariable Long id) {
+
         return disponibilidadService.existePorId(id);
     }
 
@@ -137,10 +141,10 @@ public class DisponibilidadController {
 
         return EntityModel.of(
                 disponibilidad,
-                linkTo(DisponibilidadController.class).slash(disponibilidad.getId()).withSelfRel(),
-                linkTo(DisponibilidadController.class).withRel("disponibilidades"),
-                linkTo(DisponibilidadController.class).slash(disponibilidad.getId()).slash("exists").withRel("existe"),
-                Link.of("http://localhost:7092/canchas/" + disponibilidad.getIdCancha()).withRel("cancha")
+                Link.of(API_GATEWAY + "/disponibilidades/" + disponibilidad.getId()).withSelfRel(),
+                Link.of(API_GATEWAY + "/disponibilidades").withRel("disponibilidades"),
+                Link.of(API_GATEWAY + "/disponibilidades/" + disponibilidad.getId() + "/exists").withRel("existe"),
+                Link.of(API_GATEWAY + "/canchas/" + disponibilidad.getIdCancha()).withRel("cancha")
         );
     }
 }

@@ -12,11 +12,17 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 
 import jakarta.validation.Valid;
 
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.Link;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Tag(
         name = "Usuarios",
@@ -26,6 +32,8 @@ import java.util.List;
 @RestController
 @RequestMapping("/usuarios")
 public class UsuarioController {
+
+    private static final String API_GATEWAY = "http://localhost:7090";
 
     private final UsuarioService usuarioService;
 
@@ -51,27 +59,39 @@ public class UsuarioController {
 
     @Operation(
             summary = "Listar usuarios",
-            description = "Obtiene todos los usuarios registrados"
+            description = "Obtiene todos los usuarios registrados con enlaces HATEOAS apuntando al API Gateway"
     )
     @ApiResponse(responseCode = "200", description = "Listado obtenido correctamente")
     @GetMapping
-    public ResponseEntity<List<Usuario>> listar() {
+    public ResponseEntity<CollectionModel<EntityModel<Usuario>>> listar() {
 
-        return ResponseEntity.ok(usuarioService.listar());
+        List<EntityModel<Usuario>> usuarios = usuarioService.listar()
+                .stream()
+                .map(this::agregarLinks)
+                .collect(Collectors.toList());
+
+        CollectionModel<EntityModel<Usuario>> respuesta = CollectionModel.of(
+                usuarios,
+                Link.of(API_GATEWAY + "/usuarios").withSelfRel()
+        );
+
+        return ResponseEntity.ok(respuesta);
     }
 
     @Operation(
             summary = "Buscar usuario por ID",
-            description = "Obtiene un usuario específico mediante su identificador"
+            description = "Obtiene un usuario específico mediante su identificador con enlaces HATEOAS apuntando al API Gateway"
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Usuario encontrado"),
             @ApiResponse(responseCode = "404", description = "Usuario no encontrado")
     })
     @GetMapping("/{id}")
-    public ResponseEntity<Usuario> buscarPorId(@PathVariable Long id) {
+    public ResponseEntity<EntityModel<Usuario>> buscarPorId(@PathVariable Long id) {
 
-        return ResponseEntity.ok(usuarioService.buscarPorId(id));
+        Usuario usuario = usuarioService.buscarPorId(id);
+
+        return ResponseEntity.ok(agregarLinks(usuario));
     }
 
     @Operation(
@@ -118,5 +138,16 @@ public class UsuarioController {
     public boolean existe(@PathVariable Long id) {
 
         return usuarioService.existePorId(id);
+    }
+
+    private EntityModel<Usuario> agregarLinks(Usuario usuario) {
+
+        return EntityModel.of(
+                usuario,
+                Link.of(API_GATEWAY + "/usuarios/" + usuario.getId()).withSelfRel(),
+                Link.of(API_GATEWAY + "/usuarios").withRel("usuarios"),
+                Link.of(API_GATEWAY + "/usuarios/" + usuario.getId() + "/exists").withRel("existe"),
+                Link.of(API_GATEWAY + "/reservas/usuario/" + usuario.getId()).withRel("reservas")
+        );
     }
 }

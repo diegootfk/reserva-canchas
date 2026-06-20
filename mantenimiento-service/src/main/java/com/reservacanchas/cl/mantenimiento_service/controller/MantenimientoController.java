@@ -21,8 +21,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-
 @Tag(
         name = "Mantenimientos",
         description = "Operaciones para la gestión de mantenimientos de canchas"
@@ -31,6 +29,8 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 @RestController
 @RequestMapping("/mantenimientos")
 public class MantenimientoController {
+
+    private static final String API_GATEWAY = "http://localhost:7090";
 
     private final MantenimientoService mantenimientoService;
 
@@ -57,7 +57,7 @@ public class MantenimientoController {
 
     @Operation(
             summary = "Listar mantenimientos",
-            description = "Obtiene todos los mantenimientos registrados con enlaces HATEOAS"
+            description = "Obtiene todos los mantenimientos registrados con enlaces HATEOAS apuntando al API Gateway"
     )
     @ApiResponse(responseCode = "200", description = "Listado obtenido correctamente")
     @GetMapping
@@ -70,7 +70,7 @@ public class MantenimientoController {
 
         CollectionModel<EntityModel<Mantenimiento>> respuesta = CollectionModel.of(
                 mantenimientos,
-                linkTo(MantenimientoController.class).withSelfRel()
+                Link.of(API_GATEWAY + "/mantenimientos").withSelfRel()
         );
 
         return ResponseEntity.ok(respuesta);
@@ -78,7 +78,7 @@ public class MantenimientoController {
 
     @Operation(
             summary = "Buscar mantenimiento por ID",
-            description = "Obtiene un mantenimiento específico mediante su identificador con enlaces HATEOAS"
+            description = "Obtiene un mantenimiento específico mediante su identificador con enlaces HATEOAS apuntando al API Gateway"
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Mantenimiento encontrado"),
@@ -141,10 +141,10 @@ public class MantenimientoController {
 
         return EntityModel.of(
                 mantenimiento,
-                linkTo(MantenimientoController.class).slash(mantenimiento.getId()).withSelfRel(),
-                linkTo(MantenimientoController.class).withRel("mantenimientos"),
-                linkTo(MantenimientoController.class).slash(mantenimiento.getId()).slash("exists").withRel("existe"),
-                Link.of("http://localhost:7092/canchas/" + mantenimiento.getIdCancha()).withRel("cancha")
+                Link.of(API_GATEWAY + "/mantenimientos/" + mantenimiento.getId()).withSelfRel(),
+                Link.of(API_GATEWAY + "/mantenimientos").withRel("mantenimientos"),
+                Link.of(API_GATEWAY + "/mantenimientos/" + mantenimiento.getId() + "/exists").withRel("existe"),
+                Link.of(API_GATEWAY + "/canchas/" + mantenimiento.getIdCancha()).withRel("cancha")
         );
     }
 }

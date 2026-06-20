@@ -21,8 +21,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-
 @Tag(
         name = "Notificaciones",
         description = "Operaciones para la gestión de notificaciones del sistema"
@@ -31,6 +29,8 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 @RestController
 @RequestMapping("/notificaciones")
 public class NotificacionController {
+
+    private static final String API_GATEWAY = "http://localhost:7090";
 
     private final NotificacionService notificacionService;
 
@@ -57,7 +57,7 @@ public class NotificacionController {
 
     @Operation(
             summary = "Listar notificaciones",
-            description = "Obtiene todas las notificaciones registradas con enlaces HATEOAS"
+            description = "Obtiene todas las notificaciones registradas con enlaces HATEOAS apuntando al API Gateway"
     )
     @ApiResponse(responseCode = "200", description = "Listado obtenido correctamente")
     @GetMapping
@@ -70,7 +70,7 @@ public class NotificacionController {
 
         CollectionModel<EntityModel<Notificacion>> respuesta = CollectionModel.of(
                 notificaciones,
-                linkTo(NotificacionController.class).withSelfRel()
+                Link.of(API_GATEWAY + "/notificaciones").withSelfRel()
         );
 
         return ResponseEntity.ok(respuesta);
@@ -78,7 +78,7 @@ public class NotificacionController {
 
     @Operation(
             summary = "Buscar notificación por ID",
-            description = "Obtiene una notificación específica mediante su identificador con enlaces HATEOAS"
+            description = "Obtiene una notificación específica mediante su identificador con enlaces HATEOAS apuntando al API Gateway"
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Notificación encontrada"),
@@ -141,11 +141,11 @@ public class NotificacionController {
 
         return EntityModel.of(
                 notificacion,
-                linkTo(NotificacionController.class).slash(notificacion.getId()).withSelfRel(),
-                linkTo(NotificacionController.class).withRel("notificaciones"),
-                linkTo(NotificacionController.class).slash(notificacion.getId()).slash("exists").withRel("existe"),
-                Link.of("http://localhost:7091/usuarios/" + notificacion.getIdUsuario()).withRel("usuario"),
-                Link.of("http://localhost:7093/reservas/" + notificacion.getIdReserva()).withRel("reserva")
+                Link.of(API_GATEWAY + "/notificaciones/" + notificacion.getId()).withSelfRel(),
+                Link.of(API_GATEWAY + "/notificaciones").withRel("notificaciones"),
+                Link.of(API_GATEWAY + "/notificaciones/" + notificacion.getId() + "/exists").withRel("existe"),
+                Link.of(API_GATEWAY + "/usuarios/" + notificacion.getIdUsuario()).withRel("usuario"),
+                Link.of(API_GATEWAY + "/reservas/" + notificacion.getIdReserva()).withRel("reserva")
         );
     }
 }

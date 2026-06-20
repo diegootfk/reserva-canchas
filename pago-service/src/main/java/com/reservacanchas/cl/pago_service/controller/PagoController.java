@@ -24,8 +24,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-
 @Tag(
         name = "Pagos",
         description = "Operaciones para la gestión de pagos asociados a reservas"
@@ -34,6 +32,8 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 @RestController
 @RequestMapping("/pagos")
 public class PagoController {
+
+    private static final String API_GATEWAY = "http://localhost:7090";
 
     private final PagoService pagoService;
 
@@ -60,7 +60,7 @@ public class PagoController {
 
     @Operation(
             summary = "Listar pagos",
-            description = "Obtiene todos los pagos registrados en el sistema con enlaces HATEOAS"
+            description = "Obtiene todos los pagos registrados en el sistema con enlaces HATEOAS apuntando al API Gateway"
     )
     @ApiResponse(responseCode = "200", description = "Listado obtenido correctamente")
     @GetMapping
@@ -73,7 +73,7 @@ public class PagoController {
 
         CollectionModel<EntityModel<Pago>> respuesta = CollectionModel.of(
                 pagos,
-                linkTo(PagoController.class).withSelfRel()
+                Link.of(API_GATEWAY + "/pagos").withSelfRel()
         );
 
         return ResponseEntity.ok(respuesta);
@@ -81,7 +81,7 @@ public class PagoController {
 
     @Operation(
             summary = "Buscar pago por ID",
-            description = "Obtiene un pago específico mediante su identificador con enlaces HATEOAS"
+            description = "Obtiene un pago específico mediante su identificador con enlaces HATEOAS apuntando al API Gateway"
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Pago encontrado"),
@@ -143,7 +143,7 @@ public class PagoController {
 
     @Operation(
             summary = "Buscar pagos por método",
-            description = "Obtiene todos los pagos realizados con un método de pago específico con enlaces HATEOAS"
+            description = "Obtiene todos los pagos realizados con un método de pago específico con enlaces HATEOAS apuntando al API Gateway"
     )
     @ApiResponse(responseCode = "200", description = "Pagos encontrados correctamente")
     @GetMapping("/metodo/{metodoPago}")
@@ -157,8 +157,8 @@ public class PagoController {
 
         CollectionModel<EntityModel<Pago>> respuesta = CollectionModel.of(
                 pagos,
-                linkTo(PagoController.class).slash("metodo").slash(metodoPago).withSelfRel(),
-                linkTo(PagoController.class).withRel("pagos")
+                Link.of(API_GATEWAY + "/pagos/metodo/" + metodoPago).withSelfRel(),
+                Link.of(API_GATEWAY + "/pagos").withRel("pagos")
         );
 
         return ResponseEntity.ok(respuesta);
@@ -166,7 +166,7 @@ public class PagoController {
 
     @Operation(
             summary = "Buscar pagos por estado",
-            description = "Obtiene todos los pagos según su estado con enlaces HATEOAS"
+            description = "Obtiene todos los pagos según su estado con enlaces HATEOAS apuntando al API Gateway"
     )
     @ApiResponse(responseCode = "200", description = "Pagos encontrados correctamente")
     @GetMapping("/estado/{estadoPago}")
@@ -180,8 +180,8 @@ public class PagoController {
 
         CollectionModel<EntityModel<Pago>> respuesta = CollectionModel.of(
                 pagos,
-                linkTo(PagoController.class).slash("estado").slash(estadoPago).withSelfRel(),
-                linkTo(PagoController.class).withRel("pagos")
+                Link.of(API_GATEWAY + "/pagos/estado/" + estadoPago).withSelfRel(),
+                Link.of(API_GATEWAY + "/pagos").withRel("pagos")
         );
 
         return ResponseEntity.ok(respuesta);
@@ -189,7 +189,7 @@ public class PagoController {
 
     @Operation(
             summary = "Buscar pagos por reserva",
-            description = "Obtiene todos los pagos asociados a una reserva específica con enlaces HATEOAS"
+            description = "Obtiene todos los pagos asociados a una reserva específica con enlaces HATEOAS apuntando al API Gateway"
     )
     @ApiResponse(responseCode = "200", description = "Pagos encontrados correctamente")
     @GetMapping("/reserva/{idReserva}")
@@ -203,9 +203,9 @@ public class PagoController {
 
         CollectionModel<EntityModel<Pago>> respuesta = CollectionModel.of(
                 pagos,
-                linkTo(PagoController.class).slash("reserva").slash(idReserva).withSelfRel(),
-                linkTo(PagoController.class).withRel("pagos"),
-                Link.of("http://localhost:7093/reservas/" + idReserva).withRel("reserva")
+                Link.of(API_GATEWAY + "/pagos/reserva/" + idReserva).withSelfRel(),
+                Link.of(API_GATEWAY + "/pagos").withRel("pagos"),
+                Link.of(API_GATEWAY + "/reservas/" + idReserva).withRel("reserva")
         );
 
         return ResponseEntity.ok(respuesta);
@@ -215,13 +215,13 @@ public class PagoController {
 
         return EntityModel.of(
                 pago,
-                linkTo(PagoController.class).slash(pago.getId()).withSelfRel(),
-                linkTo(PagoController.class).withRel("pagos"),
-                linkTo(PagoController.class).slash(pago.getId()).slash("exists").withRel("existe"),
-                linkTo(PagoController.class).slash("metodo").slash(pago.getMetodoPago()).withRel("pagos-por-metodo"),
-                linkTo(PagoController.class).slash("estado").slash(pago.getEstadoPago()).withRel("pagos-por-estado"),
-                linkTo(PagoController.class).slash("reserva").slash(pago.getIdReserva()).withRel("pagos-por-reserva"),
-                Link.of("http://localhost:7093/reservas/" + pago.getIdReserva()).withRel("reserva")
+                Link.of(API_GATEWAY + "/pagos/" + pago.getId()).withSelfRel(),
+                Link.of(API_GATEWAY + "/pagos").withRel("pagos"),
+                Link.of(API_GATEWAY + "/pagos/" + pago.getId() + "/exists").withRel("existe"),
+                Link.of(API_GATEWAY + "/pagos/metodo/" + pago.getMetodoPago()).withRel("pagos-por-metodo"),
+                Link.of(API_GATEWAY + "/pagos/estado/" + pago.getEstadoPago()).withRel("pagos-por-estado"),
+                Link.of(API_GATEWAY + "/pagos/reserva/" + pago.getIdReserva()).withRel("pagos-por-reserva"),
+                Link.of(API_GATEWAY + "/reservas/" + pago.getIdReserva()).withRel("reserva")
         );
     }
 }

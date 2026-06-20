@@ -21,8 +21,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-
 @Tag(
         name = "Reseñas",
         description = "Operaciones para la gestión de reseñas de usuarios sobre las canchas"
@@ -31,6 +29,8 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 @RestController
 @RequestMapping("/resenas")
 public class ResenaController {
+
+    private static final String API_GATEWAY = "http://localhost:7090";
 
     private final ResenaService resenaService;
 
@@ -57,7 +57,7 @@ public class ResenaController {
 
     @Operation(
             summary = "Listar reseñas",
-            description = "Obtiene todas las reseñas registradas con enlaces HATEOAS"
+            description = "Obtiene todas las reseñas registradas con enlaces HATEOAS apuntando al API Gateway"
     )
     @ApiResponse(responseCode = "200", description = "Listado obtenido correctamente")
     @GetMapping
@@ -70,7 +70,7 @@ public class ResenaController {
 
         CollectionModel<EntityModel<Resena>> respuesta = CollectionModel.of(
                 resenas,
-                linkTo(ResenaController.class).withSelfRel()
+                Link.of(API_GATEWAY + "/resenas").withSelfRel()
         );
 
         return ResponseEntity.ok(respuesta);
@@ -78,7 +78,7 @@ public class ResenaController {
 
     @Operation(
             summary = "Buscar reseña por ID",
-            description = "Obtiene una reseña específica mediante su identificador con enlaces HATEOAS"
+            description = "Obtiene una reseña específica mediante su identificador con enlaces HATEOAS apuntando al API Gateway"
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Reseña encontrada"),
@@ -141,12 +141,12 @@ public class ResenaController {
 
         return EntityModel.of(
                 resena,
-                linkTo(ResenaController.class).slash(resena.getId()).withSelfRel(),
-                linkTo(ResenaController.class).withRel("resenas"),
-                linkTo(ResenaController.class).slash(resena.getId()).slash("exists").withRel("existe"),
-                Link.of("http://localhost:7091/usuarios/" + resena.getIdUsuario()).withRel("usuario"),
-                Link.of("http://localhost:7092/canchas/" + resena.getIdCancha()).withRel("cancha"),
-                Link.of("http://localhost:7093/reservas/" + resena.getIdReserva()).withRel("reserva")
+                Link.of(API_GATEWAY + "/resenas/" + resena.getId()).withSelfRel(),
+                Link.of(API_GATEWAY + "/resenas").withRel("resenas"),
+                Link.of(API_GATEWAY + "/resenas/" + resena.getId() + "/exists").withRel("existe"),
+                Link.of(API_GATEWAY + "/usuarios/" + resena.getIdUsuario()).withRel("usuario"),
+                Link.of(API_GATEWAY + "/canchas/" + resena.getIdCancha()).withRel("cancha"),
+                Link.of(API_GATEWAY + "/reservas/" + resena.getIdReserva()).withRel("reserva")
         );
     }
 }
