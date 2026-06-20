@@ -1,5 +1,6 @@
 package com.reservacanchas.cl.sede_service.service;
 
+import com.reservacanchas.cl.sede_service.dto.SedeDTO;
 import com.reservacanchas.cl.sede_service.exception.BadRequestException;
 import com.reservacanchas.cl.sede_service.exception.ResourceNotFoundException;
 import com.reservacanchas.cl.sede_service.model.Sede;
@@ -18,11 +19,19 @@ public class SedeService {
         this.sedeRepository = sedeRepository;
     }
 
-    public Sede guardar(Sede sede) {
+    public Sede guardar(SedeDTO sedeDTO) {
 
-        if (sede.getNombre() == null || sede.getNombre().isBlank()) {
+        if (sedeDTO.getNombre() == null || sedeDTO.getNombre().isBlank()) {
             throw new BadRequestException("El nombre de la sede es obligatorio");
         }
+
+        Sede sede = new Sede();
+
+        sede.setNombre(sedeDTO.getNombre());
+        sede.setDireccion(sedeDTO.getDireccion());
+        sede.setComuna(sedeDTO.getComuna());
+        sede.setTelefono(sedeDTO.getTelefono());
+        sede.setEstado(sedeDTO.getEstado());
 
         return sedeRepository.save(sede);
     }
@@ -37,15 +46,15 @@ public class SedeService {
                         new ResourceNotFoundException("Sede no encontrada"));
     }
 
-    public Sede actualizar(Long id, Sede sedeActualizada) {
+    public Sede actualizar(Long id, SedeDTO sedeDTO) {
 
         Sede sede = buscarPorId(id);
 
-        sede.setNombre(sedeActualizada.getNombre());
-        sede.setDireccion(sedeActualizada.getDireccion());
-        sede.setComuna(sedeActualizada.getComuna());
-        sede.setTelefono(sedeActualizada.getTelefono());
-        sede.setEstado(sedeActualizada.getEstado());
+        sede.setNombre(sedeDTO.getNombre());
+        sede.setDireccion(sedeDTO.getDireccion());
+        sede.setComuna(sedeDTO.getComuna());
+        sede.setTelefono(sedeDTO.getTelefono());
+        sede.setEstado(sedeDTO.getEstado());
 
         return sedeRepository.save(sede);
     }

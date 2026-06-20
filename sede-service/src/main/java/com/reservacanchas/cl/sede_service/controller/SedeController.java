@@ -1,5 +1,6 @@
 package com.reservacanchas.cl.sede_service.controller;
 
+import com.reservacanchas.cl.sede_service.dto.SedeDTO;
 import com.reservacanchas.cl.sede_service.model.Sede;
 import com.reservacanchas.cl.sede_service.service.SedeService;
 
@@ -8,6 +9,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+
+import jakarta.validation.Valid;
 
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
@@ -47,10 +50,10 @@ public class SedeController {
             @ApiResponse(responseCode = "400", description = "Datos inválidos")
     })
     @PostMapping
-    public ResponseEntity<Sede> crear(@RequestBody Sede sede) {
+    public ResponseEntity<Sede> crear(@Valid @RequestBody SedeDTO sedeDTO) {
 
         return new ResponseEntity<>(
-                sedeService.guardar(sede),
+                sedeService.guardar(sedeDTO),
                 HttpStatus.CREATED
         );
     }
@@ -98,15 +101,16 @@ public class SedeController {
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Sede actualizada correctamente"),
-            @ApiResponse(responseCode = "404", description = "Sede no encontrada")
+            @ApiResponse(responseCode = "404", description = "Sede no encontrada"),
+            @ApiResponse(responseCode = "400", description = "Datos inválidos")
     })
     @PutMapping("/{id}")
     public ResponseEntity<Sede> actualizar(
             @PathVariable Long id,
-            @RequestBody Sede sede) {
+            @Valid @RequestBody SedeDTO sedeDTO) {
 
         return ResponseEntity.ok(
-                sedeService.actualizar(id, sede)
+                sedeService.actualizar(id, sedeDTO)
         );
     }
 
