@@ -1,5 +1,6 @@
 package com.reservacanchas.cl.disponibilidad_service.controller;
 
+import com.reservacanchas.cl.disponibilidad_service.dto.DisponibilidadDTO;
 import com.reservacanchas.cl.disponibilidad_service.model.Disponibilidad;
 import com.reservacanchas.cl.disponibilidad_service.service.DisponibilidadService;
 
@@ -8,6 +9,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+
+import jakarta.validation.Valid;
 
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
@@ -47,10 +50,11 @@ public class DisponibilidadController {
             @ApiResponse(responseCode = "400", description = "Datos inválidos")
     })
     @PostMapping
-    public ResponseEntity<Disponibilidad> crear(@RequestBody Disponibilidad disponibilidad) {
+    public ResponseEntity<Disponibilidad> crear(
+            @Valid @RequestBody DisponibilidadDTO disponibilidadDTO) {
 
         return new ResponseEntity<>(
-                disponibilidadService.guardar(disponibilidad),
+                disponibilidadService.guardar(disponibilidadDTO),
                 HttpStatus.CREATED
         );
     }
@@ -98,15 +102,16 @@ public class DisponibilidadController {
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Disponibilidad actualizada correctamente"),
-            @ApiResponse(responseCode = "404", description = "Disponibilidad no encontrada")
+            @ApiResponse(responseCode = "404", description = "Disponibilidad no encontrada"),
+            @ApiResponse(responseCode = "400", description = "Datos inválidos")
     })
     @PutMapping("/{id}")
     public ResponseEntity<Disponibilidad> actualizar(
             @PathVariable Long id,
-            @RequestBody Disponibilidad disponibilidad) {
+            @Valid @RequestBody DisponibilidadDTO disponibilidadDTO) {
 
         return ResponseEntity.ok(
-                disponibilidadService.actualizar(id, disponibilidad)
+                disponibilidadService.actualizar(id, disponibilidadDTO)
         );
     }
 

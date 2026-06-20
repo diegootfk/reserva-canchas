@@ -1,5 +1,6 @@
 package com.reservacanchas.cl.disponibilidad_service.service;
 
+import com.reservacanchas.cl.disponibilidad_service.dto.DisponibilidadDTO;
 import com.reservacanchas.cl.disponibilidad_service.exception.BadRequestException;
 import com.reservacanchas.cl.disponibilidad_service.exception.ResourceNotFoundException;
 import com.reservacanchas.cl.disponibilidad_service.model.Disponibilidad;
@@ -21,20 +22,32 @@ public class DisponibilidadService {
         this.restTemplate = new RestTemplate();
     }
 
-    public Disponibilidad guardar(Disponibilidad disponibilidad) {
+    public Disponibilidad guardar(DisponibilidadDTO disponibilidadDTO) {
 
-        if (disponibilidad.getFecha() == null) {
+        if (disponibilidadDTO.getFecha() == null
+                || disponibilidadDTO.getFecha().isBlank()) {
+
             throw new BadRequestException("La fecha es obligatoria");
         }
 
         Boolean canchaExiste = restTemplate.getForObject(
-                "http://localhost:7092/canchas/" + disponibilidad.getIdCancha() + "/exists",
+                "http://localhost:7092/canchas/"
+                        + disponibilidadDTO.getIdCancha()
+                        + "/exists",
                 Boolean.class
         );
 
         if (canchaExiste == null || !canchaExiste) {
             throw new ResourceNotFoundException("La cancha no existe");
         }
+
+        Disponibilidad disponibilidad = new Disponibilidad();
+
+        disponibilidad.setIdCancha(disponibilidadDTO.getIdCancha());
+        disponibilidad.setFecha(disponibilidadDTO.getFecha());
+        disponibilidad.setHoraInicio(disponibilidadDTO.getHoraInicio());
+        disponibilidad.setHoraFin(disponibilidadDTO.getHoraFin());
+        disponibilidad.setEstado(disponibilidadDTO.getEstado());
 
         return disponibilidadRepository.save(disponibilidad);
     }
@@ -46,18 +59,21 @@ public class DisponibilidadService {
     public Disponibilidad buscarPorId(Long id) {
         return disponibilidadRepository.findById(id)
                 .orElseThrow(() ->
-                        new ResourceNotFoundException("Disponibilidad no encontrada"));
+                        new ResourceNotFoundException(
+                                "Disponibilidad no encontrada"));
     }
 
-    public Disponibilidad actualizar(Long id, Disponibilidad disponibilidadActualizada) {
+    public Disponibilidad actualizar(
+            Long id,
+            DisponibilidadDTO disponibilidadDTO) {
 
         Disponibilidad disponibilidad = buscarPorId(id);
 
-        disponibilidad.setIdCancha(disponibilidadActualizada.getIdCancha());
-        disponibilidad.setFecha(disponibilidadActualizada.getFecha());
-        disponibilidad.setHoraInicio(disponibilidadActualizada.getHoraInicio());
-        disponibilidad.setHoraFin(disponibilidadActualizada.getHoraFin());
-        disponibilidad.setEstado(disponibilidadActualizada.getEstado());
+        disponibilidad.setIdCancha(disponibilidadDTO.getIdCancha());
+        disponibilidad.setFecha(disponibilidadDTO.getFecha());
+        disponibilidad.setHoraInicio(disponibilidadDTO.getHoraInicio());
+        disponibilidad.setHoraFin(disponibilidadDTO.getHoraFin());
+        disponibilidad.setEstado(disponibilidadDTO.getEstado());
 
         return disponibilidadRepository.save(disponibilidad);
     }
