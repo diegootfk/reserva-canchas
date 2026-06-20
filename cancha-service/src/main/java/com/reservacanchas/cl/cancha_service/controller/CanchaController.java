@@ -14,6 +14,7 @@ import jakarta.validation.Valid;
 
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.Link;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,8 +24,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-
 @Tag(
         name = "Canchas",
         description = "Operaciones para la gestión de canchas deportivas"
@@ -33,6 +32,8 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 @RestController
 @RequestMapping("/canchas")
 public class CanchaController {
+
+    private static final String API_GATEWAY = "http://localhost:7090";
 
     private final CanchaService canchaService;
 
@@ -58,7 +59,7 @@ public class CanchaController {
 
     @Operation(
             summary = "Listar canchas",
-            description = "Obtiene todas las canchas registradas con enlaces HATEOAS"
+            description = "Obtiene todas las canchas registradas con enlaces HATEOAS apuntando al API Gateway"
     )
     @ApiResponse(responseCode = "200", description = "Listado obtenido correctamente")
     @GetMapping
@@ -71,7 +72,7 @@ public class CanchaController {
 
         CollectionModel<EntityModel<Cancha>> respuesta = CollectionModel.of(
                 canchas,
-                linkTo(CanchaController.class).withSelfRel()
+                Link.of(API_GATEWAY + "/canchas").withSelfRel()
         );
 
         return ResponseEntity.ok(respuesta);
@@ -79,7 +80,7 @@ public class CanchaController {
 
     @Operation(
             summary = "Buscar cancha por ID",
-            description = "Obtiene una cancha específica mediante su identificador con enlaces HATEOAS"
+            description = "Obtiene una cancha específica mediante su identificador con enlaces HATEOAS apuntando al API Gateway"
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Cancha encontrada"),
@@ -142,9 +143,14 @@ public class CanchaController {
 
         return EntityModel.of(
                 cancha,
-                linkTo(CanchaController.class).slash(cancha.getId()).withSelfRel(),
-                linkTo(CanchaController.class).withRel("canchas"),
-                linkTo(CanchaController.class).slash(cancha.getId()).slash("exists").withRel("existe")
+                Link.of(API_GATEWAY + "/canchas/" + cancha.getId()).withSelfRel(),
+                Link.of(API_GATEWAY + "/canchas").withRel("canchas"),
+                Link.of(API_GATEWAY + "/canchas/" + cancha.getId() + "/exists").withRel("existe"),
+                Link.of(API_GATEWAY + "/reservas/cancha/" + cancha.getId()).withRel("reservas"),
+                Link.of(API_GATEWAY + "/disponibilidades/cancha/" + cancha.getId()).withRel("disponibilidades"),
+                Link.of(API_GATEWAY + "/horarios/cancha/" + cancha.getId()).withRel("horarios"),
+                Link.of(API_GATEWAY + "/resenas/cancha/" + cancha.getId()).withRel("resenas"),
+                Link.of(API_GATEWAY + "/mantenimientos/cancha/" + cancha.getId()).withRel("mantenimientos")
         );
     }
 }

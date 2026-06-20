@@ -21,8 +21,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-
 @Tag(
         name = "Horarios",
         description = "Operaciones para la gestión de horarios de canchas"
@@ -31,6 +29,8 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 @RestController
 @RequestMapping("/horarios")
 public class HorarioController {
+
+    private static final String API_GATEWAY = "http://localhost:7090";
 
     private final HorarioService horarioService;
 
@@ -57,7 +57,7 @@ public class HorarioController {
 
     @Operation(
             summary = "Listar horarios",
-            description = "Obtiene todos los horarios registrados con enlaces HATEOAS"
+            description = "Obtiene todos los horarios registrados con enlaces HATEOAS apuntando al API Gateway"
     )
     @ApiResponse(responseCode = "200", description = "Listado obtenido correctamente")
     @GetMapping
@@ -70,7 +70,7 @@ public class HorarioController {
 
         CollectionModel<EntityModel<Horario>> respuesta = CollectionModel.of(
                 horarios,
-                linkTo(HorarioController.class).withSelfRel()
+                Link.of(API_GATEWAY + "/horarios").withSelfRel()
         );
 
         return ResponseEntity.ok(respuesta);
@@ -78,7 +78,7 @@ public class HorarioController {
 
     @Operation(
             summary = "Buscar horario por ID",
-            description = "Obtiene un horario específico mediante su identificador con enlaces HATEOAS"
+            description = "Obtiene un horario específico mediante su identificador con enlaces HATEOAS apuntando al API Gateway"
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Horario encontrado"),
@@ -141,10 +141,10 @@ public class HorarioController {
 
         return EntityModel.of(
                 horario,
-                linkTo(HorarioController.class).slash(horario.getId()).withSelfRel(),
-                linkTo(HorarioController.class).withRel("horarios"),
-                linkTo(HorarioController.class).slash(horario.getId()).slash("exists").withRel("existe"),
-                Link.of("http://localhost:7092/canchas/" + horario.getIdCancha()).withRel("cancha")
+                Link.of(API_GATEWAY + "/horarios/" + horario.getId()).withSelfRel(),
+                Link.of(API_GATEWAY + "/horarios").withRel("horarios"),
+                Link.of(API_GATEWAY + "/horarios/" + horario.getId() + "/exists").withRel("existe"),
+                Link.of(API_GATEWAY + "/canchas/" + horario.getIdCancha()).withRel("cancha")
         );
     }
 }
