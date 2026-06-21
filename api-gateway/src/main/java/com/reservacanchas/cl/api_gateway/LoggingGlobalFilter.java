@@ -74,5 +74,5 @@ public class LoggingGlobalFilter implements GlobalFilter, Ordered {
     @Override
     public int getOrder() {
         return -1;
-    }
+    } 
 }
