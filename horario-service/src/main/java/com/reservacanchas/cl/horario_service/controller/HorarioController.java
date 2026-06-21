@@ -8,6 +8,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
@@ -28,6 +31,8 @@ import java.util.stream.Collectors;
 @RequestMapping("/horarios")
 public class HorarioController {
 
+    private static final Logger logger = LoggerFactory.getLogger(HorarioController.class);
+
     private static final String API_GATEWAY = "http://localhost:7090";
 
     private final HorarioService horarioService;
@@ -47,8 +52,15 @@ public class HorarioController {
     @PostMapping
     public ResponseEntity<Horario> crear(@RequestBody Horario horario) {
 
+        logger.info("Solicitud POST recibida para crear horario de cancha ID: {}",
+                horario.getIdCancha());
+
+        Horario horarioGuardado = horarioService.guardar(horario);
+
+        logger.info("Horario creado correctamente con ID: {}", horarioGuardado.getId());
+
         return new ResponseEntity<>(
-                horarioService.guardar(horario),
+                horarioGuardado,
                 HttpStatus.CREATED
         );
     }
@@ -61,7 +73,13 @@ public class HorarioController {
     @GetMapping
     public ResponseEntity<CollectionModel<EntityModel<Horario>>> listar() {
 
-        List<EntityModel<Horario>> horarios = horarioService.listar()
+        logger.info("Solicitud GET recibida para listar todos los horarios");
+
+        List<Horario> horariosEncontrados = horarioService.listar();
+
+        logger.info("Se encontraron {} horarios registrados", horariosEncontrados.size());
+
+        List<EntityModel<Horario>> horarios = horariosEncontrados
                 .stream()
                 .map(this::agregarLinks)
                 .collect(Collectors.toList());
@@ -70,6 +88,8 @@ public class HorarioController {
                 horarios,
                 Link.of(API_GATEWAY + "/horarios").withSelfRel()
         );
+
+        logger.info("Respuesta HATEOAS generada correctamente para listado de horarios");
 
         return ResponseEntity.ok(respuesta);
     }
@@ -85,7 +105,11 @@ public class HorarioController {
     @GetMapping("/{id}")
     public ResponseEntity<EntityModel<Horario>> buscarPorId(@PathVariable Long id) {
 
+        logger.info("Solicitud GET recibida para buscar horario con ID: {}", id);
+
         Horario horario = horarioService.buscarPorId(id);
+
+        logger.info("Horario encontrado correctamente con ID: {}", id);
 
         return ResponseEntity.ok(agregarLinks(horario));
     }
@@ -103,9 +127,13 @@ public class HorarioController {
             @PathVariable Long id,
             @RequestBody Horario horario) {
 
-        return ResponseEntity.ok(
-                horarioService.actualizar(id, horario)
-        );
+        logger.info("Solicitud PUT recibida para actualizar horario con ID: {}", id);
+
+        Horario horarioActualizado = horarioService.actualizar(id, horario);
+
+        logger.info("Horario actualizado correctamente con ID: {}", id);
+
+        return ResponseEntity.ok(horarioActualizado);
     }
 
     @Operation(
@@ -119,7 +147,11 @@ public class HorarioController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminar(@PathVariable Long id) {
 
+        logger.warn("Solicitud DELETE recibida para eliminar horario con ID: {}", id);
+
         horarioService.eliminar(id);
+
+        logger.info("Horario eliminado correctamente con ID: {}", id);
 
         return ResponseEntity.noContent().build();
     }
@@ -132,10 +164,18 @@ public class HorarioController {
     @GetMapping("/{id}/exists")
     public boolean existe(@PathVariable Long id) {
 
-        return horarioService.existePorId(id);
+        logger.info("Solicitud GET recibida para verificar existencia de horario con ID: {}", id);
+
+        boolean existe = horarioService.existePorId(id);
+
+        logger.info("Resultado de existencia para horario ID {}: {}", id, existe);
+
+        return existe;
     }
 
     private EntityModel<Horario> agregarLinks(Horario horario) {
+
+        logger.debug("Agregando enlaces HATEOAS para horario con ID: {}", horario.getId());
 
         return EntityModel.of(
                 horario,
