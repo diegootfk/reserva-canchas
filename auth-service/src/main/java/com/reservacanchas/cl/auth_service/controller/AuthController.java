@@ -7,6 +7,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -19,6 +22,8 @@ import java.util.Map;
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
+
+    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 
     private final UserService userService;
 
@@ -40,14 +45,20 @@ public class AuthController {
         String email = request.get("email");
         String password = request.get("password");
 
+        logger.info("Solicitud POST recibida para iniciar sesión con email: {}", email);
+
         String token = userService.login(email, password);
 
         Map<String, String> response = new HashMap<>();
 
         if (token == null) {
+            logger.warn("Inicio de sesión fallido para email: {}", email);
+
             response.put("status", "error");
             response.put("token", "");
         } else {
+            logger.info("Inicio de sesión exitoso para email: {}", email);
+
             response.put("status", "ok");
             response.put("token", token);
         }
@@ -69,7 +80,11 @@ public class AuthController {
         String email = request.get("email");
         String password = request.get("password");
 
+        logger.info("Solicitud POST recibida para registrar usuario con email: {}", email);
+
         String resultado = userService.register(email, password);
+
+        logger.info("Resultado del registro para email {}: {}", email, resultado);
 
         Map<String, String> response = new HashMap<>();
         response.put("message", resultado);
