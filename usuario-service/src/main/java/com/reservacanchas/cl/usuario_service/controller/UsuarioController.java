@@ -11,6 +11,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 
 import jakarta.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
@@ -31,6 +34,8 @@ import java.util.stream.Collectors;
 @RequestMapping("/usuarios")
 public class UsuarioController {
 
+    private static final Logger logger = LoggerFactory.getLogger(UsuarioController.class);
+
     private static final String API_GATEWAY = "http://localhost:7090";
 
     private final UsuarioService usuarioService;
@@ -50,7 +55,11 @@ public class UsuarioController {
     @PostMapping
     public ResponseEntity<Usuario> crear(@Valid @RequestBody UsuarioDTO usuarioDTO) {
 
+        logger.info("Solicitud POST recibida para crear un nuevo usuario");
+
         Usuario usuario = usuarioService.guardar(usuarioDTO);
+
+        logger.info("Usuario creado correctamente con ID: {}", usuario.getId());
 
         return new ResponseEntity<>(usuario, HttpStatus.CREATED);
     }
@@ -63,7 +72,13 @@ public class UsuarioController {
     @GetMapping
     public ResponseEntity<CollectionModel<EntityModel<Usuario>>> listar() {
 
-        List<EntityModel<Usuario>> usuarios = usuarioService.listar()
+        logger.info("Solicitud GET recibida para listar todos los usuarios");
+
+        List<Usuario> usuariosEncontrados = usuarioService.listar();
+
+        logger.info("Se encontraron {} usuarios registrados", usuariosEncontrados.size());
+
+        List<EntityModel<Usuario>> usuarios = usuariosEncontrados
                 .stream()
                 .map(this::agregarLinks)
                 .collect(Collectors.toList());
@@ -72,6 +87,8 @@ public class UsuarioController {
                 usuarios,
                 Link.of(API_GATEWAY + "/usuarios").withSelfRel()
         );
+
+        logger.info("Respuesta HATEOAS generada correctamente para listado de usuarios");
 
         return ResponseEntity.ok(respuesta);
     }
@@ -87,7 +104,11 @@ public class UsuarioController {
     @GetMapping("/{id}")
     public ResponseEntity<EntityModel<Usuario>> buscarPorId(@PathVariable Long id) {
 
+        logger.info("Solicitud GET recibida para buscar usuario con ID: {}", id);
+
         Usuario usuario = usuarioService.buscarPorId(id);
+
+        logger.info("Usuario encontrado correctamente con ID: {}", id);
 
         return ResponseEntity.ok(agregarLinks(usuario));
     }
@@ -106,9 +127,13 @@ public class UsuarioController {
             @PathVariable Long id,
             @Valid @RequestBody UsuarioDTO usuarioDTO) {
 
-        return ResponseEntity.ok(
-                usuarioService.actualizar(id, usuarioDTO)
-        );
+        logger.info("Solicitud PUT recibida para actualizar usuario con ID: {}", id);
+
+        Usuario usuarioActualizado = usuarioService.actualizar(id, usuarioDTO);
+
+        logger.info("Usuario actualizado correctamente con ID: {}", id);
+
+        return ResponseEntity.ok(usuarioActualizado);
     }
 
     @Operation(
@@ -122,7 +147,11 @@ public class UsuarioController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminar(@PathVariable Long id) {
 
+        logger.warn("Solicitud DELETE recibida para eliminar usuario con ID: {}", id);
+
         usuarioService.eliminar(id);
+
+        logger.info("Usuario eliminado correctamente con ID: {}", id);
 
         return ResponseEntity.noContent().build();
     }
@@ -135,10 +164,18 @@ public class UsuarioController {
     @GetMapping("/{id}/exists")
     public boolean existe(@PathVariable Long id) {
 
-        return usuarioService.existePorId(id);
+        logger.info("Solicitud GET recibida para verificar existencia de usuario con ID: {}", id);
+
+        boolean existe = usuarioService.existePorId(id);
+
+        logger.info("Resultado de existencia para usuario ID {}: {}", id, existe);
+
+        return existe;
     }
 
     private EntityModel<Usuario> agregarLinks(Usuario usuario) {
+
+        logger.debug("Agregando enlaces HATEOAS para usuario con ID: {}", usuario.getId());
 
         return EntityModel.of(
                 usuario,

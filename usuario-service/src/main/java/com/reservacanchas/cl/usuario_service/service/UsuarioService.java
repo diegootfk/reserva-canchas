@@ -16,8 +16,7 @@ import java.util.List;
 @Service
 public class UsuarioService {
 
-    private static final Logger logger =
-            LoggerFactory.getLogger(UsuarioService.class);
+    private static final Logger logger = LoggerFactory.getLogger(UsuarioService.class);
 
     private final UsuarioRepository usuarioRepository;
 
@@ -27,15 +26,9 @@ public class UsuarioService {
 
     public Usuario guardar(UsuarioDTO usuarioDTO) {
 
-        logger.info("Intentando guardar usuario con email: {}",
-                usuarioDTO.getEmail());
+        logger.info("Iniciando proceso para guardar un nuevo usuario con email: {}", usuarioDTO.getEmail());
 
-        if (usuarioDTO.getEmail() == null || usuarioDTO.getEmail().isBlank()) {
-
-            logger.error("Error al guardar usuario: email vacío");
-
-            throw new BadRequestException("El email es obligatorio");
-        }
+        validarEmail(usuarioDTO.getEmail());
 
         Usuario usuario = new Usuario();
 
@@ -49,36 +42,42 @@ public class UsuarioService {
 
         Usuario usuarioGuardado = usuarioRepository.save(usuario);
 
-        logger.info("Usuario creado correctamente con ID: {}",
-                usuarioGuardado.getId());
+        logger.info("Usuario creado correctamente con ID: {}", usuarioGuardado.getId());
 
         return usuarioGuardado;
     }
 
     public List<Usuario> listar() {
 
-        logger.info("Listando todos los usuarios");
+        logger.info("Iniciando búsqueda de todos los usuarios");
 
-        return usuarioRepository.findAll();
+        List<Usuario> usuarios = usuarioRepository.findAll();
+
+        logger.info("Búsqueda finalizada. Total de usuarios encontrados: {}", usuarios.size());
+
+        return usuarios;
     }
 
     public Usuario buscarPorId(Long id) {
 
-        logger.info("Buscando usuario con ID: {}", id);
+        logger.info("Iniciando búsqueda de usuario con ID: {}", id);
 
         return usuarioRepository.findById(id)
+                .map(usuario -> {
+                    logger.info("Usuario encontrado correctamente con ID: {}", id);
+                    return usuario;
+                })
                 .orElseThrow(() -> {
-
-                    logger.error("Usuario no encontrado con ID: {}", id);
-
-                    return new ResourceNotFoundException(
-                            "Usuario no encontrado");
+                    logger.warn("Usuario no encontrado con ID: {}", id);
+                    return new ResourceNotFoundException("Usuario no encontrado");
                 });
     }
 
     public Usuario actualizar(Long id, UsuarioDTO usuarioDTO) {
 
-        logger.info("Actualizando usuario con ID: {}", id);
+        logger.info("Iniciando actualización de usuario con ID: {}", id);
+
+        validarEmail(usuarioDTO.getEmail());
 
         Usuario usuario = buscarPorId(id);
 
@@ -99,7 +98,7 @@ public class UsuarioService {
 
     public void eliminar(Long id) {
 
-        logger.info("Eliminando usuario con ID: {}", id);
+        logger.warn("Iniciando eliminación de usuario con ID: {}", id);
 
         Usuario usuario = buscarPorId(id);
 
@@ -112,6 +111,22 @@ public class UsuarioService {
 
         logger.info("Verificando existencia de usuario con ID: {}", id);
 
-        return usuarioRepository.existsById(id);
+        boolean existe = usuarioRepository.existsById(id);
+
+        logger.info("Resultado de existencia para usuario con ID {}: {}", id, existe);
+
+        return existe;
+    }
+
+    private void validarEmail(String email) {
+
+        logger.debug("Validando email de usuario");
+
+        if (email == null || email.isBlank()) {
+            logger.warn("Validación fallida: el email del usuario está vacío o es nulo");
+            throw new BadRequestException("El email es obligatorio");
+        }
+
+        logger.debug("Email validado correctamente");
     }
 }
