@@ -8,6 +8,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
@@ -28,6 +31,8 @@ import java.util.stream.Collectors;
 @RequestMapping("/sedes")
 public class SedeController {
 
+    private static final Logger logger = LoggerFactory.getLogger(SedeController.class);
+
     private static final String API_GATEWAY = "http://localhost:7090";
 
     private final SedeService sedeService;
@@ -47,8 +52,14 @@ public class SedeController {
     @PostMapping
     public ResponseEntity<Sede> crear(@RequestBody Sede sede) {
 
+        logger.info("Solicitud POST recibida para crear una nueva sede");
+
+        Sede sedeGuardada = sedeService.guardar(sede);
+
+        logger.info("Sede creada correctamente con ID: {}", sedeGuardada.getId());
+
         return new ResponseEntity<>(
-                sedeService.guardar(sede),
+                sedeGuardada,
                 HttpStatus.CREATED
         );
     }
@@ -61,7 +72,13 @@ public class SedeController {
     @GetMapping
     public ResponseEntity<CollectionModel<EntityModel<Sede>>> listar() {
 
-        List<EntityModel<Sede>> sedes = sedeService.listar()
+        logger.info("Solicitud GET recibida para listar todas las sedes");
+
+        List<Sede> sedesEncontradas = sedeService.listar();
+
+        logger.info("Se encontraron {} sedes registradas", sedesEncontradas.size());
+
+        List<EntityModel<Sede>> sedes = sedesEncontradas
                 .stream()
                 .map(this::agregarLinks)
                 .collect(Collectors.toList());
@@ -70,6 +87,8 @@ public class SedeController {
                 sedes,
                 Link.of(API_GATEWAY + "/sedes").withSelfRel()
         );
+
+        logger.info("Respuesta HATEOAS generada correctamente para listado de sedes");
 
         return ResponseEntity.ok(respuesta);
     }
@@ -85,7 +104,11 @@ public class SedeController {
     @GetMapping("/{id}")
     public ResponseEntity<EntityModel<Sede>> buscarPorId(@PathVariable Long id) {
 
+        logger.info("Solicitud GET recibida para buscar sede con ID: {}", id);
+
         Sede sede = sedeService.buscarPorId(id);
+
+        logger.info("Sede encontrada correctamente con ID: {}", id);
 
         return ResponseEntity.ok(agregarLinks(sede));
     }
@@ -103,9 +126,13 @@ public class SedeController {
             @PathVariable Long id,
             @RequestBody Sede sede) {
 
-        return ResponseEntity.ok(
-                sedeService.actualizar(id, sede)
-        );
+        logger.info("Solicitud PUT recibida para actualizar sede con ID: {}", id);
+
+        Sede sedeActualizada = sedeService.actualizar(id, sede);
+
+        logger.info("Sede actualizada correctamente con ID: {}", id);
+
+        return ResponseEntity.ok(sedeActualizada);
     }
 
     @Operation(
@@ -119,7 +146,11 @@ public class SedeController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminar(@PathVariable Long id) {
 
+        logger.warn("Solicitud DELETE recibida para eliminar sede con ID: {}", id);
+
         sedeService.eliminar(id);
+
+        logger.info("Sede eliminada correctamente con ID: {}", id);
 
         return ResponseEntity.noContent().build();
     }
@@ -132,10 +163,18 @@ public class SedeController {
     @GetMapping("/{id}/exists")
     public boolean existe(@PathVariable Long id) {
 
-        return sedeService.existePorId(id);
+        logger.info("Solicitud GET recibida para verificar existencia de sede con ID: {}", id);
+
+        boolean existe = sedeService.existePorId(id);
+
+        logger.info("Resultado de existencia para sede ID {}: {}", id, existe);
+
+        return existe;
     }
 
     private EntityModel<Sede> agregarLinks(Sede sede) {
+
+        logger.debug("Agregando enlaces HATEOAS para sede con ID: {}", sede.getId());
 
         return EntityModel.of(
                 sede,
