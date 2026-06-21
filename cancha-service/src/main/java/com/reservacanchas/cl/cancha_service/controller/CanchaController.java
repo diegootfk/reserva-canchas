@@ -12,6 +12,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 
 import jakarta.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
@@ -33,6 +36,8 @@ import java.util.stream.Collectors;
 @RequestMapping("/canchas")
 public class CanchaController {
 
+    private static final Logger logger = LoggerFactory.getLogger(CanchaController.class);
+
     private static final String API_GATEWAY = "http://localhost:7090";
 
     private final CanchaService canchaService;
@@ -52,7 +57,11 @@ public class CanchaController {
     @PostMapping
     public ResponseEntity<Cancha> crear(@Valid @RequestBody CanchaDTO canchaDTO) {
 
+        logger.info("Solicitud POST recibida para crear una nueva cancha");
+
         Cancha cancha = canchaService.guardar(canchaDTO);
+
+        logger.info("Cancha creada correctamente con ID: {}", cancha.getId());
 
         return new ResponseEntity<>(cancha, HttpStatus.CREATED);
     }
@@ -65,7 +74,13 @@ public class CanchaController {
     @GetMapping
     public ResponseEntity<CollectionModel<EntityModel<Cancha>>> listar() {
 
-        List<EntityModel<Cancha>> canchas = canchaService.listar()
+        logger.info("Solicitud GET recibida para listar todas las canchas");
+
+        List<Cancha> canchasEncontradas = canchaService.listar();
+
+        logger.info("Se encontraron {} canchas registradas", canchasEncontradas.size());
+
+        List<EntityModel<Cancha>> canchas = canchasEncontradas
                 .stream()
                 .map(this::agregarLinks)
                 .collect(Collectors.toList());
@@ -74,6 +89,8 @@ public class CanchaController {
                 canchas,
                 Link.of(API_GATEWAY + "/canchas").withSelfRel()
         );
+
+        logger.info("Respuesta HATEOAS generada correctamente para listado de canchas");
 
         return ResponseEntity.ok(respuesta);
     }
@@ -89,7 +106,11 @@ public class CanchaController {
     @GetMapping("/{id}")
     public ResponseEntity<EntityModel<Cancha>> buscarPorId(@PathVariable Long id) {
 
+        logger.info("Solicitud GET recibida para buscar cancha con ID: {}", id);
+
         Cancha cancha = canchaService.buscarPorId(id);
+
+        logger.info("Cancha encontrada correctamente con ID: {}", id);
 
         return ResponseEntity.ok(agregarLinks(cancha));
     }
@@ -109,7 +130,13 @@ public class CanchaController {
             @Valid @RequestBody CanchaDTO canchaDTO
     ) {
 
-        return ResponseEntity.ok(canchaService.actualizar(id, canchaDTO));
+        logger.info("Solicitud PUT recibida para actualizar cancha con ID: {}", id);
+
+        Cancha canchaActualizada = canchaService.actualizar(id, canchaDTO);
+
+        logger.info("Cancha actualizada correctamente con ID: {}", id);
+
+        return ResponseEntity.ok(canchaActualizada);
     }
 
     @Operation(
@@ -123,7 +150,11 @@ public class CanchaController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminar(@PathVariable Long id) {
 
+        logger.warn("Solicitud DELETE recibida para eliminar cancha con ID: {}", id);
+
         canchaService.eliminar(id);
+
+        logger.info("Cancha eliminada correctamente con ID: {}", id);
 
         return ResponseEntity.noContent().build();
     }
@@ -136,10 +167,18 @@ public class CanchaController {
     @GetMapping("/{id}/exists")
     public boolean existe(@PathVariable Long id) {
 
-        return canchaService.existePorId(id);
+        logger.info("Solicitud GET recibida para verificar existencia de cancha con ID: {}", id);
+
+        boolean existe = canchaService.existePorId(id);
+
+        logger.info("Resultado de existencia para cancha ID {}: {}", id, existe);
+
+        return existe;
     }
 
     private EntityModel<Cancha> agregarLinks(Cancha cancha) {
+
+        logger.debug("Agregando enlaces HATEOAS para cancha con ID: {}", cancha.getId());
 
         return EntityModel.of(
                 cancha,
