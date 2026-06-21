@@ -8,6 +8,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
@@ -28,6 +31,8 @@ import java.util.stream.Collectors;
 @RequestMapping("/notificaciones")
 public class NotificacionController {
 
+    private static final Logger logger = LoggerFactory.getLogger(NotificacionController.class);
+
     private static final String API_GATEWAY = "http://localhost:7090";
 
     private final NotificacionService notificacionService;
@@ -47,8 +52,18 @@ public class NotificacionController {
     @PostMapping
     public ResponseEntity<Notificacion> crear(@RequestBody Notificacion notificacion) {
 
+        logger.info(
+                "Solicitud POST recibida para crear notificación para usuario ID: {} y reserva ID: {}",
+                notificacion.getIdUsuario(),
+                notificacion.getIdReserva()
+        );
+
+        Notificacion notificacionGuardada = notificacionService.guardar(notificacion);
+
+        logger.info("Notificación creada correctamente con ID: {}", notificacionGuardada.getId());
+
         return new ResponseEntity<>(
-                notificacionService.guardar(notificacion),
+                notificacionGuardada,
                 HttpStatus.CREATED
         );
     }
@@ -61,7 +76,13 @@ public class NotificacionController {
     @GetMapping
     public ResponseEntity<CollectionModel<EntityModel<Notificacion>>> listar() {
 
-        List<EntityModel<Notificacion>> notificaciones = notificacionService.listar()
+        logger.info("Solicitud GET recibida para listar todas las notificaciones");
+
+        List<Notificacion> notificacionesEncontradas = notificacionService.listar();
+
+        logger.info("Se encontraron {} notificaciones registradas", notificacionesEncontradas.size());
+
+        List<EntityModel<Notificacion>> notificaciones = notificacionesEncontradas
                 .stream()
                 .map(this::agregarLinks)
                 .collect(Collectors.toList());
@@ -70,6 +91,8 @@ public class NotificacionController {
                 notificaciones,
                 Link.of(API_GATEWAY + "/notificaciones").withSelfRel()
         );
+
+        logger.info("Respuesta HATEOAS generada correctamente para listado de notificaciones");
 
         return ResponseEntity.ok(respuesta);
     }
@@ -85,7 +108,11 @@ public class NotificacionController {
     @GetMapping("/{id}")
     public ResponseEntity<EntityModel<Notificacion>> buscarPorId(@PathVariable Long id) {
 
+        logger.info("Solicitud GET recibida para buscar notificación con ID: {}", id);
+
         Notificacion notificacion = notificacionService.buscarPorId(id);
+
+        logger.info("Notificación encontrada correctamente con ID: {}", id);
 
         return ResponseEntity.ok(agregarLinks(notificacion));
     }
@@ -103,9 +130,13 @@ public class NotificacionController {
             @PathVariable Long id,
             @RequestBody Notificacion notificacion) {
 
-        return ResponseEntity.ok(
-                notificacionService.actualizar(id, notificacion)
-        );
+        logger.info("Solicitud PUT recibida para actualizar notificación con ID: {}", id);
+
+        Notificacion notificacionActualizada = notificacionService.actualizar(id, notificacion);
+
+        logger.info("Notificación actualizada correctamente con ID: {}", id);
+
+        return ResponseEntity.ok(notificacionActualizada);
     }
 
     @Operation(
@@ -119,7 +150,11 @@ public class NotificacionController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminar(@PathVariable Long id) {
 
+        logger.warn("Solicitud DELETE recibida para eliminar notificación con ID: {}", id);
+
         notificacionService.eliminar(id);
+
+        logger.info("Notificación eliminada correctamente con ID: {}", id);
 
         return ResponseEntity.noContent().build();
     }
@@ -132,10 +167,18 @@ public class NotificacionController {
     @GetMapping("/{id}/exists")
     public boolean existe(@PathVariable Long id) {
 
-        return notificacionService.existePorId(id);
+        logger.info("Solicitud GET recibida para verificar existencia de notificación con ID: {}", id);
+
+        boolean existe = notificacionService.existePorId(id);
+
+        logger.info("Resultado de existencia para notificación ID {}: {}", id, existe);
+
+        return existe;
     }
 
     private EntityModel<Notificacion> agregarLinks(Notificacion notificacion) {
+
+        logger.debug("Agregando enlaces HATEOAS para notificación con ID: {}", notificacion.getId());
 
         return EntityModel.of(
                 notificacion,
