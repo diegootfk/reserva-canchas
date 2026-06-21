@@ -1,6 +1,7 @@
 package com.reservacanchas.cl.notificacion_service.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.reservacanchas.cl.notificacion_service.dto.NotificacionDTO;
 import com.reservacanchas.cl.notificacion_service.model.Notificacion;
 import com.reservacanchas.cl.notificacion_service.service.NotificacionService;
 
@@ -15,6 +16,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
@@ -38,29 +40,45 @@ class NotificacionControllerTest {
     @Test
     void debeCrearNotificacion() throws Exception {
 
-        Notificacion notificacion = new Notificacion(
-                1L,1L,1L,
+        NotificacionDTO dto = new NotificacionDTO(
+                1L,
+                1L,
                 "Reserva confirmada",
                 "EMAIL",
                 "2025-06-20",
                 "ENVIADA"
         );
 
-        when(notificacionService.guardar(any()))
+        Notificacion notificacion = new Notificacion(
+                1L,
+                1L,
+                1L,
+                "Reserva confirmada",
+                "EMAIL",
+                "2025-06-20",
+                "ENVIADA"
+        );
+
+        when(notificacionService.guardar(any(NotificacionDTO.class)))
                 .thenReturn(notificacion);
 
         mockMvc.perform(post("/notificaciones")
                         .with(jwt())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(notificacion)))
+                        .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isCreated());
+
+        verify(notificacionService)
+                .guardar(any(NotificacionDTO.class));
     }
 
     @Test
     void debeListarNotificaciones() throws Exception {
 
         Notificacion notificacion = new Notificacion(
-                1L,1L,1L,
+                1L,
+                1L,
+                1L,
                 "Reserva confirmada",
                 "EMAIL",
                 "2025-06-20",
@@ -73,13 +91,17 @@ class NotificacionControllerTest {
         mockMvc.perform(get("/notificaciones")
                         .with(jwt()))
                 .andExpect(status().isOk());
+
+        verify(notificacionService).listar();
     }
 
     @Test
     void debeBuscarPorId() throws Exception {
 
         Notificacion notificacion = new Notificacion(
-                1L,1L,1L,
+                1L,
+                1L,
+                1L,
                 "Reserva confirmada",
                 "EMAIL",
                 "2025-06-20",
@@ -92,6 +114,44 @@ class NotificacionControllerTest {
         mockMvc.perform(get("/notificaciones/1")
                         .with(jwt()))
                 .andExpect(status().isOk());
+
+        verify(notificacionService)
+                .buscarPorId(1L);
+    }
+
+    @Test
+    void debeActualizarNotificacion() throws Exception {
+
+        NotificacionDTO dto = new NotificacionDTO(
+                1L,
+                1L,
+                "Reserva modificada",
+                "SMS",
+                "2025-06-21",
+                "PENDIENTE"
+        );
+
+        Notificacion notificacion = new Notificacion(
+                1L,
+                1L,
+                1L,
+                "Reserva modificada",
+                "SMS",
+                "2025-06-21",
+                "PENDIENTE"
+        );
+
+        when(notificacionService.actualizar(eq(1L), any(NotificacionDTO.class)))
+                .thenReturn(notificacion);
+
+        mockMvc.perform(put("/notificaciones/1")
+                        .with(jwt())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isOk());
+
+        verify(notificacionService)
+                .actualizar(eq(1L), any(NotificacionDTO.class));
     }
 
     @Test
@@ -103,6 +163,9 @@ class NotificacionControllerTest {
         mockMvc.perform(delete("/notificaciones/1")
                         .with(jwt()))
                 .andExpect(status().isNoContent());
+
+        verify(notificacionService)
+                .eliminar(1L);
     }
 
     @Test
@@ -111,7 +174,11 @@ class NotificacionControllerTest {
         when(notificacionService.existePorId(1L))
                 .thenReturn(true);
 
-        mockMvc.perform(get("/notificaciones/1/exists"))
+        mockMvc.perform(get("/notificaciones/1/exists")
+                        .with(jwt()))
                 .andExpect(status().isOk());
+
+        verify(notificacionService)
+                .existePorId(1L);
     }
 }

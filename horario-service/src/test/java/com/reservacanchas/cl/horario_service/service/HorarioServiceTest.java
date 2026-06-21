@@ -1,5 +1,6 @@
 package com.reservacanchas.cl.horario_service.service;
 
+import com.reservacanchas.cl.horario_service.dto.HorarioDTO;
 import com.reservacanchas.cl.horario_service.exception.ResourceNotFoundException;
 import com.reservacanchas.cl.horario_service.model.Horario;
 import com.reservacanchas.cl.horario_service.repository.HorarioRepository;
@@ -81,29 +82,56 @@ class HorarioServiceTest {
     @Test
     void actualizarDebeActualizarHorario() {
 
+        HorarioDTO dto = new HorarioDTO(
+                1L,
+                "MARTES",
+                "10:00",
+                "11:00",
+                "ACTIVO"
+        );
+
+        Horario horarioActualizado = new Horario(
+                1L,
+                1L,
+                "MARTES",
+                "10:00",
+                "11:00",
+                "ACTIVO"
+        );
+
         when(horarioRepository.findById(1L))
                 .thenReturn(Optional.of(horario));
 
         when(horarioRepository.save(any(Horario.class)))
-                .thenReturn(horario);
+                .thenReturn(horarioActualizado);
 
         Horario resultado =
-                horarioService.actualizar(1L, horario);
+                horarioService.actualizar(1L, dto);
 
         assertNotNull(resultado);
+        assertEquals("MARTES", resultado.getDiaSemana());
 
-        verify(horarioRepository).save(any(Horario.class));
+        verify(horarioRepository)
+                .save(any(Horario.class));
     }
 
     @Test
     void actualizarDebeLanzarExcepcionSiNoExiste() {
+
+        HorarioDTO dto = new HorarioDTO(
+                1L,
+                "MARTES",
+                "10:00",
+                "11:00",
+                "ACTIVO"
+        );
 
         when(horarioRepository.findById(99L))
                 .thenReturn(Optional.empty());
 
         assertThrows(
                 ResourceNotFoundException.class,
-                () -> horarioService.actualizar(99L, horario)
+                () -> horarioService.actualizar(99L, dto)
         );
     }
 

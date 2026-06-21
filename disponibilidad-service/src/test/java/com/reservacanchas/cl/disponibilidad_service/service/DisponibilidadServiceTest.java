@@ -1,5 +1,6 @@
 package com.reservacanchas.cl.disponibilidad_service.service;
 
+import com.reservacanchas.cl.disponibilidad_service.dto.DisponibilidadDTO;
 import com.reservacanchas.cl.disponibilidad_service.model.Disponibilidad;
 import com.reservacanchas.cl.disponibilidad_service.repository.DisponibilidadRepository;
 
@@ -71,24 +72,32 @@ class DisponibilidadServiceTest {
                 1L,1L,"2025-06-20","09:00","10:00","DISPONIBLE"
         );
 
-        Disponibilidad nueva = new Disponibilidad(
+        DisponibilidadDTO dto = new DisponibilidadDTO(
+                1L,
+                "2025-06-21",
+                "10:00",
+                "11:00",
+                "OCUPADO"
+        );
+
+        Disponibilidad actualizada = new Disponibilidad(
                 1L,1L,"2025-06-21","10:00","11:00","OCUPADO"
         );
 
         when(disponibilidadRepository.findById(1L))
                 .thenReturn(Optional.of(actual));
 
-        when(disponibilidadRepository.save(any()))
-                .thenReturn(nueva);
+        when(disponibilidadRepository.save(any(Disponibilidad.class)))
+                .thenReturn(actualizada);
 
         Disponibilidad resultado =
-                disponibilidadService.actualizar(1L,nueva);
+                disponibilidadService.actualizar(1L, dto);
 
         assertEquals("OCUPADO",
                 resultado.getEstado());
 
         verify(disponibilidadRepository)
-                .save(any());
+                .save(any(Disponibilidad.class));
     }
 
     @Test

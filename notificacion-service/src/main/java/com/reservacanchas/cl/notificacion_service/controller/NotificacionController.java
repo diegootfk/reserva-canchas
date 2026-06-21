@@ -1,5 +1,6 @@
 package com.reservacanchas.cl.notificacion_service.controller;
 
+import com.reservacanchas.cl.notificacion_service.dto.NotificacionDTO;
 import com.reservacanchas.cl.notificacion_service.model.Notificacion;
 import com.reservacanchas.cl.notificacion_service.service.NotificacionService;
 
@@ -8,6 +9,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+
+import jakarta.validation.Valid;
 
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
@@ -47,10 +50,11 @@ public class NotificacionController {
             @ApiResponse(responseCode = "400", description = "Datos inválidos")
     })
     @PostMapping
-    public ResponseEntity<Notificacion> crear(@RequestBody Notificacion notificacion) {
+    public ResponseEntity<Notificacion> crear(
+            @Valid @RequestBody NotificacionDTO notificacionDTO) {
 
         return new ResponseEntity<>(
-                notificacionService.guardar(notificacion),
+                notificacionService.guardar(notificacionDTO),
                 HttpStatus.CREATED
         );
     }
@@ -98,15 +102,16 @@ public class NotificacionController {
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Notificación actualizada correctamente"),
+            @ApiResponse(responseCode = "400", description = "Datos inválidos"),
             @ApiResponse(responseCode = "404", description = "Notificación no encontrada")
     })
     @PutMapping("/{id}")
     public ResponseEntity<Notificacion> actualizar(
             @PathVariable Long id,
-            @RequestBody Notificacion notificacion) {
+            @Valid @RequestBody NotificacionDTO notificacionDTO) {
 
         return ResponseEntity.ok(
-                notificacionService.actualizar(id, notificacion)
+                notificacionService.actualizar(id, notificacionDTO)
         );
     }
 

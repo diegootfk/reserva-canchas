@@ -1,5 +1,6 @@
 package com.reservacanchas.cl.resena_service.controller;
 
+import com.reservacanchas.cl.resena_service.dto.ResenaDTO;
 import com.reservacanchas.cl.resena_service.model.Resena;
 import com.reservacanchas.cl.resena_service.service.ResenaService;
 
@@ -8,6 +9,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+
+import jakarta.validation.Valid;
 
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
@@ -47,10 +50,11 @@ public class ResenaController {
             @ApiResponse(responseCode = "400", description = "Datos inválidos")
     })
     @PostMapping
-    public ResponseEntity<Resena> crear(@RequestBody Resena resena) {
+    public ResponseEntity<Resena> crear(
+            @Valid @RequestBody ResenaDTO resenaDTO) {
 
         return new ResponseEntity<>(
-                resenaService.guardar(resena),
+                resenaService.guardar(resenaDTO),
                 HttpStatus.CREATED
         );
     }
@@ -98,15 +102,16 @@ public class ResenaController {
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Reseña actualizada correctamente"),
-            @ApiResponse(responseCode = "404", description = "Reseña no encontrada")
+            @ApiResponse(responseCode = "404", description = "Reseña no encontrada"),
+            @ApiResponse(responseCode = "400", description = "Datos inválidos")
     })
     @PutMapping("/{id}")
     public ResponseEntity<Resena> actualizar(
             @PathVariable Long id,
-            @RequestBody Resena resena) {
+            @Valid @RequestBody ResenaDTO resenaDTO) {
 
         return ResponseEntity.ok(
-                resenaService.actualizar(id, resena)
+                resenaService.actualizar(id, resenaDTO)
         );
     }
 

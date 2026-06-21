@@ -1,5 +1,6 @@
 package com.reservacanchas.cl.horario_service.controller;
 
+import com.reservacanchas.cl.horario_service.dto.HorarioDTO;
 import com.reservacanchas.cl.horario_service.model.Horario;
 import com.reservacanchas.cl.horario_service.service.HorarioService;
 
@@ -8,6 +9,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+
+import jakarta.validation.Valid;
 
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
@@ -47,10 +50,11 @@ public class HorarioController {
             @ApiResponse(responseCode = "400", description = "Datos inválidos")
     })
     @PostMapping
-    public ResponseEntity<Horario> crear(@RequestBody Horario horario) {
+    public ResponseEntity<Horario> crear(
+            @Valid @RequestBody HorarioDTO horarioDTO) {
 
         return new ResponseEntity<>(
-                horarioService.guardar(horario),
+                horarioService.guardar(horarioDTO),
                 HttpStatus.CREATED
         );
     }
@@ -98,15 +102,16 @@ public class HorarioController {
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Horario actualizado correctamente"),
-            @ApiResponse(responseCode = "404", description = "Horario no encontrado")
+            @ApiResponse(responseCode = "404", description = "Horario no encontrado"),
+            @ApiResponse(responseCode = "400", description = "Datos inválidos")
     })
     @PutMapping("/{id}")
     public ResponseEntity<Horario> actualizar(
             @PathVariable Long id,
-            @RequestBody Horario horario) {
+            @Valid @RequestBody HorarioDTO horarioDTO) {
 
         return ResponseEntity.ok(
-                horarioService.actualizar(id, horario)
+                horarioService.actualizar(id, horarioDTO)
         );
     }
 

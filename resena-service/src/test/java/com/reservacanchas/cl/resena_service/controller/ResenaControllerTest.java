@@ -1,6 +1,7 @@
 package com.reservacanchas.cl.resena_service.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.reservacanchas.cl.resena_service.dto.ResenaDTO;
 import com.reservacanchas.cl.resena_service.model.Resena;
 import com.reservacanchas.cl.resena_service.service.ResenaService;
 
@@ -38,28 +39,45 @@ class ResenaControllerTest {
     @Test
     void debeCrearResena() throws Exception {
 
-        Resena resena = new Resena(
-                1L,1L,1L,1L,
+        ResenaDTO dto = new ResenaDTO(
+                1L,
+                1L,
+                1L,
                 5,
                 "Excelente cancha",
                 "2025-06-20"
         );
 
-        when(resenaService.guardar(any()))
+        Resena resena = new Resena(
+                1L,
+                1L,
+                1L,
+                1L,
+                5,
+                "Excelente cancha",
+                "2025-06-20"
+        );
+
+        when(resenaService.guardar(any(ResenaDTO.class)))
                 .thenReturn(resena);
 
         mockMvc.perform(post("/resenas")
                         .with(jwt())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(resena)))
+                        .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isCreated());
+
+        verify(resenaService).guardar(any(ResenaDTO.class));
     }
 
     @Test
     void debeListarResenas() throws Exception {
 
         Resena resena = new Resena(
-                1L,1L,1L,1L,
+                1L,
+                1L,
+                1L,
+                1L,
                 5,
                 "Excelente cancha",
                 "2025-06-20"
@@ -71,13 +89,18 @@ class ResenaControllerTest {
         mockMvc.perform(get("/resenas")
                         .with(jwt()))
                 .andExpect(status().isOk());
+
+        verify(resenaService).listar();
     }
 
     @Test
     void debeBuscarPorId() throws Exception {
 
         Resena resena = new Resena(
-                1L,1L,1L,1L,
+                1L,
+                1L,
+                1L,
+                1L,
                 5,
                 "Excelente cancha",
                 "2025-06-20"
@@ -89,6 +112,42 @@ class ResenaControllerTest {
         mockMvc.perform(get("/resenas/1")
                         .with(jwt()))
                 .andExpect(status().isOk());
+
+        verify(resenaService).buscarPorId(1L);
+    }
+
+    @Test
+    void debeActualizarResena() throws Exception {
+
+        ResenaDTO dto = new ResenaDTO(
+                1L,
+                1L,
+                1L,
+                5,
+                "Excelente cancha",
+                "2025-06-21"
+        );
+
+        Resena resena = new Resena(
+                1L,
+                1L,
+                1L,
+                1L,
+                5,
+                "Excelente cancha",
+                "2025-06-21"
+        );
+
+        when(resenaService.actualizar(eq(1L), any(ResenaDTO.class)))
+                .thenReturn(resena);
+
+        mockMvc.perform(put("/resenas/1")
+                        .with(jwt())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isOk());
+
+        verify(resenaService).actualizar(eq(1L), any(ResenaDTO.class));
     }
 
     @Test
@@ -100,6 +159,8 @@ class ResenaControllerTest {
         mockMvc.perform(delete("/resenas/1")
                         .with(jwt()))
                 .andExpect(status().isNoContent());
+
+        verify(resenaService).eliminar(1L);
     }
 
     @Test
@@ -108,7 +169,10 @@ class ResenaControllerTest {
         when(resenaService.existePorId(1L))
                 .thenReturn(true);
 
-        mockMvc.perform(get("/resenas/1/exists"))
+        mockMvc.perform(get("/resenas/1/exists")
+                        .with(jwt()))
                 .andExpect(status().isOk());
+
+        verify(resenaService).existePorId(1L);
     }
 }

@@ -1,5 +1,6 @@
 package com.reservacanchas.cl.mantenimiento_service.controller;
 
+import com.reservacanchas.cl.mantenimiento_service.dto.MantenimientoDTO;
 import com.reservacanchas.cl.mantenimiento_service.model.Mantenimiento;
 import com.reservacanchas.cl.mantenimiento_service.service.MantenimientoService;
 
@@ -8,6 +9,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+
+import jakarta.validation.Valid;
 
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
@@ -47,10 +50,11 @@ public class MantenimientoController {
             @ApiResponse(responseCode = "400", description = "Datos inválidos")
     })
     @PostMapping
-    public ResponseEntity<Mantenimiento> crear(@RequestBody Mantenimiento mantenimiento) {
+    public ResponseEntity<Mantenimiento> crear(
+            @Valid @RequestBody MantenimientoDTO mantenimientoDTO) {
 
         return new ResponseEntity<>(
-                mantenimientoService.guardar(mantenimiento),
+                mantenimientoService.guardar(mantenimientoDTO),
                 HttpStatus.CREATED
         );
     }
@@ -98,15 +102,16 @@ public class MantenimientoController {
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Mantenimiento actualizado correctamente"),
-            @ApiResponse(responseCode = "404", description = "Mantenimiento no encontrado")
+            @ApiResponse(responseCode = "404", description = "Mantenimiento no encontrado"),
+            @ApiResponse(responseCode = "400", description = "Datos inválidos")
     })
     @PutMapping("/{id}")
     public ResponseEntity<Mantenimiento> actualizar(
             @PathVariable Long id,
-            @RequestBody Mantenimiento mantenimiento) {
+            @Valid @RequestBody MantenimientoDTO mantenimientoDTO) {
 
         return ResponseEntity.ok(
-                mantenimientoService.actualizar(id, mantenimiento)
+                mantenimientoService.actualizar(id, mantenimientoDTO)
         );
     }
 

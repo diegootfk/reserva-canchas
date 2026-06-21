@@ -1,6 +1,7 @@
 package com.reservacanchas.cl.horario_service.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.reservacanchas.cl.horario_service.dto.HorarioDTO;
 import com.reservacanchas.cl.horario_service.model.Horario;
 import com.reservacanchas.cl.horario_service.service.HorarioService;
 
@@ -40,6 +41,14 @@ class HorarioControllerTest {
     @DisplayName("Debe crear horario")
     void debeCrearHorario() throws Exception {
 
+        HorarioDTO dto = new HorarioDTO(
+                1L,
+                "LUNES",
+                "09:00",
+                "10:00",
+                "ACTIVO"
+        );
+
         Horario horario = new Horario(
                 1L,
                 1L,
@@ -49,16 +58,16 @@ class HorarioControllerTest {
                 "ACTIVO"
         );
 
-        when(horarioService.guardar(any(Horario.class)))
+        when(horarioService.guardar(any(HorarioDTO.class)))
                 .thenReturn(horario);
 
         mockMvc.perform(post("/horarios")
                         .with(jwt())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(horario)))
+                        .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isCreated());
 
-        verify(horarioService).guardar(any(Horario.class));
+        verify(horarioService).guardar(any(HorarioDTO.class));
     }
 
     @Test
@@ -111,6 +120,14 @@ class HorarioControllerTest {
     @DisplayName("Debe actualizar horario")
     void debeActualizarHorario() throws Exception {
 
+        HorarioDTO dto = new HorarioDTO(
+                1L,
+                "LUNES",
+                "09:00",
+                "10:00",
+                "ACTIVO"
+        );
+
         Horario horario = new Horario(
                 1L,
                 1L,
@@ -120,16 +137,17 @@ class HorarioControllerTest {
                 "ACTIVO"
         );
 
-        when(horarioService.actualizar(eq(1L), any(Horario.class)))
+        when(horarioService.actualizar(eq(1L), any(HorarioDTO.class)))
                 .thenReturn(horario);
 
         mockMvc.perform(put("/horarios/1")
                         .with(jwt())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(horario)))
+                        .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isOk());
 
-        verify(horarioService).actualizar(eq(1L), any(Horario.class));
+        verify(horarioService)
+                .actualizar(eq(1L), any(HorarioDTO.class));
     }
 
     @Test
