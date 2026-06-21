@@ -11,6 +11,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 
 import jakarta.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
@@ -30,6 +33,8 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/reservas")
 public class ReservaController {
+
+    private static final Logger logger = LoggerFactory.getLogger(ReservaController.class);
 
     private static final String API_GATEWAY = "http://localhost:7090";
 
@@ -51,7 +56,11 @@ public class ReservaController {
     @PostMapping
     public ResponseEntity<Reserva> crear(@Valid @RequestBody ReservaDTO reservaDTO) {
 
+        logger.info("Solicitud POST recibida para crear una nueva reserva");
+
         Reserva reserva = reservaService.guardar(reservaDTO);
+
+        logger.info("Reserva creada correctamente con ID: {}", reserva.getId());
 
         return new ResponseEntity<>(reserva, HttpStatus.CREATED);
     }
@@ -64,7 +73,13 @@ public class ReservaController {
     @GetMapping
     public ResponseEntity<CollectionModel<EntityModel<Reserva>>> listar() {
 
-        List<EntityModel<Reserva>> reservas = reservaService.listar()
+        logger.info("Solicitud GET recibida para listar todas las reservas");
+
+        List<Reserva> reservasEncontradas = reservaService.listar();
+
+        logger.info("Se encontraron {} reservas registradas", reservasEncontradas.size());
+
+        List<EntityModel<Reserva>> reservas = reservasEncontradas
                 .stream()
                 .map(this::agregarLinks)
                 .collect(Collectors.toList());
@@ -73,6 +88,8 @@ public class ReservaController {
                 reservas,
                 Link.of(API_GATEWAY + "/reservas").withSelfRel()
         );
+
+        logger.info("Respuesta HATEOAS generada correctamente para listado de reservas");
 
         return ResponseEntity.ok(respuesta);
     }
@@ -88,7 +105,11 @@ public class ReservaController {
     @GetMapping("/{id}")
     public ResponseEntity<EntityModel<Reserva>> buscarPorId(@PathVariable Long id) {
 
+        logger.info("Solicitud GET recibida para buscar reserva con ID: {}", id);
+
         Reserva reserva = reservaService.buscarPorId(id);
+
+        logger.info("Reserva encontrada correctamente con ID: {}", id);
 
         return ResponseEntity.ok(agregarLinks(reserva));
     }
@@ -108,9 +129,13 @@ public class ReservaController {
             @Valid @RequestBody ReservaDTO reservaDTO
     ) {
 
-        return ResponseEntity.ok(
-                reservaService.actualizar(id, reservaDTO)
-        );
+        logger.info("Solicitud PUT recibida para actualizar reserva con ID: {}", id);
+
+        Reserva reservaActualizada = reservaService.actualizar(id, reservaDTO);
+
+        logger.info("Reserva actualizada correctamente con ID: {}", id);
+
+        return ResponseEntity.ok(reservaActualizada);
     }
 
     @Operation(
@@ -124,7 +149,11 @@ public class ReservaController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminar(@PathVariable Long id) {
 
+        logger.warn("Solicitud DELETE recibida para eliminar reserva con ID: {}", id);
+
         reservaService.eliminar(id);
+
+        logger.info("Reserva eliminada correctamente con ID: {}", id);
 
         return ResponseEntity.noContent().build();
     }
@@ -137,7 +166,13 @@ public class ReservaController {
     @GetMapping("/{id}/exists")
     public boolean existe(@PathVariable Long id) {
 
-        return reservaService.existePorId(id);
+        logger.info("Solicitud GET recibida para verificar existencia de reserva con ID: {}", id);
+
+        boolean existe = reservaService.existePorId(id);
+
+        logger.info("Resultado de existencia para reserva ID {}: {}", id, existe);
+
+        return existe;
     }
 
     @Operation(
@@ -148,7 +183,13 @@ public class ReservaController {
     @GetMapping("/estado/{estado}")
     public ResponseEntity<CollectionModel<EntityModel<Reserva>>> buscarPorEstado(@PathVariable String estado) {
 
-        List<EntityModel<Reserva>> reservas = reservaService.buscarPorEstado(estado)
+        logger.info("Solicitud GET recibida para buscar reservas con estado: {}", estado);
+
+        List<Reserva> reservasEncontradas = reservaService.buscarPorEstado(estado);
+
+        logger.info("Se encontraron {} reservas con estado: {}", reservasEncontradas.size(), estado);
+
+        List<EntityModel<Reserva>> reservas = reservasEncontradas
                 .stream()
                 .map(this::agregarLinks)
                 .collect(Collectors.toList());
@@ -158,6 +199,8 @@ public class ReservaController {
                 Link.of(API_GATEWAY + "/reservas/estado/" + estado).withSelfRel(),
                 Link.of(API_GATEWAY + "/reservas").withRel("reservas")
         );
+
+        logger.info("Respuesta HATEOAS generada correctamente para reservas con estado: {}", estado);
 
         return ResponseEntity.ok(respuesta);
     }
@@ -170,7 +213,13 @@ public class ReservaController {
     @GetMapping("/usuario/{idUsuario}")
     public ResponseEntity<CollectionModel<EntityModel<Reserva>>> buscarPorUsuario(@PathVariable Long idUsuario) {
 
-        List<EntityModel<Reserva>> reservas = reservaService.buscarPorUsuario(idUsuario)
+        logger.info("Solicitud GET recibida para buscar reservas del usuario con ID: {}", idUsuario);
+
+        List<Reserva> reservasEncontradas = reservaService.buscarPorUsuario(idUsuario);
+
+        logger.info("Se encontraron {} reservas para el usuario con ID: {}", reservasEncontradas.size(), idUsuario);
+
+        List<EntityModel<Reserva>> reservas = reservasEncontradas
                 .stream()
                 .map(this::agregarLinks)
                 .collect(Collectors.toList());
@@ -181,6 +230,8 @@ public class ReservaController {
                 Link.of(API_GATEWAY + "/reservas").withRel("reservas"),
                 Link.of(API_GATEWAY + "/usuarios/" + idUsuario).withRel("usuario")
         );
+
+        logger.info("Respuesta HATEOAS generada correctamente para reservas del usuario con ID: {}", idUsuario);
 
         return ResponseEntity.ok(respuesta);
     }
@@ -193,7 +244,13 @@ public class ReservaController {
     @GetMapping("/cancha/{idCancha}")
     public ResponseEntity<CollectionModel<EntityModel<Reserva>>> buscarPorCancha(@PathVariable Long idCancha) {
 
-        List<EntityModel<Reserva>> reservas = reservaService.buscarPorCancha(idCancha)
+        logger.info("Solicitud GET recibida para buscar reservas de la cancha con ID: {}", idCancha);
+
+        List<Reserva> reservasEncontradas = reservaService.buscarPorCancha(idCancha);
+
+        logger.info("Se encontraron {} reservas para la cancha con ID: {}", reservasEncontradas.size(), idCancha);
+
+        List<EntityModel<Reserva>> reservas = reservasEncontradas
                 .stream()
                 .map(this::agregarLinks)
                 .collect(Collectors.toList());
@@ -205,10 +262,14 @@ public class ReservaController {
                 Link.of(API_GATEWAY + "/canchas/" + idCancha).withRel("cancha")
         );
 
+        logger.info("Respuesta HATEOAS generada correctamente para reservas de la cancha con ID: {}", idCancha);
+
         return ResponseEntity.ok(respuesta);
     }
 
     private EntityModel<Reserva> agregarLinks(Reserva reserva) {
+
+        logger.debug("Agregando enlaces HATEOAS para reserva con ID: {}", reserva.getId());
 
         return EntityModel.of(
                 reserva,
