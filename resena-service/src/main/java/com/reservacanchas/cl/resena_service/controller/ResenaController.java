@@ -8,6 +8,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
@@ -28,6 +31,8 @@ import java.util.stream.Collectors;
 @RequestMapping("/resenas")
 public class ResenaController {
 
+    private static final Logger logger = LoggerFactory.getLogger(ResenaController.class);
+
     private static final String API_GATEWAY = "http://localhost:7090";
 
     private final ResenaService resenaService;
@@ -47,8 +52,14 @@ public class ResenaController {
     @PostMapping
     public ResponseEntity<Resena> crear(@RequestBody Resena resena) {
 
+        logger.info("Solicitud POST recibida para crear una nueva reseña");
+
+        Resena resenaGuardada = resenaService.guardar(resena);
+
+        logger.info("Reseña creada correctamente con ID: {}", resenaGuardada.getId());
+
         return new ResponseEntity<>(
-                resenaService.guardar(resena),
+                resenaGuardada,
                 HttpStatus.CREATED
         );
     }
@@ -61,7 +72,13 @@ public class ResenaController {
     @GetMapping
     public ResponseEntity<CollectionModel<EntityModel<Resena>>> listar() {
 
-        List<EntityModel<Resena>> resenas = resenaService.listar()
+        logger.info("Solicitud GET recibida para listar todas las reseñas");
+
+        List<Resena> resenasEncontradas = resenaService.listar();
+
+        logger.info("Se encontraron {} reseñas registradas", resenasEncontradas.size());
+
+        List<EntityModel<Resena>> resenas = resenasEncontradas
                 .stream()
                 .map(this::agregarLinks)
                 .collect(Collectors.toList());
@@ -70,6 +87,8 @@ public class ResenaController {
                 resenas,
                 Link.of(API_GATEWAY + "/resenas").withSelfRel()
         );
+
+        logger.info("Respuesta HATEOAS generada correctamente para listado de reseñas");
 
         return ResponseEntity.ok(respuesta);
     }
@@ -85,7 +104,11 @@ public class ResenaController {
     @GetMapping("/{id}")
     public ResponseEntity<EntityModel<Resena>> buscarPorId(@PathVariable Long id) {
 
+        logger.info("Solicitud GET recibida para buscar reseña con ID: {}", id);
+
         Resena resena = resenaService.buscarPorId(id);
+
+        logger.info("Reseña encontrada correctamente con ID: {}", id);
 
         return ResponseEntity.ok(agregarLinks(resena));
     }
@@ -103,9 +126,13 @@ public class ResenaController {
             @PathVariable Long id,
             @RequestBody Resena resena) {
 
-        return ResponseEntity.ok(
-                resenaService.actualizar(id, resena)
-        );
+        logger.info("Solicitud PUT recibida para actualizar reseña con ID: {}", id);
+
+        Resena resenaActualizada = resenaService.actualizar(id, resena);
+
+        logger.info("Reseña actualizada correctamente con ID: {}", id);
+
+        return ResponseEntity.ok(resenaActualizada);
     }
 
     @Operation(
@@ -119,7 +146,11 @@ public class ResenaController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminar(@PathVariable Long id) {
 
+        logger.warn("Solicitud DELETE recibida para eliminar reseña con ID: {}", id);
+
         resenaService.eliminar(id);
+
+        logger.info("Reseña eliminada correctamente con ID: {}", id);
 
         return ResponseEntity.noContent().build();
     }
@@ -132,10 +163,18 @@ public class ResenaController {
     @GetMapping("/{id}/exists")
     public boolean existe(@PathVariable Long id) {
 
-        return resenaService.existePorId(id);
+        logger.info("Solicitud GET recibida para verificar existencia de reseña con ID: {}", id);
+
+        boolean existe = resenaService.existePorId(id);
+
+        logger.info("Resultado de existencia para reseña ID {}: {}", id, existe);
+
+        return existe;
     }
 
     private EntityModel<Resena> agregarLinks(Resena resena) {
+
+        logger.debug("Agregando enlaces HATEOAS para reseña con ID: {}", resena.getId());
 
         return EntityModel.of(
                 resena,
