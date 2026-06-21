@@ -1,6 +1,7 @@
 package com.reservacanchas.cl.sede_service.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.reservacanchas.cl.sede_service.dto.SedeDTO;
 import com.reservacanchas.cl.sede_service.model.Sede;
 import com.reservacanchas.cl.sede_service.service.SedeService;
 
@@ -40,6 +41,14 @@ class SedeControllerTest {
     @DisplayName("Debe crear sede")
     void debeCrearSede() throws Exception {
 
+        SedeDTO sedeDTO = new SedeDTO(
+                "Antonio Varas",
+                "Av. Antonio Varas 666",
+                "Providencia",
+                "22223333",
+                "ACTIVA"
+        );
+
         Sede sede = new Sede(
                 1L,
                 "Antonio Varas",
@@ -49,16 +58,16 @@ class SedeControllerTest {
                 "ACTIVA"
         );
 
-        when(sedeService.guardar(any(Sede.class)))
+        when(sedeService.guardar(any(SedeDTO.class)))
                 .thenReturn(sede);
 
         mockMvc.perform(post("/sedes")
                         .with(jwt())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(sede)))
+                        .content(objectMapper.writeValueAsString(sedeDTO)))
                 .andExpect(status().isCreated());
 
-        verify(sedeService).guardar(any(Sede.class));
+        verify(sedeService).guardar(any(SedeDTO.class));
     }
 
     @Test
@@ -111,6 +120,14 @@ class SedeControllerTest {
     @DisplayName("Debe actualizar sede")
     void debeActualizarSede() throws Exception {
 
+        SedeDTO sedeDTO = new SedeDTO(
+                "Antonio Varas",
+                "Av. Antonio Varas 666",
+                "Providencia",
+                "22223333",
+                "ACTIVA"
+        );
+
         Sede sede = new Sede(
                 1L,
                 "Antonio Varas",
@@ -120,16 +137,16 @@ class SedeControllerTest {
                 "ACTIVA"
         );
 
-        when(sedeService.actualizar(eq(1L), any(Sede.class)))
+        when(sedeService.actualizar(eq(1L), any(SedeDTO.class)))
                 .thenReturn(sede);
 
         mockMvc.perform(put("/sedes/1")
                         .with(jwt())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(sede)))
+                        .content(objectMapper.writeValueAsString(sedeDTO)))
                 .andExpect(status().isOk());
 
-        verify(sedeService).actualizar(eq(1L), any(Sede.class));
+        verify(sedeService).actualizar(eq(1L), any(SedeDTO.class));
     }
 
     @Test

@@ -1,5 +1,6 @@
 package com.reservacanchas.cl.mantenimiento_service.service;
 
+import com.reservacanchas.cl.mantenimiento_service.dto.MantenimientoDTO;
 import com.reservacanchas.cl.mantenimiento_service.model.Mantenimiento;
 import com.reservacanchas.cl.mantenimiento_service.repository.MantenimientoRepository;
 
@@ -76,36 +77,57 @@ class MantenimientoServiceTest {
     void debeActualizarMantenimiento() {
 
         Mantenimiento actual = new Mantenimiento(
-                1L,1L,"2025-06-20","2025-06-21",
-                "Cambio de césped","PENDIENTE"
+                1L,
+                1L,
+                "2025-06-20",
+                "2025-06-21",
+                "Cambio de césped",
+                "PENDIENTE"
         );
 
-        Mantenimiento nuevo = new Mantenimiento(
-                1L,1L,"2025-06-25","2025-06-26",
-                "Mantención completa","FINALIZADO"
+        MantenimientoDTO dto = new MantenimientoDTO(
+                1L,
+                "2025-06-25",
+                "2025-06-26",
+                "Mantención completa",
+                "FINALIZADO"
+        );
+
+        Mantenimiento actualizado = new Mantenimiento(
+                1L,
+                1L,
+                "2025-06-25",
+                "2025-06-26",
+                "Mantención completa",
+                "FINALIZADO"
         );
 
         when(mantenimientoRepository.findById(1L))
                 .thenReturn(Optional.of(actual));
 
-        when(mantenimientoRepository.save(any()))
-                .thenReturn(nuevo);
+        when(mantenimientoRepository.save(any(Mantenimiento.class)))
+                .thenReturn(actualizado);
 
         Mantenimiento resultado =
-                mantenimientoService.actualizar(1L,nuevo);
+                mantenimientoService.actualizar(1L, dto);
 
         assertEquals("FINALIZADO",
                 resultado.getEstado());
 
-        verify(mantenimientoRepository).save(any());
+        verify(mantenimientoRepository)
+                .save(any(Mantenimiento.class));
     }
 
     @Test
     void debeEliminarMantenimiento() {
 
         Mantenimiento mantenimiento = new Mantenimiento(
-                1L,1L,"2025-06-20","2025-06-21",
-                "Cambio de césped","PENDIENTE"
+                1L,
+                1L,
+                "2025-06-20",
+                "2025-06-21",
+                "Cambio de césped",
+                "PENDIENTE"
         );
 
         when(mantenimientoRepository.findById(1L))

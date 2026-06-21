@@ -1,5 +1,6 @@
 package com.reservacanchas.cl.sede_service.service;
 
+import com.reservacanchas.cl.sede_service.dto.SedeDTO;
 import com.reservacanchas.cl.sede_service.exception.BadRequestException;
 import com.reservacanchas.cl.sede_service.exception.ResourceNotFoundException;
 import com.reservacanchas.cl.sede_service.model.Sede;
@@ -29,12 +30,21 @@ class SedeServiceTest {
     private SedeService sedeService;
 
     private Sede sede;
+    private SedeDTO sedeDTO;
 
     @BeforeEach
     void setUp() {
 
         sede = new Sede(
                 1L,
+                "Antonio Varas",
+                "Av. Antonio Varas 666",
+                "Providencia",
+                "22223333",
+                "ACTIVA"
+        );
+
+        sedeDTO = new SedeDTO(
                 "Antonio Varas",
                 "Av. Antonio Varas 666",
                 "Providencia",
@@ -49,7 +59,7 @@ class SedeServiceTest {
         when(sedeRepository.save(any(Sede.class)))
                 .thenReturn(sede);
 
-        Sede resultado = sedeService.guardar(sede);
+        Sede resultado = sedeService.guardar(sedeDTO);
 
         assertNotNull(resultado);
         assertEquals("Antonio Varas", resultado.getNombre());
@@ -60,11 +70,11 @@ class SedeServiceTest {
     @Test
     void guardarDebeLanzarExcepcionSiNombreVacio() {
 
-        sede.setNombre("");
+        sedeDTO.setNombre("");
 
         assertThrows(
                 BadRequestException.class,
-                () -> sedeService.guardar(sede)
+                () -> sedeService.guardar(sedeDTO)
         );
     }
 
@@ -114,7 +124,7 @@ class SedeServiceTest {
                 .thenReturn(sede);
 
         Sede resultado =
-                sedeService.actualizar(1L, sede);
+                sedeService.actualizar(1L, sedeDTO);
 
         assertNotNull(resultado);
 
@@ -129,7 +139,7 @@ class SedeServiceTest {
 
         assertThrows(
                 ResourceNotFoundException.class,
-                () -> sedeService.actualizar(99L, sede)
+                () -> sedeService.actualizar(99L, sedeDTO)
         );
     }
 

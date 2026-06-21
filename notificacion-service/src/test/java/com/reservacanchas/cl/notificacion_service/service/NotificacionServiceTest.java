@@ -1,5 +1,6 @@
 package com.reservacanchas.cl.notificacion_service.service;
 
+import com.reservacanchas.cl.notificacion_service.dto.NotificacionDTO;
 import com.reservacanchas.cl.notificacion_service.model.Notificacion;
 import com.reservacanchas.cl.notificacion_service.repository.NotificacionRepository;
 
@@ -78,15 +79,28 @@ class NotificacionServiceTest {
     void debeActualizarNotificacion() {
 
         Notificacion actual = new Notificacion(
-                1L,1L,1L,
+                1L,
+                1L,
+                1L,
                 "Reserva confirmada",
                 "EMAIL",
                 "2025-06-20",
                 "ENVIADA"
         );
 
-        Notificacion nueva = new Notificacion(
-                1L,1L,1L,
+        NotificacionDTO dto = new NotificacionDTO(
+                1L,
+                1L,
+                "Reserva modificada",
+                "SMS",
+                "2025-06-21",
+                "PENDIENTE"
+        );
+
+        Notificacion actualizada = new Notificacion(
+                1L,
+                1L,
+                1L,
                 "Reserva modificada",
                 "SMS",
                 "2025-06-21",
@@ -96,23 +110,26 @@ class NotificacionServiceTest {
         when(notificacionRepository.findById(1L))
                 .thenReturn(Optional.of(actual));
 
-        when(notificacionRepository.save(any()))
-                .thenReturn(nueva);
+        when(notificacionRepository.save(any(Notificacion.class)))
+                .thenReturn(actualizada);
 
         Notificacion resultado =
-                notificacionService.actualizar(1L, nueva);
+                notificacionService.actualizar(1L, dto);
 
         assertEquals("SMS",
                 resultado.getTipoNotificacion());
 
-        verify(notificacionRepository).save(any());
+        verify(notificacionRepository)
+                .save(any(Notificacion.class));
     }
 
     @Test
     void debeEliminarNotificacion() {
 
         Notificacion notificacion = new Notificacion(
-                1L,1L,1L,
+                1L,
+                1L,
+                1L,
                 "Reserva confirmada",
                 "EMAIL",
                 "2025-06-20",

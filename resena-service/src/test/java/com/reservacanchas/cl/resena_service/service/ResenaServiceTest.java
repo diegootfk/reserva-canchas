@@ -1,5 +1,6 @@
 package com.reservacanchas.cl.resena_service.service;
 
+import com.reservacanchas.cl.resena_service.dto.ResenaDTO;
 import com.reservacanchas.cl.resena_service.model.Resena;
 import com.reservacanchas.cl.resena_service.repository.ResenaRepository;
 
@@ -76,14 +77,29 @@ class ResenaServiceTest {
     void debeActualizarResena() {
 
         Resena actual = new Resena(
-                1L,1L,1L,1L,
+                1L,
+                1L,
+                1L,
+                1L,
                 4,
                 "Buena",
                 "2025-06-20"
         );
 
-        Resena nueva = new Resena(
-                1L,1L,1L,1L,
+        ResenaDTO dto = new ResenaDTO(
+                1L,
+                1L,
+                1L,
+                5,
+                "Excelente",
+                "2025-06-21"
+        );
+
+        Resena actualizada = new Resena(
+                1L,
+                1L,
+                1L,
+                1L,
                 5,
                 "Excelente",
                 "2025-06-21"
@@ -92,23 +108,25 @@ class ResenaServiceTest {
         when(resenaRepository.findById(1L))
                 .thenReturn(Optional.of(actual));
 
-        when(resenaRepository.save(any()))
-                .thenReturn(nueva);
+        when(resenaRepository.save(any(Resena.class)))
+                .thenReturn(actualizada);
 
         Resena resultado =
-                resenaService.actualizar(1L, nueva);
+                resenaService.actualizar(1L, dto);
 
-        assertEquals(5,
-                resultado.getCalificacion());
+        assertEquals(5, resultado.getCalificacion());
 
-        verify(resenaRepository).save(any());
+        verify(resenaRepository).save(any(Resena.class));
     }
 
     @Test
     void debeEliminarResena() {
 
         Resena resena = new Resena(
-                1L,1L,1L,1L,
+                1L,
+                1L,
+                1L,
+                1L,
                 5,
                 "Excelente",
                 "2025-06-20"
@@ -119,8 +137,7 @@ class ResenaServiceTest {
 
         resenaService.eliminar(1L);
 
-        verify(resenaRepository)
-                .delete(resena);
+        verify(resenaRepository).delete(resena);
     }
 
     @Test
