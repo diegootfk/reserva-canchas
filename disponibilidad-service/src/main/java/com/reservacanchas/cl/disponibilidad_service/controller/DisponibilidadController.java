@@ -9,6 +9,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
@@ -30,6 +33,8 @@ import java.util.stream.Collectors;
 @RequestMapping("/disponibilidades")
 public class DisponibilidadController {
 
+    private static final Logger logger = LoggerFactory.getLogger(DisponibilidadController.class);
+
     private static final String API_GATEWAY = "http://localhost:7090";
 
     private final DisponibilidadService disponibilidadService;
@@ -49,8 +54,15 @@ public class DisponibilidadController {
     @PostMapping
     public ResponseEntity<Disponibilidad> crear(@RequestBody Disponibilidad disponibilidad) {
 
+        logger.info("Solicitud POST recibida para crear disponibilidad de cancha ID: {}",
+                disponibilidad.getIdCancha());
+
+        Disponibilidad disponibilidadGuardada = disponibilidadService.guardar(disponibilidad);
+
+        logger.info("Disponibilidad creada correctamente con ID: {}", disponibilidadGuardada.getId());
+
         return new ResponseEntity<>(
-                disponibilidadService.guardar(disponibilidad),
+                disponibilidadGuardada,
                 HttpStatus.CREATED
         );
     }
@@ -63,7 +75,13 @@ public class DisponibilidadController {
     @GetMapping
     public ResponseEntity<CollectionModel<EntityModel<Disponibilidad>>> listar() {
 
-        List<EntityModel<Disponibilidad>> disponibilidades = disponibilidadService.listar()
+        logger.info("Solicitud GET recibida para listar todas las disponibilidades");
+
+        List<Disponibilidad> disponibilidadesEncontradas = disponibilidadService.listar();
+
+        logger.info("Se encontraron {} disponibilidades registradas", disponibilidadesEncontradas.size());
+
+        List<EntityModel<Disponibilidad>> disponibilidades = disponibilidadesEncontradas
                 .stream()
                 .map(this::agregarLinks)
                 .collect(Collectors.toList());
@@ -72,6 +90,8 @@ public class DisponibilidadController {
                 disponibilidades,
                 Link.of(API_GATEWAY + "/disponibilidades").withSelfRel()
         );
+
+        logger.info("Respuesta HATEOAS generada correctamente para listado de disponibilidades");
 
         return ResponseEntity.ok(respuesta);
     }
@@ -87,7 +107,11 @@ public class DisponibilidadController {
     @GetMapping("/{id}")
     public ResponseEntity<EntityModel<Disponibilidad>> buscarPorId(@PathVariable Long id) {
 
+        logger.info("Solicitud GET recibida para buscar disponibilidad con ID: {}", id);
+
         Disponibilidad disponibilidad = disponibilidadService.buscarPorId(id);
+
+        logger.info("Disponibilidad encontrada correctamente con ID: {}", id);
 
         return ResponseEntity.ok(agregarLinks(disponibilidad));
     }
@@ -105,9 +129,13 @@ public class DisponibilidadController {
             @PathVariable Long id,
             @RequestBody Disponibilidad disponibilidad) {
 
-        return ResponseEntity.ok(
-                disponibilidadService.actualizar(id, disponibilidad)
-        );
+        logger.info("Solicitud PUT recibida para actualizar disponibilidad con ID: {}", id);
+
+        Disponibilidad disponibilidadActualizada = disponibilidadService.actualizar(id, disponibilidad);
+
+        logger.info("Disponibilidad actualizada correctamente con ID: {}", id);
+
+        return ResponseEntity.ok(disponibilidadActualizada);
     }
 
     @Operation(
@@ -121,7 +149,11 @@ public class DisponibilidadController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminar(@PathVariable Long id) {
 
+        logger.warn("Solicitud DELETE recibida para eliminar disponibilidad con ID: {}", id);
+
         disponibilidadService.eliminar(id);
+
+        logger.info("Disponibilidad eliminada correctamente con ID: {}", id);
 
         return ResponseEntity.noContent().build();
     }
@@ -134,10 +166,19 @@ public class DisponibilidadController {
     @GetMapping("/{id}/exists")
     public boolean existe(@PathVariable Long id) {
 
-        return disponibilidadService.existePorId(id);
+        logger.info("Solicitud GET recibida para verificar existencia de disponibilidad con ID: {}", id);
+
+        boolean existe = disponibilidadService.existePorId(id);
+
+        logger.info("Resultado de existencia para disponibilidad ID {}: {}", id, existe);
+
+        return existe;
     }
 
     private EntityModel<Disponibilidad> agregarLinks(Disponibilidad disponibilidad) {
+
+        logger.debug("Agregando enlaces HATEOAS para disponibilidad con ID: {}",
+                disponibilidad.getId());
 
         return EntityModel.of(
                 disponibilidad,
