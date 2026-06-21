@@ -11,6 +11,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 
 import jakarta.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
@@ -30,6 +33,8 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/pagos")
 public class PagoController {
+
+    private static final Logger logger = LoggerFactory.getLogger(PagoController.class);
 
     private static final String API_GATEWAY = "http://localhost:7090";
 
@@ -51,7 +56,12 @@ public class PagoController {
     @PostMapping
     public ResponseEntity<Pago> crear(@Valid @RequestBody PagoDTO pagoDTO) {
 
+        logger.info("Solicitud POST recibida para registrar un nuevo pago asociado a reserva ID: {}",
+                pagoDTO.getIdReserva());
+
         Pago pago = pagoService.guardar(pagoDTO);
+
+        logger.info("Pago registrado correctamente con ID: {}", pago.getId());
 
         return new ResponseEntity<>(pago, HttpStatus.CREATED);
     }
@@ -64,7 +74,13 @@ public class PagoController {
     @GetMapping
     public ResponseEntity<CollectionModel<EntityModel<Pago>>> listar() {
 
-        List<EntityModel<Pago>> pagos = pagoService.listar()
+        logger.info("Solicitud GET recibida para listar todos los pagos");
+
+        List<Pago> pagosEncontrados = pagoService.listar();
+
+        logger.info("Se encontraron {} pagos registrados", pagosEncontrados.size());
+
+        List<EntityModel<Pago>> pagos = pagosEncontrados
                 .stream()
                 .map(this::agregarLinks)
                 .collect(Collectors.toList());
@@ -73,6 +89,8 @@ public class PagoController {
                 pagos,
                 Link.of(API_GATEWAY + "/pagos").withSelfRel()
         );
+
+        logger.info("Respuesta HATEOAS generada correctamente para listado de pagos");
 
         return ResponseEntity.ok(respuesta);
     }
@@ -88,7 +106,11 @@ public class PagoController {
     @GetMapping("/{id}")
     public ResponseEntity<EntityModel<Pago>> buscarPorId(@PathVariable Long id) {
 
+        logger.info("Solicitud GET recibida para buscar pago con ID: {}", id);
+
         Pago pago = pagoService.buscarPorId(id);
+
+        logger.info("Pago encontrado correctamente con ID: {}", id);
 
         return ResponseEntity.ok(agregarLinks(pago));
     }
@@ -107,9 +129,13 @@ public class PagoController {
             @PathVariable Long id,
             @Valid @RequestBody PagoDTO pagoDTO) {
 
-        return ResponseEntity.ok(
-                pagoService.actualizar(id, pagoDTO)
-        );
+        logger.info("Solicitud PUT recibida para actualizar pago con ID: {}", id);
+
+        Pago pagoActualizado = pagoService.actualizar(id, pagoDTO);
+
+        logger.info("Pago actualizado correctamente con ID: {}", id);
+
+        return ResponseEntity.ok(pagoActualizado);
     }
 
     @Operation(
@@ -123,7 +149,11 @@ public class PagoController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminar(@PathVariable Long id) {
 
+        logger.warn("Solicitud DELETE recibida para eliminar pago con ID: {}", id);
+
         pagoService.eliminar(id);
+
+        logger.info("Pago eliminado correctamente con ID: {}", id);
 
         return ResponseEntity.noContent().build();
     }
@@ -136,7 +166,13 @@ public class PagoController {
     @GetMapping("/{id}/exists")
     public boolean existe(@PathVariable Long id) {
 
-        return pagoService.existePorId(id);
+        logger.info("Solicitud GET recibida para verificar existencia de pago con ID: {}", id);
+
+        boolean existe = pagoService.existePorId(id);
+
+        logger.info("Resultado de existencia para pago ID {}: {}", id, existe);
+
+        return existe;
     }
 
     @Operation(
@@ -148,7 +184,15 @@ public class PagoController {
     public ResponseEntity<CollectionModel<EntityModel<Pago>>> buscarPorMetodoPago(
             @PathVariable String metodoPago) {
 
-        List<EntityModel<Pago>> pagos = pagoService.buscarPorMetodoPago(metodoPago)
+        logger.info("Solicitud GET recibida para buscar pagos con método de pago: {}", metodoPago);
+
+        List<Pago> pagosEncontrados = pagoService.buscarPorMetodoPago(metodoPago);
+
+        logger.info("Se encontraron {} pagos con método de pago: {}",
+                pagosEncontrados.size(),
+                metodoPago);
+
+        List<EntityModel<Pago>> pagos = pagosEncontrados
                 .stream()
                 .map(this::agregarLinks)
                 .collect(Collectors.toList());
@@ -158,6 +202,8 @@ public class PagoController {
                 Link.of(API_GATEWAY + "/pagos/metodo/" + metodoPago).withSelfRel(),
                 Link.of(API_GATEWAY + "/pagos").withRel("pagos")
         );
+
+        logger.info("Respuesta HATEOAS generada correctamente para pagos con método: {}", metodoPago);
 
         return ResponseEntity.ok(respuesta);
     }
@@ -171,7 +217,15 @@ public class PagoController {
     public ResponseEntity<CollectionModel<EntityModel<Pago>>> buscarPorEstadoPago(
             @PathVariable String estadoPago) {
 
-        List<EntityModel<Pago>> pagos = pagoService.buscarPorEstadoPago(estadoPago)
+        logger.info("Solicitud GET recibida para buscar pagos con estado: {}", estadoPago);
+
+        List<Pago> pagosEncontrados = pagoService.buscarPorEstadoPago(estadoPago);
+
+        logger.info("Se encontraron {} pagos con estado: {}",
+                pagosEncontrados.size(),
+                estadoPago);
+
+        List<EntityModel<Pago>> pagos = pagosEncontrados
                 .stream()
                 .map(this::agregarLinks)
                 .collect(Collectors.toList());
@@ -181,6 +235,8 @@ public class PagoController {
                 Link.of(API_GATEWAY + "/pagos/estado/" + estadoPago).withSelfRel(),
                 Link.of(API_GATEWAY + "/pagos").withRel("pagos")
         );
+
+        logger.info("Respuesta HATEOAS generada correctamente para pagos con estado: {}", estadoPago);
 
         return ResponseEntity.ok(respuesta);
     }
@@ -194,7 +250,15 @@ public class PagoController {
     public ResponseEntity<CollectionModel<EntityModel<Pago>>> buscarPorReserva(
             @PathVariable Long idReserva) {
 
-        List<EntityModel<Pago>> pagos = pagoService.buscarPorReserva(idReserva)
+        logger.info("Solicitud GET recibida para buscar pagos asociados a reserva ID: {}", idReserva);
+
+        List<Pago> pagosEncontrados = pagoService.buscarPorReserva(idReserva);
+
+        logger.info("Se encontraron {} pagos asociados a reserva ID: {}",
+                pagosEncontrados.size(),
+                idReserva);
+
+        List<EntityModel<Pago>> pagos = pagosEncontrados
                 .stream()
                 .map(this::agregarLinks)
                 .collect(Collectors.toList());
@@ -206,10 +270,14 @@ public class PagoController {
                 Link.of(API_GATEWAY + "/reservas/" + idReserva).withRel("reserva")
         );
 
+        logger.info("Respuesta HATEOAS generada correctamente para pagos de reserva ID: {}", idReserva);
+
         return ResponseEntity.ok(respuesta);
     }
 
     private EntityModel<Pago> agregarLinks(Pago pago) {
+
+        logger.debug("Agregando enlaces HATEOAS para pago con ID: {}", pago.getId());
 
         return EntityModel.of(
                 pago,
