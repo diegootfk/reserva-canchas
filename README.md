@@ -390,5 +390,5 @@ Duoc UC – Ingeniería en Informática.
 
 Integrantes:
 
-- Diego
-- Oscar
+- Diego Berrios
+- Oscar Muñoz
