@@ -12,6 +12,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 
 import jakarta.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
@@ -33,6 +36,9 @@ import java.util.stream.Collectors;
 @RequestMapping("/notificaciones")
 public class NotificacionController {
 
+    private static final Logger logger =
+            LoggerFactory.getLogger(NotificacionController.class);
+
     private static final String API_GATEWAY = "http://localhost:7090";
 
     private final NotificacionService notificacionService;
@@ -53,8 +59,17 @@ public class NotificacionController {
     public ResponseEntity<Notificacion> crear(
             @Valid @RequestBody NotificacionDTO notificacionDTO) {
 
+        logger.info("Solicitud para crear notificación para usuario {}",
+                notificacionDTO.getIdUsuario());
+
+        Notificacion notificacion =
+                notificacionService.guardar(notificacionDTO);
+
+        logger.info("Notificación creada correctamente con ID {}",
+                notificacion.getId());
+
         return new ResponseEntity<>(
-                notificacionService.guardar(notificacionDTO),
+                notificacion,
                 HttpStatus.CREATED
         );
     }
@@ -67,15 +82,19 @@ public class NotificacionController {
     @GetMapping
     public ResponseEntity<CollectionModel<EntityModel<Notificacion>>> listar() {
 
-        List<EntityModel<Notificacion>> notificaciones = notificacionService.listar()
-                .stream()
-                .map(this::agregarLinks)
-                .collect(Collectors.toList());
+        logger.info("Solicitud para listar todas las notificaciones");
 
-        CollectionModel<EntityModel<Notificacion>> respuesta = CollectionModel.of(
-                notificaciones,
-                Link.of(API_GATEWAY + "/notificaciones").withSelfRel()
-        );
+        List<EntityModel<Notificacion>> notificaciones =
+                notificacionService.listar()
+                        .stream()
+                        .map(this::agregarLinks)
+                        .collect(Collectors.toList());
+
+        CollectionModel<EntityModel<Notificacion>> respuesta =
+                CollectionModel.of(
+                        notificaciones,
+                        Link.of(API_GATEWAY + "/notificaciones").withSelfRel()
+                );
 
         return ResponseEntity.ok(respuesta);
     }
@@ -89,11 +108,18 @@ public class NotificacionController {
             @ApiResponse(responseCode = "404", description = "Notificación no encontrada")
     })
     @GetMapping("/{id}")
-    public ResponseEntity<EntityModel<Notificacion>> buscarPorId(@PathVariable Long id) {
+    public ResponseEntity<EntityModel<Notificacion>> buscarPorId(
+            @PathVariable Long id) {
 
-        Notificacion notificacion = notificacionService.buscarPorId(id);
+        logger.info("Solicitud para buscar notificación con ID {}",
+                id);
 
-        return ResponseEntity.ok(agregarLinks(notificacion));
+        Notificacion notificacion =
+                notificacionService.buscarPorId(id);
+
+        return ResponseEntity.ok(
+                agregarLinks(notificacion)
+        );
     }
 
     @Operation(
@@ -109,6 +135,9 @@ public class NotificacionController {
     public ResponseEntity<Notificacion> actualizar(
             @PathVariable Long id,
             @Valid @RequestBody NotificacionDTO notificacionDTO) {
+
+        logger.info("Solicitud para actualizar notificación con ID {}",
+                id);
 
         return ResponseEntity.ok(
                 notificacionService.actualizar(id, notificacionDTO)
@@ -126,6 +155,9 @@ public class NotificacionController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminar(@PathVariable Long id) {
 
+        logger.info("Solicitud para eliminar notificación con ID {}",
+                id);
+
         notificacionService.eliminar(id);
 
         return ResponseEntity.noContent().build();
@@ -138,6 +170,9 @@ public class NotificacionController {
     @ApiResponse(responseCode = "200", description = "Verificación realizada correctamente")
     @GetMapping("/{id}/exists")
     public boolean existe(@PathVariable Long id) {
+
+        logger.info("Verificando existencia de notificación con ID {}",
+                id);
 
         return notificacionService.existePorId(id);
     }
