@@ -12,6 +12,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 
 import jakarta.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
@@ -33,6 +36,9 @@ import java.util.stream.Collectors;
 @RequestMapping("/resenas")
 public class ResenaController {
 
+    private static final Logger logger =
+            LoggerFactory.getLogger(ResenaController.class);
+
     private static final String API_GATEWAY = "http://localhost:7090";
 
     private final ResenaService resenaService;
@@ -53,10 +59,14 @@ public class ResenaController {
     public ResponseEntity<Resena> crear(
             @Valid @RequestBody ResenaDTO resenaDTO) {
 
-        return new ResponseEntity<>(
-                resenaService.guardar(resenaDTO),
-                HttpStatus.CREATED
-        );
+        logger.info("Solicitud para crear reseña");
+
+        Resena resena = resenaService.guardar(resenaDTO);
+
+        logger.info("Reseña creada correctamente con ID: {}",
+                resena.getId());
+
+        return new ResponseEntity<>(resena, HttpStatus.CREATED);
     }
 
     @Operation(
@@ -67,10 +77,14 @@ public class ResenaController {
     @GetMapping
     public ResponseEntity<CollectionModel<EntityModel<Resena>>> listar() {
 
+        logger.info("Solicitud para listar reseñas");
+
         List<EntityModel<Resena>> resenas = resenaService.listar()
                 .stream()
                 .map(this::agregarLinks)
                 .collect(Collectors.toList());
+
+        logger.info("Reseñas listadas correctamente");
 
         CollectionModel<EntityModel<Resena>> respuesta = CollectionModel.of(
                 resenas,
@@ -91,7 +105,11 @@ public class ResenaController {
     @GetMapping("/{id}")
     public ResponseEntity<EntityModel<Resena>> buscarPorId(@PathVariable Long id) {
 
+        logger.info("Solicitud para buscar reseña con ID: {}", id);
+
         Resena resena = resenaService.buscarPorId(id);
+
+        logger.info("Reseña encontrada con ID: {}", id);
 
         return ResponseEntity.ok(agregarLinks(resena));
     }
@@ -110,9 +128,13 @@ public class ResenaController {
             @PathVariable Long id,
             @Valid @RequestBody ResenaDTO resenaDTO) {
 
-        return ResponseEntity.ok(
-                resenaService.actualizar(id, resenaDTO)
-        );
+        logger.info("Solicitud para actualizar reseña con ID: {}", id);
+
+        Resena resena = resenaService.actualizar(id, resenaDTO);
+
+        logger.info("Reseña actualizada correctamente con ID: {}", id);
+
+        return ResponseEntity.ok(resena);
     }
 
     @Operation(
@@ -126,7 +148,11 @@ public class ResenaController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminar(@PathVariable Long id) {
 
+        logger.info("Solicitud para eliminar reseña con ID: {}", id);
+
         resenaService.eliminar(id);
+
+        logger.info("Reseña eliminada correctamente con ID: {}", id);
 
         return ResponseEntity.noContent().build();
     }
@@ -138,6 +164,8 @@ public class ResenaController {
     @ApiResponse(responseCode = "200", description = "Verificación realizada correctamente")
     @GetMapping("/{id}/exists")
     public boolean existe(@PathVariable Long id) {
+
+        logger.info("Verificando existencia de reseña con ID: {}", id);
 
         return resenaService.existePorId(id);
     }
