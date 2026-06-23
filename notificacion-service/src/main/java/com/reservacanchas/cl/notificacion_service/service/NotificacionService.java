@@ -40,7 +40,7 @@ public class NotificacionService {
 
         Boolean usuarioExiste = webClientBuilder.build()
                 .get()
-                .uri("http://localhost:7091/usuarios/"
+                .uri("http://usuario-service:7091/usuarios/"
                         + notificacionDTO.getIdUsuario()
                         + "/exists")
                 .retrieve()
@@ -59,7 +59,7 @@ public class NotificacionService {
 
         Boolean reservaExiste = webClientBuilder.build()
                 .get()
-                .uri("http://localhost:7093/reservas/"
+                .uri("http://reserva-service:7093/reservas/"
                         + notificacionDTO.getIdReserva()
                         + "/exists")
                 .retrieve()

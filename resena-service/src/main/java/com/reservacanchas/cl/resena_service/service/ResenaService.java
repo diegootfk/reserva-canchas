@@ -41,7 +41,7 @@ public class ResenaService {
 
         Boolean usuarioExiste = webClientBuilder.build()
                 .get()
-                .uri("http://localhost:7091/usuarios/"
+                .uri("http://usuario-service:7091/usuarios/"
                         + resenaDTO.getIdUsuario()
                         + "/exists")
                 .retrieve()
@@ -62,7 +62,7 @@ public class ResenaService {
 
         Boolean canchaExiste = webClientBuilder.build()
                 .get()
-                .uri("http://localhost:7092/canchas/"
+                .uri("http://cancha-service:7092/canchas/"
                         + resenaDTO.getIdCancha()
                         + "/exists")
                 .retrieve()
@@ -83,7 +83,7 @@ public class ResenaService {
 
         Boolean reservaExiste = webClientBuilder.build()
                 .get()
-                .uri("http://localhost:7093/reservas/"
+                .uri("http://reserva-service:7093/reservas/"
                         + resenaDTO.getIdReserva()
                         + "/exists")
                 .retrieve()

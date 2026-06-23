@@ -37,7 +37,7 @@ public class PagoService {
 
         Boolean reservaExiste = webClientBuilder.build()
                 .get()
-                .uri("http://localhost:7093/reservas/"
+                .uri("http://reserva-service:7093/reservas/"
                         + pagoDTO.getIdReserva()
                         + "/exists")
                 .retrieve()

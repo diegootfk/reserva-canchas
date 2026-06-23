@@ -39,7 +39,7 @@ public class MantenimientoService {
 
         Boolean canchaExiste = webClientBuilder.build()
                 .get()
-                .uri("http://localhost:7092/canchas/"
+                .uri("http://cancha-service:7092/canchas/"
                         + mantenimientoDTO.getIdCancha()
                         + "/exists")
                 .retrieve()
