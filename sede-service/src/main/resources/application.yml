@@ -30,3 +30,11 @@ springdoc:
   swagger-ui:
     enabled: true
     path: /doc/swagger-ui.html
+
+logging:
+  file:
+    name: logs/sede-service.log
+
+  pattern:
+    console: "%d{HH:mm:ss} %-5level %msg%n"
+    file: "%d{HH:mm:ss} %-5level %msg%n"

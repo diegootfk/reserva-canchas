@@ -195,3 +195,11 @@ springdoc:
 
       - name: Mantenimiento Service
         url: /api-docs/mantenimientos
+
+logging:
+  file:
+    name: logs/api-gateway.log
+
+  pattern:
+    console: "%d{HH:mm:ss} %-5level %msg%n"
+    file: "%d{HH:mm:ss} %-5level %msg%n"
