@@ -16,7 +16,8 @@ import java.util.List;
 @Service
 public class ReservaService {
 
-    private static final Logger logger = LoggerFactory.getLogger(ReservaService.class);
+    private static final Logger logger =
+            LoggerFactory.getLogger(ReservaService.class);
 
     private final ReservaRepository reservaRepository;
     private final RestTemplate restTemplate;
@@ -28,7 +29,7 @@ public class ReservaService {
 
     public Reserva guardar(ReservaDTO reservaDTO) {
 
-        logger.info("Iniciando creación de reserva para usuario {} y cancha {}",
+        logger.info("Intentando crear reserva para usuario {} y cancha {}",
                 reservaDTO.getIdUsuario(),
                 reservaDTO.getIdCancha());
 
@@ -38,7 +39,10 @@ public class ReservaService {
         );
 
         if (usuarioExiste == null || !usuarioExiste) {
-            logger.warn("No se pudo crear reserva. Usuario {} no existe", reservaDTO.getIdUsuario());
+
+            logger.error("No se pudo crear reserva. Usuario {} no existe",
+                    reservaDTO.getIdUsuario());
+
             throw new ResourceNotFoundException("El usuario no existe");
         }
 
@@ -48,11 +52,15 @@ public class ReservaService {
         );
 
         if (canchaExiste == null || !canchaExiste) {
-            logger.warn("No se pudo crear reserva. Cancha {} no existe", reservaDTO.getIdCancha());
+
+            logger.error("No se pudo crear reserva. Cancha {} no existe",
+                    reservaDTO.getIdCancha());
+
             throw new ResourceNotFoundException("La cancha no existe");
         }
 
         Reserva reserva = new Reserva();
+
         reserva.setIdUsuario(reservaDTO.getIdUsuario());
         reserva.setIdCancha(reservaDTO.getIdCancha());
         reserva.setTotal(reservaDTO.getTotal());
@@ -60,28 +68,36 @@ public class ReservaService {
 
         Reserva reservaGuardada = reservaRepository.save(reserva);
 
-        logger.info("Reserva creada correctamente con ID {}", reservaGuardada.getId());
+        logger.info("Reserva creada correctamente con ID: {}",
+                reservaGuardada.getId());
 
         return reservaGuardada;
     }
 
     public List<Reserva> listar() {
+
         logger.info("Listando todas las reservas");
+
         return reservaRepository.findAll();
     }
 
     public Reserva buscarPorId(Long id) {
-        logger.info("Buscando reserva con ID {}", id);
+
+        logger.info("Buscando reserva con ID: {}", id);
 
         return reservaRepository.findById(id)
                 .orElseThrow(() -> {
-                    logger.warn("Reserva con ID {} no encontrada", id);
-                    return new ResourceNotFoundException("Reserva no encontrada");
+
+                    logger.error("Reserva no encontrada con ID: {}", id);
+
+                    return new ResourceNotFoundException(
+                            "Reserva no encontrada");
                 });
     }
 
     public Reserva actualizar(Long id, ReservaDTO reservaDTO) {
-        logger.info("Actualizando reserva con ID {}", id);
+
+        logger.info("Actualizando reserva con ID: {}", id);
 
         Reserva reserva = buscarPorId(id);
 
@@ -91,37 +107,51 @@ public class ReservaService {
 
         Reserva reservaActualizada = reservaRepository.save(reserva);
 
-        logger.info("Reserva con ID {} actualizada correctamente", id);
+        logger.info("Reserva actualizada correctamente con ID: {}", id);
 
         return reservaActualizada;
     }
 
     public void eliminar(Long id) {
-        logger.info("Eliminando reserva con ID {}", id);
+
+        logger.info("Eliminando reserva con ID: {}", id);
 
         Reserva reserva = buscarPorId(id);
+
         reservaRepository.delete(reserva);
 
-        logger.info("Reserva con ID {} eliminada correctamente", id);
+        logger.info("Reserva eliminada correctamente con ID: {}", id);
     }
 
     public boolean existePorId(Long id) {
-        logger.info("Verificando existencia de reserva con ID {}", id);
-        return reservaRepository.existsById(id);
+
+        logger.info("Verificando existencia de reserva con ID: {}", id);
+
+        boolean existe = reservaRepository.existsById(id);
+
+        logger.info("Resultado existencia reserva {}: {}", id, existe);
+
+        return existe;
     }
 
     public List<Reserva> buscarPorEstado(String estado) {
-        logger.info("Buscando reservas por estado {}", estado);
+
+        logger.info("Buscando reservas por estado: {}", estado);
+
         return reservaRepository.findByEstado(estado);
     }
 
     public List<Reserva> buscarPorUsuario(Long idUsuario) {
-        logger.info("Buscando reservas del usuario {}", idUsuario);
+
+        logger.info("Buscando reservas del usuario ID: {}", idUsuario);
+
         return reservaRepository.findByIdUsuario(idUsuario);
     }
 
     public List<Reserva> buscarPorCancha(Long idCancha) {
-        logger.info("Buscando reservas de la cancha {}", idCancha);
+
+        logger.info("Buscando reservas de la cancha ID: {}", idCancha);
+
         return reservaRepository.findByIdCancha(idCancha);
     }
 }

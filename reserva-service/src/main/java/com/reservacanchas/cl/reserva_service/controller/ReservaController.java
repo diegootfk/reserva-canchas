@@ -12,6 +12,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 
 import jakarta.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
@@ -33,6 +36,9 @@ import java.util.stream.Collectors;
 @RequestMapping("/reservas")
 public class ReservaController {
 
+    private static final Logger logger =
+            LoggerFactory.getLogger(ReservaController.class);
+
     private static final String API_GATEWAY = "http://localhost:7090";
 
     private final ReservaService reservaService;
@@ -53,7 +59,12 @@ public class ReservaController {
     @PostMapping
     public ResponseEntity<Reserva> crear(@Valid @RequestBody ReservaDTO reservaDTO) {
 
+        logger.info("Solicitud para crear reserva");
+
         Reserva reserva = reservaService.guardar(reservaDTO);
+
+        logger.info("Reserva creada correctamente con ID: {}",
+                reserva.getId());
 
         return new ResponseEntity<>(reserva, HttpStatus.CREATED);
     }
@@ -66,10 +77,14 @@ public class ReservaController {
     @GetMapping
     public ResponseEntity<CollectionModel<EntityModel<Reserva>>> listar() {
 
+        logger.info("Solicitud para listar reservas");
+
         List<EntityModel<Reserva>> reservas = reservaService.listar()
                 .stream()
                 .map(this::agregarLinks)
                 .collect(Collectors.toList());
+
+        logger.info("Reservas listadas correctamente");
 
         CollectionModel<EntityModel<Reserva>> respuesta = CollectionModel.of(
                 reservas,
@@ -90,7 +105,11 @@ public class ReservaController {
     @GetMapping("/{id}")
     public ResponseEntity<EntityModel<Reserva>> buscarPorId(@PathVariable Long id) {
 
+        logger.info("Solicitud para buscar reserva con ID: {}", id);
+
         Reserva reserva = reservaService.buscarPorId(id);
+
+        logger.info("Reserva encontrada con ID: {}", id);
 
         return ResponseEntity.ok(agregarLinks(reserva));
     }
@@ -110,9 +129,13 @@ public class ReservaController {
             @Valid @RequestBody ReservaDTO reservaDTO
     ) {
 
-        return ResponseEntity.ok(
-                reservaService.actualizar(id, reservaDTO)
-        );
+        logger.info("Solicitud para actualizar reserva con ID: {}", id);
+
+        Reserva reserva = reservaService.actualizar(id, reservaDTO);
+
+        logger.info("Reserva actualizada correctamente con ID: {}", id);
+
+        return ResponseEntity.ok(reserva);
     }
 
     @Operation(
@@ -126,7 +149,11 @@ public class ReservaController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminar(@PathVariable Long id) {
 
+        logger.info("Solicitud para eliminar reserva con ID: {}", id);
+
         reservaService.eliminar(id);
+
+        logger.info("Reserva eliminada correctamente con ID: {}", id);
 
         return ResponseEntity.noContent().build();
     }
@@ -139,6 +166,8 @@ public class ReservaController {
     @GetMapping("/{id}/exists")
     public boolean existe(@PathVariable Long id) {
 
+        logger.info("Verificando existencia de reserva con ID: {}", id);
+
         return reservaService.existePorId(id);
     }
 
@@ -149,6 +178,8 @@ public class ReservaController {
     @ApiResponse(responseCode = "200", description = "Reservas encontradas correctamente")
     @GetMapping("/estado/{estado}")
     public ResponseEntity<CollectionModel<EntityModel<Reserva>>> buscarPorEstado(@PathVariable String estado) {
+
+        logger.info("Buscando reservas por estado: {}", estado);
 
         List<EntityModel<Reserva>> reservas = reservaService.buscarPorEstado(estado)
                 .stream()
@@ -172,6 +203,8 @@ public class ReservaController {
     @GetMapping("/usuario/{idUsuario}")
     public ResponseEntity<CollectionModel<EntityModel<Reserva>>> buscarPorUsuario(@PathVariable Long idUsuario) {
 
+        logger.info("Buscando reservas del usuario ID: {}", idUsuario);
+
         List<EntityModel<Reserva>> reservas = reservaService.buscarPorUsuario(idUsuario)
                 .stream()
                 .map(this::agregarLinks)
@@ -194,6 +227,8 @@ public class ReservaController {
     @ApiResponse(responseCode = "200", description = "Reservas encontradas correctamente")
     @GetMapping("/cancha/{idCancha}")
     public ResponseEntity<CollectionModel<EntityModel<Reserva>>> buscarPorCancha(@PathVariable Long idCancha) {
+
+        logger.info("Buscando reservas de la cancha ID: {}", idCancha);
 
         List<EntityModel<Reserva>> reservas = reservaService.buscarPorCancha(idCancha)
                 .stream()
