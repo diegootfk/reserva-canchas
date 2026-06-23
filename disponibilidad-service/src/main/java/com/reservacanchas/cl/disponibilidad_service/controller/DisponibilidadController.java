@@ -1,5 +1,6 @@
 package com.reservacanchas.cl.disponibilidad_service.controller;
 
+import com.reservacanchas.cl.disponibilidad_service.assembler.DisponibilidadAssembler;
 import com.reservacanchas.cl.disponibilidad_service.dto.DisponibilidadDTO;
 import com.reservacanchas.cl.disponibilidad_service.model.Disponibilidad;
 import com.reservacanchas.cl.disponibilidad_service.service.DisponibilidadService;
@@ -42,9 +43,11 @@ public class DisponibilidadController {
     private static final String API_GATEWAY = "http://localhost:7090";
 
     private final DisponibilidadService disponibilidadService;
+    private final DisponibilidadAssembler disponibilidadAssembler;
 
-    public DisponibilidadController(DisponibilidadService disponibilidadService) {
+    public DisponibilidadController(DisponibilidadService disponibilidadService, DisponibilidadAssembler disponibilidadAssembler) {
         this.disponibilidadService = disponibilidadService;
+        this.disponibilidadAssembler = disponibilidadAssembler;
     }
 
     @Operation(
@@ -86,7 +89,7 @@ public class DisponibilidadController {
 
         List<EntityModel<Disponibilidad>> disponibilidades = disponibilidadService.listar()
                 .stream()
-                .map(this::agregarLinks)
+                .map(disponibilidadAssembler::toModel)
                 .collect(Collectors.toList());
 
         CollectionModel<EntityModel<Disponibilidad>> respuesta = CollectionModel.of(
@@ -117,7 +120,7 @@ public class DisponibilidadController {
 
         logger.info("Disponibilidad encontrada con ID {}", id);
 
-        return ResponseEntity.ok(agregarLinks(disponibilidad));
+        return ResponseEntity.ok(disponibilidadAssembler.toModel(disponibilidad));
     }
 
     @Operation(
@@ -175,16 +178,5 @@ public class DisponibilidadController {
         logger.info("Verificando existencia de disponibilidad con ID {}", id);
 
         return disponibilidadService.existePorId(id);
-    }
-
-    private EntityModel<Disponibilidad> agregarLinks(Disponibilidad disponibilidad) {
-
-        return EntityModel.of(
-                disponibilidad,
-                Link.of(API_GATEWAY + "/disponibilidades/" + disponibilidad.getId()).withSelfRel(),
-                Link.of(API_GATEWAY + "/disponibilidades").withRel("disponibilidades"),
-                Link.of(API_GATEWAY + "/disponibilidades/" + disponibilidad.getId() + "/exists").withRel("existe"),
-                Link.of(API_GATEWAY + "/canchas/" + disponibilidad.getIdCancha()).withRel("cancha")
-        );
     }
 }
