@@ -1,5 +1,6 @@
 package com.reservacanchas.cl.mantenimiento_service.controller;
 
+import com.reservacanchas.cl.mantenimiento_service.assembler.MantenimientoAssembler;
 import com.reservacanchas.cl.mantenimiento_service.dto.MantenimientoDTO;
 import com.reservacanchas.cl.mantenimiento_service.model.Mantenimiento;
 import com.reservacanchas.cl.mantenimiento_service.service.MantenimientoService;
@@ -42,9 +43,11 @@ public class MantenimientoController {
     private static final String API_GATEWAY = "http://localhost:7090";
 
     private final MantenimientoService mantenimientoService;
+    private final MantenimientoAssembler mantenimientoAssembler;
 
-    public MantenimientoController(MantenimientoService mantenimientoService) {
+    public MantenimientoController(MantenimientoService mantenimientoService, MantenimientoAssembler mantenimientoAssembler) {
         this.mantenimientoService = mantenimientoService;
+        this.mantenimientoAssembler = mantenimientoAssembler;
     }
 
     @Operation(
@@ -91,7 +94,7 @@ public class MantenimientoController {
         List<EntityModel<Mantenimiento>> mantenimientos =
                 mantenimientoService.listar()
                         .stream()
-                        .map(this::agregarLinks)
+                        .map(mantenimientoAssembler::toModel)
                         .collect(Collectors.toList());
 
         logger.info(
@@ -135,7 +138,7 @@ public class MantenimientoController {
         );
 
         return ResponseEntity.ok(
-                agregarLinks(mantenimiento)
+                mantenimientoAssembler.toModel(mantenimiento)
         );
     }
 
@@ -211,17 +214,5 @@ public class MantenimientoController {
         );
 
         return mantenimientoService.existePorId(id);
-    }
-
-    private EntityModel<Mantenimiento> agregarLinks(
-            Mantenimiento mantenimiento) {
-
-        return EntityModel.of(
-                mantenimiento,
-                Link.of(API_GATEWAY + "/mantenimientos/" + mantenimiento.getId()).withSelfRel(),
-                Link.of(API_GATEWAY + "/mantenimientos").withRel("mantenimientos"),
-                Link.of(API_GATEWAY + "/mantenimientos/" + mantenimiento.getId() + "/exists").withRel("existe"),
-                Link.of(API_GATEWAY + "/canchas/" + mantenimiento.getIdCancha()).withRel("cancha")
-        );
     }
 }
