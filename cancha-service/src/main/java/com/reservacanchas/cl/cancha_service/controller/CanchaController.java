@@ -1,5 +1,6 @@
 package com.reservacanchas.cl.cancha_service.controller;
 
+import com.reservacanchas.cl.cancha_service.assembler.CanchaAssembler;
 import com.reservacanchas.cl.cancha_service.dto.CanchaDTO;
 import com.reservacanchas.cl.cancha_service.model.Cancha;
 import com.reservacanchas.cl.cancha_service.service.CanchaService;
@@ -42,9 +43,11 @@ public class CanchaController {
     private static final String API_GATEWAY = "http://localhost:7090";
 
     private final CanchaService canchaService;
+    private final CanchaAssembler canchaAssembler;
 
-    public CanchaController(CanchaService canchaService) {
+    public CanchaController(CanchaService canchaService, CanchaAssembler canchaAssembler) {
         this.canchaService = canchaService;
+        this.canchaAssembler = canchaAssembler;
     }
 
     @Operation(
@@ -80,7 +83,7 @@ public class CanchaController {
 
         List<EntityModel<Cancha>> canchas = canchaService.listar()
                 .stream()
-                .map(this::agregarLinks)
+                .map(canchaAssembler::toModel)
                 .collect(Collectors.toList());
 
         CollectionModel<EntityModel<Cancha>> respuesta = CollectionModel.of(
@@ -110,7 +113,7 @@ public class CanchaController {
 
         logger.info("Cancha encontrada con ID {}", id);
 
-        return ResponseEntity.ok(agregarLinks(cancha));
+        return ResponseEntity.ok(canchaAssembler.toModel(cancha));
     }
 
     @Operation(
@@ -168,20 +171,5 @@ public class CanchaController {
         logger.info("Verificando existencia de cancha con ID {}", id);
 
         return canchaService.existePorId(id);
-    }
-
-    private EntityModel<Cancha> agregarLinks(Cancha cancha) {
-
-        return EntityModel.of(
-                cancha,
-                Link.of(API_GATEWAY + "/canchas/" + cancha.getId()).withSelfRel(),
-                Link.of(API_GATEWAY + "/canchas").withRel("canchas"),
-                Link.of(API_GATEWAY + "/canchas/" + cancha.getId() + "/exists").withRel("existe"),
-                Link.of(API_GATEWAY + "/reservas/cancha/" + cancha.getId()).withRel("reservas"),
-                Link.of(API_GATEWAY + "/disponibilidades/cancha/" + cancha.getId()).withRel("disponibilidades"),
-                Link.of(API_GATEWAY + "/horarios/cancha/" + cancha.getId()).withRel("horarios"),
-                Link.of(API_GATEWAY + "/resenas/cancha/" + cancha.getId()).withRel("resenas"),
-                Link.of(API_GATEWAY + "/mantenimientos/cancha/" + cancha.getId()).withRel("mantenimientos")
-        );
     }
 }
