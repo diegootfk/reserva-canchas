@@ -1,5 +1,6 @@
 package com.reservacanchas.cl.notificacion_service.controller;
 
+import com.reservacanchas.cl.notificacion_service.assembler.NotificacionAssembler;
 import com.reservacanchas.cl.notificacion_service.dto.NotificacionDTO;
 import com.reservacanchas.cl.notificacion_service.model.Notificacion;
 import com.reservacanchas.cl.notificacion_service.service.NotificacionService;
@@ -42,9 +43,11 @@ public class NotificacionController {
     private static final String API_GATEWAY = "http://localhost:7090";
 
     private final NotificacionService notificacionService;
+    private final NotificacionAssembler notificacionAssembler;
 
-    public NotificacionController(NotificacionService notificacionService) {
+    public NotificacionController(NotificacionService notificacionService, NotificacionAssembler notificacionAssembler) {
         this.notificacionService = notificacionService;
+        this.notificacionAssembler = notificacionAssembler;
     }
 
     @Operation(
@@ -87,7 +90,7 @@ public class NotificacionController {
         List<EntityModel<Notificacion>> notificaciones =
                 notificacionService.listar()
                         .stream()
-                        .map(this::agregarLinks)
+                        .map(notificacionAssembler::toModel)
                         .collect(Collectors.toList());
 
         CollectionModel<EntityModel<Notificacion>> respuesta =
@@ -118,7 +121,7 @@ public class NotificacionController {
                 notificacionService.buscarPorId(id);
 
         return ResponseEntity.ok(
-                agregarLinks(notificacion)
+                notificacionAssembler.toModel(notificacion)
         );
     }
 
@@ -175,17 +178,5 @@ public class NotificacionController {
                 id);
 
         return notificacionService.existePorId(id);
-    }
-
-    private EntityModel<Notificacion> agregarLinks(Notificacion notificacion) {
-
-        return EntityModel.of(
-                notificacion,
-                Link.of(API_GATEWAY + "/notificaciones/" + notificacion.getId()).withSelfRel(),
-                Link.of(API_GATEWAY + "/notificaciones").withRel("notificaciones"),
-                Link.of(API_GATEWAY + "/notificaciones/" + notificacion.getId() + "/exists").withRel("existe"),
-                Link.of(API_GATEWAY + "/usuarios/" + notificacion.getIdUsuario()).withRel("usuario"),
-                Link.of(API_GATEWAY + "/reservas/" + notificacion.getIdReserva()).withRel("reserva")
-        );
     }
 }
