@@ -1,5 +1,6 @@
 package com.reservacanchas.cl.reserva_service.controller;
 
+import com.reservacanchas.cl.reserva_service.assembler.ReservaAssembler;
 import com.reservacanchas.cl.reserva_service.dto.ReservaDTO;
 import com.reservacanchas.cl.reserva_service.model.Reserva;
 import com.reservacanchas.cl.reserva_service.service.ReservaService;
@@ -42,9 +43,11 @@ public class ReservaController {
     private static final String API_GATEWAY = "http://localhost:7090";
 
     private final ReservaService reservaService;
+    private final ReservaAssembler reservaAssembler;
 
-    public ReservaController(ReservaService reservaService) {
+    public ReservaController(ReservaService reservaService, ReservaAssembler reservaAssembler) {
         this.reservaService = reservaService;
+        this.reservaAssembler = reservaAssembler;
     }
 
     @Operation(
@@ -81,7 +84,7 @@ public class ReservaController {
 
         List<EntityModel<Reserva>> reservas = reservaService.listar()
                 .stream()
-                .map(this::agregarLinks)
+                .map(reservaAssembler::toModel)
                 .collect(Collectors.toList());
 
         logger.info("Reservas listadas correctamente");
@@ -111,7 +114,7 @@ public class ReservaController {
 
         logger.info("Reserva encontrada con ID: {}", id);
 
-        return ResponseEntity.ok(agregarLinks(reserva));
+        return ResponseEntity.ok(reservaAssembler.toModel(reserva));
     }
 
     @Operation(
@@ -183,7 +186,7 @@ public class ReservaController {
 
         List<EntityModel<Reserva>> reservas = reservaService.buscarPorEstado(estado)
                 .stream()
-                .map(this::agregarLinks)
+                .map(reservaAssembler::toModel)
                 .collect(Collectors.toList());
 
         CollectionModel<EntityModel<Reserva>> respuesta = CollectionModel.of(
@@ -207,7 +210,7 @@ public class ReservaController {
 
         List<EntityModel<Reserva>> reservas = reservaService.buscarPorUsuario(idUsuario)
                 .stream()
-                .map(this::agregarLinks)
+                .map(reservaAssembler::toModel)
                 .collect(Collectors.toList());
 
         CollectionModel<EntityModel<Reserva>> respuesta = CollectionModel.of(
@@ -232,7 +235,7 @@ public class ReservaController {
 
         List<EntityModel<Reserva>> reservas = reservaService.buscarPorCancha(idCancha)
                 .stream()
-                .map(this::agregarLinks)
+                .map(reservaAssembler::toModel)
                 .collect(Collectors.toList());
 
         CollectionModel<EntityModel<Reserva>> respuesta = CollectionModel.of(
@@ -243,21 +246,5 @@ public class ReservaController {
         );
 
         return ResponseEntity.ok(respuesta);
-    }
-
-    private EntityModel<Reserva> agregarLinks(Reserva reserva) {
-
-        return EntityModel.of(
-                reserva,
-                Link.of(API_GATEWAY + "/reservas/" + reserva.getId()).withSelfRel(),
-                Link.of(API_GATEWAY + "/reservas").withRel("reservas"),
-                Link.of(API_GATEWAY + "/reservas/" + reserva.getId() + "/exists").withRel("existe"),
-                Link.of(API_GATEWAY + "/reservas/estado/" + reserva.getEstado()).withRel("reservas-por-estado"),
-                Link.of(API_GATEWAY + "/reservas/usuario/" + reserva.getIdUsuario()).withRel("reservas-por-usuario"),
-                Link.of(API_GATEWAY + "/reservas/cancha/" + reserva.getIdCancha()).withRel("reservas-por-cancha"),
-                Link.of(API_GATEWAY + "/usuarios/" + reserva.getIdUsuario()).withRel("usuario"),
-                Link.of(API_GATEWAY + "/canchas/" + reserva.getIdCancha()).withRel("cancha"),
-                Link.of(API_GATEWAY + "/pagos/reserva/" + reserva.getId()).withRel("pagos")
-        );
     }
 }
