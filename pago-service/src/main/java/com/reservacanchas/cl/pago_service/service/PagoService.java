@@ -167,4 +167,21 @@ public class PagoService {
 
         return pagoRepository.findByIdReserva(idReserva);
     }
+
+
+    public double calcularIva(double montoNeto) {
+        logger.info("Calculando 19% de IVA para el monto neto: {}", montoNeto);
+        return montoNeto * 0.19;
+    }
+
+    public double aplicarDescuento(double montoOriginal, double porcentajeDescuento) {
+        logger.info("Aplicando un descuento del {}% al monto inicial: {}", porcentajeDescuento, montoOriginal);
+        double descuento = montoOriginal * (porcentajeDescuento / 100.0);
+        return montoOriginal - descuento;
+    }
+
+    public double calcularTotalConIva(double montoNeto) {
+        logger.info("Calculando total a pagar sumando IVA para el monto neto: {}", montoNeto);
+        return montoNeto + calcularIva(montoNeto);
+    }
 }
