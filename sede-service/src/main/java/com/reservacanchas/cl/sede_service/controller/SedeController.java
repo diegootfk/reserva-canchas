@@ -1,5 +1,6 @@
 package com.reservacanchas.cl.sede_service.controller;
 
+import com.reservacanchas.cl.sede_service.assembler.SedeAssembler;
 import com.reservacanchas.cl.sede_service.dto.SedeDTO;
 import com.reservacanchas.cl.sede_service.model.Sede;
 import com.reservacanchas.cl.sede_service.service.SedeService;
@@ -42,9 +43,14 @@ public class SedeController {
     private static final String API_GATEWAY = "http://localhost:7090";
 
     private final SedeService sedeService;
+    private final SedeAssembler sedeAssembler;
 
-    public SedeController(SedeService sedeService) {
+    public SedeController(
+            SedeService sedeService,
+            SedeAssembler sedeAssembler) {
+
         this.sedeService = sedeService;
+        this.sedeAssembler = sedeAssembler;
     }
 
     @Operation(
@@ -58,7 +64,7 @@ public class SedeController {
     @PostMapping
     public ResponseEntity<Sede> crear(@Valid @RequestBody SedeDTO sedeDTO) {
 
-        logger.info("POST /sedes - Creando sede: {}", sedeDTO.getNombre());
+        logger.info("Solicitud para crear sede: {}", sedeDTO.getNombre());
 
         Sede sede = sedeService.guardar(sedeDTO);
 
@@ -75,11 +81,11 @@ public class SedeController {
     @GetMapping
     public ResponseEntity<CollectionModel<EntityModel<Sede>>> listar() {
 
-        logger.info("GET /sedes - Listando sedes");
+        logger.info("Solicitud para listar sedes");
 
         List<EntityModel<Sede>> sedes = sedeService.listar()
                 .stream()
-                .map(this::agregarLinks)
+                .map(sedeAssembler::toModel)
                 .collect(Collectors.toList());
 
         logger.info("Se encontraron {} sedes", sedes.size());
@@ -103,13 +109,15 @@ public class SedeController {
     @GetMapping("/{id}")
     public ResponseEntity<EntityModel<Sede>> buscarPorId(@PathVariable Long id) {
 
-        logger.info("GET /sedes/{} - Buscando sede", id);
+        logger.info("Solicitud para buscar sede con ID: {}", id);
 
         Sede sede = sedeService.buscarPorId(id);
 
         logger.info("Sede encontrada con ID: {}", id);
 
-        return ResponseEntity.ok(agregarLinks(sede));
+        return ResponseEntity.ok(
+                sedeAssembler.toModel(sede)
+        );
     }
 
     @Operation(
@@ -126,7 +134,7 @@ public class SedeController {
             @PathVariable Long id,
             @Valid @RequestBody SedeDTO sedeDTO) {
 
-        logger.info("PUT /sedes/{} - Actualizando sede", id);
+        logger.info("Solicitud para actualizar sede con ID: {}", id);
 
         Sede sede = sedeService.actualizar(id, sedeDTO);
 
@@ -146,7 +154,7 @@ public class SedeController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminar(@PathVariable Long id) {
 
-        logger.info("DELETE /sedes/{} - Eliminando sede", id);
+        logger.info("Solicitud para eliminar sede con ID: {}", id);
 
         sedeService.eliminar(id);
 
@@ -163,22 +171,8 @@ public class SedeController {
     @GetMapping("/{id}/exists")
     public boolean existe(@PathVariable Long id) {
 
-        logger.info("GET /sedes/{}/exists - Verificando existencia", id);
+        logger.info("Verificando existencia de sede con ID: {}", id);
 
-        boolean existe = sedeService.existePorId(id);
-
-        logger.info("Resultado existencia sede {}: {}", id, existe);
-
-        return existe;
-    }
-
-    private EntityModel<Sede> agregarLinks(Sede sede) {
-
-        return EntityModel.of(
-                sede,
-                Link.of(API_GATEWAY + "/sedes/" + sede.getId()).withSelfRel(),
-                Link.of(API_GATEWAY + "/sedes").withRel("sedes"),
-                Link.of(API_GATEWAY + "/sedes/" + sede.getId() + "/exists").withRel("existe")
-        );
+        return sedeService.existePorId(id);
     }
 }
