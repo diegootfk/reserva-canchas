@@ -12,6 +12,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 
 import jakarta.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
@@ -33,6 +36,9 @@ import java.util.stream.Collectors;
 @RequestMapping("/horarios")
 public class HorarioController {
 
+    private static final Logger logger =
+            LoggerFactory.getLogger(HorarioController.class);
+
     private static final String API_GATEWAY = "http://localhost:7090";
 
     private final HorarioService horarioService;
@@ -53,8 +59,20 @@ public class HorarioController {
     public ResponseEntity<Horario> crear(
             @Valid @RequestBody HorarioDTO horarioDTO) {
 
+        logger.info(
+                "Solicitud para crear horario de cancha {}",
+                horarioDTO.getIdCancha()
+        );
+
+        Horario horario = horarioService.guardar(horarioDTO);
+
+        logger.info(
+                "Horario creado correctamente con ID {}",
+                horario.getId()
+        );
+
         return new ResponseEntity<>(
-                horarioService.guardar(horarioDTO),
+                horario,
                 HttpStatus.CREATED
         );
     }
@@ -67,10 +85,17 @@ public class HorarioController {
     @GetMapping
     public ResponseEntity<CollectionModel<EntityModel<Horario>>> listar() {
 
+        logger.info("Solicitud para listar todos los horarios");
+
         List<EntityModel<Horario>> horarios = horarioService.listar()
                 .stream()
                 .map(this::agregarLinks)
                 .collect(Collectors.toList());
+
+        logger.info(
+                "Se encontraron {} horarios",
+                horarios.size()
+        );
 
         CollectionModel<EntityModel<Horario>> respuesta = CollectionModel.of(
                 horarios,
@@ -89,11 +114,24 @@ public class HorarioController {
             @ApiResponse(responseCode = "404", description = "Horario no encontrado")
     })
     @GetMapping("/{id}")
-    public ResponseEntity<EntityModel<Horario>> buscarPorId(@PathVariable Long id) {
+    public ResponseEntity<EntityModel<Horario>> buscarPorId(
+            @PathVariable Long id) {
+
+        logger.info(
+                "Solicitud para buscar horario con ID {}",
+                id
+        );
 
         Horario horario = horarioService.buscarPorId(id);
 
-        return ResponseEntity.ok(agregarLinks(horario));
+        logger.info(
+                "Horario encontrado con ID {}",
+                id
+        );
+
+        return ResponseEntity.ok(
+                agregarLinks(horario)
+        );
     }
 
     @Operation(
@@ -110,8 +148,21 @@ public class HorarioController {
             @PathVariable Long id,
             @Valid @RequestBody HorarioDTO horarioDTO) {
 
+        logger.info(
+                "Solicitud para actualizar horario con ID {}",
+                id
+        );
+
+        Horario horarioActualizado =
+                horarioService.actualizar(id, horarioDTO);
+
+        logger.info(
+                "Horario actualizado correctamente con ID {}",
+                id
+        );
+
         return ResponseEntity.ok(
-                horarioService.actualizar(id, horarioDTO)
+                horarioActualizado
         );
     }
 
@@ -126,7 +177,17 @@ public class HorarioController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminar(@PathVariable Long id) {
 
+        logger.info(
+                "Solicitud para eliminar horario con ID {}",
+                id
+        );
+
         horarioService.eliminar(id);
+
+        logger.info(
+                "Horario eliminado correctamente con ID {}",
+                id
+        );
 
         return ResponseEntity.noContent().build();
     }
@@ -138,6 +199,11 @@ public class HorarioController {
     @ApiResponse(responseCode = "200", description = "Verificación realizada correctamente")
     @GetMapping("/{id}/exists")
     public boolean existe(@PathVariable Long id) {
+
+        logger.info(
+                "Verificando existencia de horario con ID {}",
+                id
+        );
 
         return horarioService.existePorId(id);
     }
