@@ -40,7 +40,7 @@ public class ReservaService {
 
         Boolean usuarioExiste = webClientBuilder.build()
                 .get()
-                .uri("http://localhost:7091/usuarios/"
+                .uri("http://usuario-service:7091/usuarios/"
                         + reservaDTO.getIdUsuario()
                         + "/exists")
                 .retrieve()
@@ -61,7 +61,7 @@ public class ReservaService {
 
         Boolean canchaExiste = webClientBuilder.build()
                 .get()
-                .uri("http://localhost:7092/canchas/"
+                .uri("http://cancha-service:7092/canchas/"
                         + reservaDTO.getIdCancha()
                         + "/exists")
                 .retrieve()
