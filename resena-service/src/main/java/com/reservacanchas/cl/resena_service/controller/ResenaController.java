@@ -1,5 +1,6 @@
 package com.reservacanchas.cl.resena_service.controller;
 
+import com.reservacanchas.cl.resena_service.assembler.ResenaAssembler;
 import com.reservacanchas.cl.resena_service.dto.ResenaDTO;
 import com.reservacanchas.cl.resena_service.model.Resena;
 import com.reservacanchas.cl.resena_service.service.ResenaService;
@@ -42,9 +43,11 @@ public class ResenaController {
     private static final String API_GATEWAY = "http://localhost:7090";
 
     private final ResenaService resenaService;
+    private final ResenaAssembler resenaAssembler;
 
-    public ResenaController(ResenaService resenaService) {
+    public ResenaController(ResenaService resenaService, ResenaAssembler resenaAssembler) {
         this.resenaService = resenaService;
+        this.resenaAssembler = resenaAssembler;
     }
 
     @Operation(
@@ -81,7 +84,7 @@ public class ResenaController {
 
         List<EntityModel<Resena>> resenas = resenaService.listar()
                 .stream()
-                .map(this::agregarLinks)
+                .map(resenaAssembler::toModel)
                 .collect(Collectors.toList());
 
         logger.info("Reseñas listadas correctamente");
@@ -111,7 +114,7 @@ public class ResenaController {
 
         logger.info("Reseña encontrada con ID: {}", id);
 
-        return ResponseEntity.ok(agregarLinks(resena));
+        return ResponseEntity.ok(resenaAssembler.toModel(resena));
     }
 
     @Operation(
@@ -168,18 +171,5 @@ public class ResenaController {
         logger.info("Verificando existencia de reseña con ID: {}", id);
 
         return resenaService.existePorId(id);
-    }
-
-    private EntityModel<Resena> agregarLinks(Resena resena) {
-
-        return EntityModel.of(
-                resena,
-                Link.of(API_GATEWAY + "/resenas/" + resena.getId()).withSelfRel(),
-                Link.of(API_GATEWAY + "/resenas").withRel("resenas"),
-                Link.of(API_GATEWAY + "/resenas/" + resena.getId() + "/exists").withRel("existe"),
-                Link.of(API_GATEWAY + "/usuarios/" + resena.getIdUsuario()).withRel("usuario"),
-                Link.of(API_GATEWAY + "/canchas/" + resena.getIdCancha()).withRel("cancha"),
-                Link.of(API_GATEWAY + "/reservas/" + resena.getIdReserva()).withRel("reserva")
-        );
     }
 }
