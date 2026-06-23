@@ -1,5 +1,6 @@
 package com.reservacanchas.cl.horario_service.controller;
 
+import com.reservacanchas.cl.horario_service.assembler.HorarioAssembler;
 import com.reservacanchas.cl.horario_service.dto.HorarioDTO;
 import com.reservacanchas.cl.horario_service.model.Horario;
 import com.reservacanchas.cl.horario_service.service.HorarioService;
@@ -42,9 +43,11 @@ public class HorarioController {
     private static final String API_GATEWAY = "http://localhost:7090";
 
     private final HorarioService horarioService;
+    private final HorarioAssembler horarioAssembler;
 
-    public HorarioController(HorarioService horarioService) {
+    public HorarioController(HorarioService horarioService, HorarioAssembler horarioAssembler) {
         this.horarioService = horarioService;
+        this.horarioAssembler = horarioAssembler;
     }
 
     @Operation(
@@ -89,7 +92,7 @@ public class HorarioController {
 
         List<EntityModel<Horario>> horarios = horarioService.listar()
                 .stream()
-                .map(this::agregarLinks)
+                .map(horarioAssembler::toModel)
                 .collect(Collectors.toList());
 
         logger.info(
@@ -130,7 +133,7 @@ public class HorarioController {
         );
 
         return ResponseEntity.ok(
-                agregarLinks(horario)
+                horarioAssembler.toModel(horario)
         );
     }
 
@@ -206,16 +209,5 @@ public class HorarioController {
         );
 
         return horarioService.existePorId(id);
-    }
-
-    private EntityModel<Horario> agregarLinks(Horario horario) {
-
-        return EntityModel.of(
-                horario,
-                Link.of(API_GATEWAY + "/horarios/" + horario.getId()).withSelfRel(),
-                Link.of(API_GATEWAY + "/horarios").withRel("horarios"),
-                Link.of(API_GATEWAY + "/horarios/" + horario.getId() + "/exists").withRel("existe"),
-                Link.of(API_GATEWAY + "/canchas/" + horario.getIdCancha()).withRel("cancha")
-        );
     }
 }
