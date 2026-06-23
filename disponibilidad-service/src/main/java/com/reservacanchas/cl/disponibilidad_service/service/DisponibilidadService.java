@@ -10,7 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.List;
 
@@ -21,11 +21,14 @@ public class DisponibilidadService {
             LoggerFactory.getLogger(DisponibilidadService.class);
 
     private final DisponibilidadRepository disponibilidadRepository;
-    private final RestTemplate restTemplate;
+    private final WebClient.Builder webClientBuilder;
 
-    public DisponibilidadService(DisponibilidadRepository disponibilidadRepository) {
+    public DisponibilidadService(
+            DisponibilidadRepository disponibilidadRepository,
+            WebClient.Builder webClientBuilder) {
+
         this.disponibilidadRepository = disponibilidadRepository;
-        this.restTemplate = new RestTemplate();
+        this.webClientBuilder = webClientBuilder;
     }
 
     public Disponibilidad guardar(DisponibilidadDTO disponibilidadDTO) {
@@ -41,19 +44,23 @@ public class DisponibilidadService {
             throw new BadRequestException("La fecha es obligatoria");
         }
 
-        Boolean canchaExiste = restTemplate.getForObject(
-                "http://localhost:7092/canchas/"
+        Boolean canchaExiste = webClientBuilder.build()
+                .get()
+                .uri("http://localhost:7092/canchas/"
                         + disponibilidadDTO.getIdCancha()
-                        + "/exists",
-                Boolean.class
-        );
+                        + "/exists")
+                .retrieve()
+                .bodyToMono(Boolean.class)
+                .block();
 
         if (canchaExiste == null || !canchaExiste) {
 
-            logger.warn("No se pudo crear disponibilidad. Cancha {} no existe",
+            logger.warn(
+                    "No se pudo crear disponibilidad. Cancha {} no existe",
                     disponibilidadDTO.getIdCancha());
 
-            throw new ResourceNotFoundException("La cancha no existe");
+            throw new ResourceNotFoundException(
+                    "La cancha no existe");
         }
 
         Disponibilidad disponibilidad = new Disponibilidad();
@@ -67,7 +74,8 @@ public class DisponibilidadService {
         Disponibilidad disponibilidadGuardada =
                 disponibilidadRepository.save(disponibilidad);
 
-        logger.info("Disponibilidad creada correctamente con ID {}",
+        logger.info(
+                "Disponibilidad creada correctamente con ID {}",
                 disponibilidadGuardada.getId());
 
         return disponibilidadGuardada;
@@ -77,7 +85,14 @@ public class DisponibilidadService {
 
         logger.info("Listando todas las disponibilidades");
 
-        return disponibilidadRepository.findAll();
+        List<Disponibilidad> disponibilidades =
+                disponibilidadRepository.findAll();
+
+        logger.info(
+                "Se encontraron {} disponibilidades",
+                disponibilidades.size());
+
+        return disponibilidades;
     }
 
     public Disponibilidad buscarPorId(Long id) {
@@ -87,7 +102,9 @@ public class DisponibilidadService {
         return disponibilidadRepository.findById(id)
                 .orElseThrow(() -> {
 
-                    logger.warn("Disponibilidad con ID {} no encontrada", id);
+                    logger.error(
+                            "Disponibilidad con ID {} no encontrada",
+                            id);
 
                     return new ResourceNotFoundException(
                             "Disponibilidad no encontrada");
@@ -98,7 +115,9 @@ public class DisponibilidadService {
             Long id,
             DisponibilidadDTO disponibilidadDTO) {
 
-        logger.info("Actualizando disponibilidad con ID {}", id);
+        logger.info(
+                "Actualizando disponibilidad con ID {}",
+                id);
 
         Disponibilidad disponibilidad = buscarPorId(id);
 
@@ -111,26 +130,42 @@ public class DisponibilidadService {
         Disponibilidad disponibilidadActualizada =
                 disponibilidadRepository.save(disponibilidad);
 
-        logger.info("Disponibilidad con ID {} actualizada correctamente", id);
+        logger.info(
+                "Disponibilidad con ID {} actualizada correctamente",
+                id);
 
         return disponibilidadActualizada;
     }
 
     public void eliminar(Long id) {
 
-        logger.info("Eliminando disponibilidad con ID {}", id);
+        logger.info(
+                "Eliminando disponibilidad con ID {}",
+                id);
 
         Disponibilidad disponibilidad = buscarPorId(id);
 
         disponibilidadRepository.delete(disponibilidad);
 
-        logger.info("Disponibilidad con ID {} eliminada correctamente", id);
+        logger.info(
+                "Disponibilidad con ID {} eliminada correctamente",
+                id);
     }
 
     public boolean existePorId(Long id) {
 
-        logger.info("Verificando existencia de disponibilidad con ID {}", id);
+        logger.info(
+                "Verificando existencia de disponibilidad con ID {}",
+                id);
 
-        return disponibilidadRepository.existsById(id);
+        boolean existe =
+                disponibilidadRepository.existsById(id);
+
+        logger.info(
+                "Resultado existencia disponibilidad {}: {}",
+                id,
+                existe);
+
+        return existe;
     }
 }
