@@ -12,6 +12,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 
 import jakarta.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
@@ -33,6 +36,9 @@ import java.util.stream.Collectors;
 @RequestMapping("/pagos")
 public class PagoController {
 
+    private static final Logger logger =
+            LoggerFactory.getLogger(PagoController.class);
+
     private static final String API_GATEWAY = "http://localhost:7090";
 
     private final PagoService pagoService;
@@ -53,7 +59,13 @@ public class PagoController {
     @PostMapping
     public ResponseEntity<Pago> crear(@Valid @RequestBody PagoDTO pagoDTO) {
 
+        logger.info("Solicitud para crear pago de reserva {}",
+                pagoDTO.getIdReserva());
+
         Pago pago = pagoService.guardar(pagoDTO);
+
+        logger.info("Pago creado correctamente con ID {}",
+                pago.getId());
 
         return new ResponseEntity<>(pago, HttpStatus.CREATED);
     }
@@ -65,6 +77,8 @@ public class PagoController {
     @ApiResponse(responseCode = "200", description = "Listado obtenido correctamente")
     @GetMapping
     public ResponseEntity<CollectionModel<EntityModel<Pago>>> listar() {
+
+        logger.info("Solicitud para listar todos los pagos");
 
         List<EntityModel<Pago>> pagos = pagoService.listar()
                 .stream()
@@ -90,6 +104,8 @@ public class PagoController {
     @GetMapping("/{id}")
     public ResponseEntity<EntityModel<Pago>> buscarPorId(@PathVariable Long id) {
 
+        logger.info("Solicitud para buscar pago con ID {}", id);
+
         Pago pago = pagoService.buscarPorId(id);
 
         return ResponseEntity.ok(agregarLinks(pago));
@@ -109,6 +125,8 @@ public class PagoController {
             @PathVariable Long id,
             @Valid @RequestBody PagoDTO pagoDTO) {
 
+        logger.info("Solicitud para actualizar pago con ID {}", id);
+
         return ResponseEntity.ok(
                 pagoService.actualizar(id, pagoDTO)
         );
@@ -125,6 +143,8 @@ public class PagoController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminar(@PathVariable Long id) {
 
+        logger.info("Solicitud para eliminar pago con ID {}", id);
+
         pagoService.eliminar(id);
 
         return ResponseEntity.noContent().build();
@@ -138,6 +158,8 @@ public class PagoController {
     @GetMapping("/{id}/exists")
     public boolean existe(@PathVariable Long id) {
 
+        logger.info("Verificando existencia del pago con ID {}", id);
+
         return pagoService.existePorId(id);
     }
 
@@ -149,6 +171,8 @@ public class PagoController {
     @GetMapping("/metodo/{metodoPago}")
     public ResponseEntity<CollectionModel<EntityModel<Pago>>> buscarPorMetodoPago(
             @PathVariable String metodoPago) {
+
+        logger.info("Buscando pagos por método {}", metodoPago);
 
         List<EntityModel<Pago>> pagos = pagoService.buscarPorMetodoPago(metodoPago)
                 .stream()
@@ -173,6 +197,8 @@ public class PagoController {
     public ResponseEntity<CollectionModel<EntityModel<Pago>>> buscarPorEstadoPago(
             @PathVariable String estadoPago) {
 
+        logger.info("Buscando pagos por estado {}", estadoPago);
+
         List<EntityModel<Pago>> pagos = pagoService.buscarPorEstadoPago(estadoPago)
                 .stream()
                 .map(this::agregarLinks)
@@ -195,6 +221,8 @@ public class PagoController {
     @GetMapping("/reserva/{idReserva}")
     public ResponseEntity<CollectionModel<EntityModel<Pago>>> buscarPorReserva(
             @PathVariable Long idReserva) {
+
+        logger.info("Buscando pagos de la reserva {}", idReserva);
 
         List<EntityModel<Pago>> pagos = pagoService.buscarPorReserva(idReserva)
                 .stream()

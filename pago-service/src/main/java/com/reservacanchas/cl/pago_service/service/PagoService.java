@@ -16,7 +16,8 @@ import java.util.List;
 @Service
 public class PagoService {
 
-    private static final Logger logger = LoggerFactory.getLogger(PagoService.class);
+    private static final Logger logger =
+            LoggerFactory.getLogger(PagoService.class);
 
     private final PagoRepository pagoRepository;
     private final RestTemplate restTemplate;
@@ -28,7 +29,8 @@ public class PagoService {
 
     public Pago guardar(PagoDTO pagoDTO) {
 
-        logger.info("Iniciando registro de pago para reserva {}", pagoDTO.getIdReserva());
+        logger.info("Iniciando registro de pago para reserva {}",
+                pagoDTO.getIdReserva());
 
         Boolean reservaExiste = restTemplate.getForObject(
                 "http://localhost:7093/reservas/" + pagoDTO.getIdReserva() + "/exists",
@@ -36,11 +38,19 @@ public class PagoService {
         );
 
         if (reservaExiste == null || !reservaExiste) {
-            logger.warn("No se pudo registrar pago. Reserva {} no existe", pagoDTO.getIdReserva());
-            throw new ResourceNotFoundException("La reserva no existe");
+
+            logger.warn(
+                    "No se pudo registrar pago. Reserva {} no existe",
+                    pagoDTO.getIdReserva()
+            );
+
+            throw new ResourceNotFoundException(
+                    "La reserva no existe"
+            );
         }
 
         Pago pago = new Pago();
+
         pago.setIdReserva(pagoDTO.getIdReserva());
         pago.setMonto(pagoDTO.getMonto());
         pago.setMetodoPago(pagoDTO.getMetodoPago());
@@ -48,29 +58,44 @@ public class PagoService {
 
         Pago pagoGuardado = pagoRepository.save(pago);
 
-        logger.info("Pago creado correctamente con ID {}", pagoGuardado.getId());
+        logger.info(
+                "Pago creado correctamente con ID {}",
+                pagoGuardado.getId()
+        );
 
         return pagoGuardado;
     }
 
     public List<Pago> listar() {
+
         logger.info("Listando todos los pagos");
+
         return pagoRepository.findAll();
     }
 
     public Pago buscarPorId(Long id) {
-        logger.info("Buscando pago con ID {}", id);
+
+        logger.info("Buscando pago con ID {}",
+                id);
 
         return pagoRepository.findById(id)
                 .orElseThrow(() -> {
-                    logger.warn("Pago con ID {} no encontrado", id);
-                    return new ResourceNotFoundException("Pago no encontrado");
+
+                    logger.error(
+                            "Pago no encontrado con ID {}",
+                            id
+                    );
+
+                    return new ResourceNotFoundException(
+                            "Pago no encontrado"
+                    );
                 });
     }
 
     public Pago actualizar(Long id, PagoDTO pagoDTO) {
 
-        logger.info("Actualizando pago con ID {}", id);
+        logger.info("Actualizando pago con ID {}",
+                id);
 
         Pago pago = buscarPorId(id);
 
@@ -80,37 +105,66 @@ public class PagoService {
 
         Pago pagoActualizado = pagoRepository.save(pago);
 
-        logger.info("Pago con ID {} actualizado correctamente", id);
+        logger.info(
+                "Pago actualizado correctamente con ID {}",
+                id
+        );
 
         return pagoActualizado;
     }
 
     public void eliminar(Long id) {
-        logger.info("Eliminando pago con ID {}", id);
+
+        logger.info("Eliminando pago con ID {}",
+                id);
 
         Pago pago = buscarPorId(id);
+
         pagoRepository.delete(pago);
 
-        logger.info("Pago con ID {} eliminado correctamente", id);
+        logger.info(
+                "Pago eliminado correctamente con ID {}",
+                id
+        );
     }
 
     public boolean existePorId(Long id) {
-        logger.info("Verificando existencia de pago con ID {}", id);
+
+        logger.info(
+                "Verificando existencia de pago con ID {}",
+                id
+        );
+
         return pagoRepository.existsById(id);
     }
 
     public List<Pago> buscarPorMetodoPago(String metodoPago) {
-        logger.info("Buscando pagos por método {}", metodoPago);
+
+        logger.info(
+                "Buscando pagos por método {}",
+                metodoPago
+        );
+
         return pagoRepository.findByMetodoPago(metodoPago);
     }
 
     public List<Pago> buscarPorEstadoPago(String estadoPago) {
-        logger.info("Buscando pagos por estado {}", estadoPago);
+
+        logger.info(
+                "Buscando pagos por estado {}",
+                estadoPago
+        );
+
         return pagoRepository.findByEstadoPago(estadoPago);
     }
 
     public List<Pago> buscarPorReserva(Long idReserva) {
-        logger.info("Buscando pagos asociados a reserva {}", idReserva);
+
+        logger.info(
+                "Buscando pagos asociados a reserva {}",
+                idReserva
+        );
+
         return pagoRepository.findByIdReserva(idReserva);
     }
 }
