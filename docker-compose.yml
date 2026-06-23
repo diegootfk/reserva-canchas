@@ -1,0 +1,38 @@
+services:
+  mysql-horario:
+    image: mysql:8.0
+    container_name: mysql-horario
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: db_horario_service
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_horario_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  horario-service:
+    build:
+      context: ./horario-service
+      dockerfile: Dockerfile
+    container_name: horario-service
+    restart: always
+    ports:
+      - "7096:7096"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-horario:3306/db_horario_service?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_SHOW_SQL: "true"
+    depends_on:
+      mysql-horario:
+        condition: service_healthy
+
+volumes:
+  mysql_horario_data:
