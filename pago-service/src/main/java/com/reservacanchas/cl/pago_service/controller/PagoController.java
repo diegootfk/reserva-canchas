@@ -1,5 +1,6 @@
 package com.reservacanchas.cl.pago_service.controller;
 
+import com.reservacanchas.cl.pago_service.assembler.PagoAssembler;
 import com.reservacanchas.cl.pago_service.dto.PagoDTO;
 import com.reservacanchas.cl.pago_service.model.Pago;
 import com.reservacanchas.cl.pago_service.service.PagoService;
@@ -42,9 +43,11 @@ public class PagoController {
     private static final String API_GATEWAY = "http://localhost:7090";
 
     private final PagoService pagoService;
+    private final PagoAssembler pagoAssembler;
 
-    public PagoController(PagoService pagoService) {
+    public PagoController(PagoService pagoService, PagoAssembler pagoAssembler) {
         this.pagoService = pagoService;
+        this.pagoAssembler = pagoAssembler;
     }
 
     @Operation(
@@ -82,7 +85,7 @@ public class PagoController {
 
         List<EntityModel<Pago>> pagos = pagoService.listar()
                 .stream()
-                .map(this::agregarLinks)
+                .map(pagoAssembler::toModel)
                 .collect(Collectors.toList());
 
         CollectionModel<EntityModel<Pago>> respuesta = CollectionModel.of(
@@ -108,7 +111,7 @@ public class PagoController {
 
         Pago pago = pagoService.buscarPorId(id);
 
-        return ResponseEntity.ok(agregarLinks(pago));
+        return ResponseEntity.ok(pagoAssembler.toModel(pago));
     }
 
     @Operation(
@@ -176,7 +179,7 @@ public class PagoController {
 
         List<EntityModel<Pago>> pagos = pagoService.buscarPorMetodoPago(metodoPago)
                 .stream()
-                .map(this::agregarLinks)
+                .map(pagoAssembler::toModel)
                 .collect(Collectors.toList());
 
         CollectionModel<EntityModel<Pago>> respuesta = CollectionModel.of(
@@ -201,7 +204,7 @@ public class PagoController {
 
         List<EntityModel<Pago>> pagos = pagoService.buscarPorEstadoPago(estadoPago)
                 .stream()
-                .map(this::agregarLinks)
+                .map(pagoAssembler::toModel)
                 .collect(Collectors.toList());
 
         CollectionModel<EntityModel<Pago>> respuesta = CollectionModel.of(
@@ -226,7 +229,7 @@ public class PagoController {
 
         List<EntityModel<Pago>> pagos = pagoService.buscarPorReserva(idReserva)
                 .stream()
-                .map(this::agregarLinks)
+                .map(pagoAssembler::toModel)
                 .collect(Collectors.toList());
 
         CollectionModel<EntityModel<Pago>> respuesta = CollectionModel.of(
@@ -237,19 +240,5 @@ public class PagoController {
         );
 
         return ResponseEntity.ok(respuesta);
-    }
-
-    private EntityModel<Pago> agregarLinks(Pago pago) {
-
-        return EntityModel.of(
-                pago,
-                Link.of(API_GATEWAY + "/pagos/" + pago.getId()).withSelfRel(),
-                Link.of(API_GATEWAY + "/pagos").withRel("pagos"),
-                Link.of(API_GATEWAY + "/pagos/" + pago.getId() + "/exists").withRel("existe"),
-                Link.of(API_GATEWAY + "/pagos/metodo/" + pago.getMetodoPago()).withRel("pagos-por-metodo"),
-                Link.of(API_GATEWAY + "/pagos/estado/" + pago.getEstadoPago()).withRel("pagos-por-estado"),
-                Link.of(API_GATEWAY + "/pagos/reserva/" + pago.getIdReserva()).withRel("pagos-por-reserva"),
-                Link.of(API_GATEWAY + "/reservas/" + pago.getIdReserva()).withRel("reserva")
-        );
     }
 }
