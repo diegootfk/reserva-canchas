@@ -78,7 +78,7 @@ public class UsuarioController {
 
     @Operation(
             summary = "Listar usuarios",
-            description = "Obtiene todos los usuarios registrados con enlaces HATEOAS apuntando al API Gateway"
+            description = "Obtiene todos los usuarios registrados con enlaces HATEOAS"
     )
     @ApiResponse(responseCode = "200", description = "Listado obtenido correctamente")
     @GetMapping
@@ -103,7 +103,7 @@ public class UsuarioController {
 
     @Operation(
             summary = "Buscar usuario por ID",
-            description = "Obtiene un usuario específico mediante su identificador con enlaces HATEOAS apuntando al API Gateway"
+            description = "Obtiene un usuario específico mediante su identificador con enlaces HATEOAS"
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Usuario encontrado"),

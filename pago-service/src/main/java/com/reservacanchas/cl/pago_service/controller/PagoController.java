@@ -75,7 +75,7 @@ public class PagoController {
 
     @Operation(
             summary = "Listar pagos",
-            description = "Obtiene todos los pagos registrados en el sistema con enlaces HATEOAS apuntando al API Gateway"
+            description = "Obtiene todos los pagos registrados en el sistema con enlaces HATEOAS"
     )
     @ApiResponse(responseCode = "200", description = "Listado obtenido correctamente")
     @GetMapping
@@ -98,7 +98,7 @@ public class PagoController {
 
     @Operation(
             summary = "Buscar pago por ID",
-            description = "Obtiene un pago específico mediante su identificador con enlaces HATEOAS apuntando al API Gateway"
+            description = "Obtiene un pago específico mediante su identificador con enlaces HATEOAS"
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Pago encontrado"),
@@ -168,7 +168,7 @@ public class PagoController {
 
     @Operation(
             summary = "Buscar pagos por método",
-            description = "Obtiene todos los pagos realizados con un método de pago específico con enlaces HATEOAS apuntando al API Gateway"
+            description = "Obtiene todos los pagos realizados con un método de pago específico con enlaces HATEOAS"
     )
     @ApiResponse(responseCode = "200", description = "Pagos encontrados correctamente")
     @GetMapping("/metodo/{metodoPago}")
@@ -193,7 +193,7 @@ public class PagoController {
 
     @Operation(
             summary = "Buscar pagos por estado",
-            description = "Obtiene todos los pagos según su estado con enlaces HATEOAS apuntando al API Gateway"
+            description = "Obtiene todos los pagos según su estado con enlaces HATEOAS"
     )
     @ApiResponse(responseCode = "200", description = "Pagos encontrados correctamente")
     @GetMapping("/estado/{estadoPago}")
@@ -218,7 +218,7 @@ public class PagoController {
 
     @Operation(
             summary = "Buscar pagos por reserva",
-            description = "Obtiene todos los pagos asociados a una reserva específica con enlaces HATEOAS apuntando al API Gateway"
+            description = "Obtiene todos los pagos asociados a una reserva específica con enlaces HATEOAS"
     )
     @ApiResponse(responseCode = "200", description = "Pagos encontrados correctamente")
     @GetMapping("/reserva/{idReserva}")

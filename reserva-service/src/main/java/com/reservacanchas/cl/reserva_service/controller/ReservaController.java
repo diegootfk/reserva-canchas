@@ -74,7 +74,7 @@ public class ReservaController {
 
     @Operation(
             summary = "Listar reservas",
-            description = "Obtiene todas las reservas registradas en el sistema con enlaces HATEOAS apuntando al API Gateway"
+            description = "Obtiene todas las reservas registradas en el sistema con enlaces HATEOAS"
     )
     @ApiResponse(responseCode = "200", description = "Listado obtenido correctamente")
     @GetMapping
@@ -99,7 +99,7 @@ public class ReservaController {
 
     @Operation(
             summary = "Buscar reserva por ID",
-            description = "Obtiene una reserva específica mediante su identificador con enlaces HATEOAS apuntando al API Gateway"
+            description = "Obtiene una reserva específica mediante su identificador con enlaces HATEOAS"
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Reserva encontrada"),
@@ -176,7 +176,7 @@ public class ReservaController {
 
     @Operation(
             summary = "Buscar reservas por estado",
-            description = "Obtiene todas las reservas según su estado con enlaces HATEOAS apuntando al API Gateway"
+            description = "Obtiene todas las reservas según su estado con enlaces HATEOAS"
     )
     @ApiResponse(responseCode = "200", description = "Reservas encontradas correctamente")
     @GetMapping("/estado/{estado}")
@@ -200,7 +200,7 @@ public class ReservaController {
 
     @Operation(
             summary = "Buscar reservas por usuario",
-            description = "Obtiene todas las reservas asociadas a un usuario específico con enlaces HATEOAS apuntando al API Gateway"
+            description = "Obtiene todas las reservas asociadas a un usuario específico con enlaces HATEOAS"
     )
     @ApiResponse(responseCode = "200", description = "Reservas encontradas correctamente")
     @GetMapping("/usuario/{idUsuario}")
@@ -225,7 +225,7 @@ public class ReservaController {
 
     @Operation(
             summary = "Buscar reservas por cancha",
-            description = "Obtiene todas las reservas asociadas a una cancha específica con enlaces HATEOAS apuntando al API Gateway"
+            description = "Obtiene todas las reservas asociadas a una cancha específica con enlaces HATEOAS"
     )
     @ApiResponse(responseCode = "200", description = "Reservas encontradas correctamente")
     @GetMapping("/cancha/{idCancha}")

@@ -82,7 +82,7 @@ public class HorarioController {
 
     @Operation(
             summary = "Listar horarios",
-            description = "Obtiene todos los horarios registrados con enlaces HATEOAS apuntando al API Gateway"
+            description = "Obtiene todos los horarios registrados con enlaces HATEOAS"
     )
     @ApiResponse(responseCode = "200", description = "Listado obtenido correctamente")
     @GetMapping
@@ -110,7 +110,7 @@ public class HorarioController {
 
     @Operation(
             summary = "Buscar horario por ID",
-            description = "Obtiene un horario específico mediante su identificador con enlaces HATEOAS apuntando al API Gateway"
+            description = "Obtiene un horario específico mediante su identificador con enlaces HATEOAS"
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Horario encontrado"),

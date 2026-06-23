@@ -75,7 +75,7 @@ public class SedeController {
 
     @Operation(
             summary = "Listar sedes",
-            description = "Obtiene todas las sedes registradas en el sistema con enlaces HATEOAS apuntando al API Gateway"
+            description = "Obtiene todas las sedes registradas en el sistema con enlaces HATEOAS"
     )
     @ApiResponse(responseCode = "200", description = "Listado obtenido correctamente")
     @GetMapping
@@ -100,7 +100,7 @@ public class SedeController {
 
     @Operation(
             summary = "Buscar sede por ID",
-            description = "Obtiene una sede específica mediante su identificador con enlaces HATEOAS apuntando al API Gateway"
+            description = "Obtiene una sede específica mediante su identificador con enlaces HATEOAS"
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Sede encontrada"),

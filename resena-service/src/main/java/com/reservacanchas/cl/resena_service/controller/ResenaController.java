@@ -74,7 +74,7 @@ public class ResenaController {
 
     @Operation(
             summary = "Listar reseñas",
-            description = "Obtiene todas las reseñas registradas con enlaces HATEOAS apuntando al API Gateway"
+            description = "Obtiene todas las reseñas registradas con enlaces HATEOAS"
     )
     @ApiResponse(responseCode = "200", description = "Listado obtenido correctamente")
     @GetMapping
@@ -99,7 +99,7 @@ public class ResenaController {
 
     @Operation(
             summary = "Buscar reseña por ID",
-            description = "Obtiene una reseña específica mediante su identificador con enlaces HATEOAS apuntando al API Gateway"
+            description = "Obtiene una reseña específica mediante su identificador con enlaces HATEOAS"
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Reseña encontrada"),

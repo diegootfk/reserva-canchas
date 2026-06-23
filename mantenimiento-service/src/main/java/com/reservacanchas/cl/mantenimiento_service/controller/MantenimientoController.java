@@ -83,7 +83,7 @@ public class MantenimientoController {
 
     @Operation(
             summary = "Listar mantenimientos",
-            description = "Obtiene todos los mantenimientos registrados con enlaces HATEOAS apuntando al API Gateway"
+            description = "Obtiene todos los mantenimientos registrados con enlaces HATEOAS"
     )
     @ApiResponse(responseCode = "200", description = "Listado obtenido correctamente")
     @GetMapping
@@ -114,7 +114,7 @@ public class MantenimientoController {
 
     @Operation(
             summary = "Buscar mantenimiento por ID",
-            description = "Obtiene un mantenimiento específico mediante su identificador con enlaces HATEOAS apuntando al API Gateway"
+            description = "Obtiene un mantenimiento específico mediante su identificador con enlaces HATEOAS"
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Mantenimiento encontrado"),

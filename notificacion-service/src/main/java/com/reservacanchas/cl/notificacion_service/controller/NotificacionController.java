@@ -79,7 +79,7 @@ public class NotificacionController {
 
     @Operation(
             summary = "Listar notificaciones",
-            description = "Obtiene todas las notificaciones registradas con enlaces HATEOAS apuntando al API Gateway"
+            description = "Obtiene todas las notificaciones registradas con enlaces HATEOAS"
     )
     @ApiResponse(responseCode = "200", description = "Listado obtenido correctamente")
     @GetMapping
@@ -104,7 +104,7 @@ public class NotificacionController {
 
     @Operation(
             summary = "Buscar notificación por ID",
-            description = "Obtiene una notificación específica mediante su identificador con enlaces HATEOAS apuntando al API Gateway"
+            description = "Obtiene una notificación específica mediante su identificador con enlaces HATEOAS"
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Notificación encontrada"),

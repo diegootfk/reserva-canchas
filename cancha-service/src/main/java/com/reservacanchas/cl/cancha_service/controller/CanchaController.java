@@ -73,7 +73,7 @@ public class CanchaController {
 
     @Operation(
             summary = "Listar canchas",
-            description = "Obtiene todas las canchas registradas con enlaces HATEOAS apuntando al API Gateway"
+            description = "Obtiene todas las canchas registradas con enlaces HATEOAS"
     )
     @ApiResponse(responseCode = "200", description = "Listado obtenido correctamente")
     @GetMapping
@@ -98,7 +98,7 @@ public class CanchaController {
 
     @Operation(
             summary = "Buscar cancha por ID",
-            description = "Obtiene una cancha específica mediante su identificador con enlaces HATEOAS apuntando al API Gateway"
+            description = "Obtiene una cancha específica mediante su identificador con enlaces HATEOAS"
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Cancha encontrada"),

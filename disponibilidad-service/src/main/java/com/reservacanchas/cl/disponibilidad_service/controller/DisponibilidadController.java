@@ -79,7 +79,7 @@ public class DisponibilidadController {
 
     @Operation(
             summary = "Listar disponibilidades",
-            description = "Obtiene todas las disponibilidades registradas con enlaces HATEOAS apuntando al API Gateway"
+            description = "Obtiene todas las disponibilidades registradas con enlaces HATEOAS"
     )
     @ApiResponse(responseCode = "200", description = "Listado obtenido correctamente")
     @GetMapping
@@ -105,7 +105,7 @@ public class DisponibilidadController {
 
     @Operation(
             summary = "Buscar disponibilidad por ID",
-            description = "Obtiene una disponibilidad específica mediante su identificador con enlaces HATEOAS apuntando al API Gateway"
+            description = "Obtiene una disponibilidad específica mediante su identificador con enlaces HATEOAS"
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Disponibilidad encontrada"),
