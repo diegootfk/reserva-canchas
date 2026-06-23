@@ -1,5 +1,6 @@
 package com.reservacanchas.cl.usuario_service.controller;
 
+import com.reservacanchas.cl.usuario_service.assembler.UsuarioAssembler;
 import com.reservacanchas.cl.usuario_service.dto.UsuarioDTO;
 import com.reservacanchas.cl.usuario_service.model.Usuario;
 import com.reservacanchas.cl.usuario_service.service.UsuarioService;
@@ -7,10 +8,13 @@ import com.reservacanchas.cl.usuario_service.service.UsuarioService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 import jakarta.validation.Valid;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
@@ -33,12 +37,20 @@ import java.util.stream.Collectors;
 @RequestMapping("/usuarios")
 public class UsuarioController {
 
+    private static final Logger logger =
+            LoggerFactory.getLogger(UsuarioController.class);
+
     private static final String API_GATEWAY = "http://localhost:7090";
 
     private final UsuarioService usuarioService;
+    private final UsuarioAssembler usuarioAssembler;
 
-    public UsuarioController(UsuarioService usuarioService) {
+    public UsuarioController(
+            UsuarioService usuarioService,
+            UsuarioAssembler usuarioAssembler) {
+
         this.usuarioService = usuarioService;
+        this.usuarioAssembler = usuarioAssembler;
     }
 
     @Operation(
@@ -50,9 +62,16 @@ public class UsuarioController {
             @ApiResponse(responseCode = "400", description = "Datos inválidos")
     })
     @PostMapping
-    public ResponseEntity<Usuario> crear(@Valid @RequestBody UsuarioDTO usuarioDTO) {
+    public ResponseEntity<Usuario> crear(
+            @Valid @RequestBody UsuarioDTO usuarioDTO) {
+
+        logger.info("Solicitud para crear usuario con email: {}",
+                usuarioDTO.getEmail());
 
         Usuario usuario = usuarioService.guardar(usuarioDTO);
+
+        logger.info("Usuario creado correctamente con ID: {}",
+                usuario.getId());
 
         return new ResponseEntity<>(usuario, HttpStatus.CREATED);
     }
@@ -65,15 +84,19 @@ public class UsuarioController {
     @GetMapping
     public ResponseEntity<CollectionModel<EntityModel<Usuario>>> listar() {
 
+        logger.info("Solicitud para listar usuarios");
+
         List<EntityModel<Usuario>> usuarios = usuarioService.listar()
                 .stream()
-                .map(this::agregarLinks)
+                .map(usuarioAssembler::toModel)
                 .collect(Collectors.toList());
 
         CollectionModel<EntityModel<Usuario>> respuesta = CollectionModel.of(
                 usuarios,
                 Link.of(API_GATEWAY + "/usuarios").withSelfRel()
         );
+
+        logger.info("Listado de usuarios obtenido correctamente");
 
         return ResponseEntity.ok(respuesta);
     }
@@ -87,11 +110,18 @@ public class UsuarioController {
             @ApiResponse(responseCode = "404", description = "Usuario no encontrado")
     })
     @GetMapping("/{id}")
-    public ResponseEntity<EntityModel<Usuario>> buscarPorId(@PathVariable Long id) {
+    public ResponseEntity<EntityModel<Usuario>> buscarPorId(
+            @PathVariable Long id) {
+
+        logger.info("Solicitud para buscar usuario con ID: {}", id);
 
         Usuario usuario = usuarioService.buscarPorId(id);
 
-        return ResponseEntity.ok(agregarLinks(usuario));
+        logger.info("Usuario encontrado con ID: {}", id);
+
+        return ResponseEntity.ok(
+                usuarioAssembler.toModel(usuario)
+        );
     }
 
     @Operation(
@@ -108,9 +138,14 @@ public class UsuarioController {
             @PathVariable Long id,
             @Valid @RequestBody UsuarioDTO usuarioDTO) {
 
-        return ResponseEntity.ok(
-                usuarioService.actualizar(id, usuarioDTO)
-        );
+        logger.info("Solicitud para actualizar usuario con ID: {}", id);
+
+        Usuario usuarioActualizado =
+                usuarioService.actualizar(id, usuarioDTO);
+
+        logger.info("Usuario actualizado correctamente con ID: {}", id);
+
+        return ResponseEntity.ok(usuarioActualizado);
     }
 
     @Operation(
@@ -124,7 +159,11 @@ public class UsuarioController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminar(@PathVariable Long id) {
 
+        logger.info("Solicitud para eliminar usuario con ID: {}", id);
+
         usuarioService.eliminar(id);
+
+        logger.info("Usuario eliminado correctamente con ID: {}", id);
 
         return ResponseEntity.noContent().build();
     }
@@ -137,17 +176,8 @@ public class UsuarioController {
     @GetMapping("/{id}/exists")
     public boolean existe(@PathVariable Long id) {
 
+        logger.info("Verificando existencia de usuario con ID: {}", id);
+
         return usuarioService.existePorId(id);
-    }
-
-    private EntityModel<Usuario> agregarLinks(Usuario usuario) {
-
-        return EntityModel.of(
-                usuario,
-                Link.of(API_GATEWAY + "/usuarios/" + usuario.getId()).withSelfRel(),
-                Link.of(API_GATEWAY + "/usuarios").withRel("usuarios"),
-                Link.of(API_GATEWAY + "/usuarios/" + usuario.getId() + "/exists").withRel("existe"),
-                Link.of(API_GATEWAY + "/reservas/usuario/" + usuario.getId()).withRel("reservas")
-        );
     }
 }
