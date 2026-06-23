@@ -392,4 +392,3 @@ Integrantes:
 
 - Diego
 - Oscar
-- Matías
