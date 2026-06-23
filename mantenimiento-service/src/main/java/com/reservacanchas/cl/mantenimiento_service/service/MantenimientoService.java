@@ -5,6 +5,9 @@ import com.reservacanchas.cl.mantenimiento_service.exception.ResourceNotFoundExc
 import com.reservacanchas.cl.mantenimiento_service.model.Mantenimiento;
 import com.reservacanchas.cl.mantenimiento_service.repository.MantenimientoRepository;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -12,6 +15,9 @@ import java.util.List;
 
 @Service
 public class MantenimientoService {
+
+    private static final Logger logger =
+            LoggerFactory.getLogger(MantenimientoService.class);
 
     private final MantenimientoRepository mantenimientoRepository;
     private final RestTemplate restTemplate;
@@ -23,13 +29,28 @@ public class MantenimientoService {
 
     public Mantenimiento guardar(MantenimientoDTO mantenimientoDTO) {
 
+        logger.info(
+                "Iniciando creación de mantenimiento para cancha {}",
+                mantenimientoDTO.getIdCancha()
+        );
+
         Boolean canchaExiste = restTemplate.getForObject(
-                "http://localhost:7092/canchas/" + mantenimientoDTO.getIdCancha() + "/exists",
+                "http://localhost:7092/canchas/"
+                        + mantenimientoDTO.getIdCancha()
+                        + "/exists",
                 Boolean.class
         );
 
         if (canchaExiste == null || !canchaExiste) {
-            throw new ResourceNotFoundException("La cancha no existe");
+
+            logger.warn(
+                    "No se pudo crear mantenimiento. Cancha {} no existe",
+                    mantenimientoDTO.getIdCancha()
+            );
+
+            throw new ResourceNotFoundException(
+                    "La cancha no existe"
+            );
         }
 
         Mantenimiento mantenimiento = new Mantenimiento();
@@ -40,20 +61,53 @@ public class MantenimientoService {
         mantenimiento.setDescripcion(mantenimientoDTO.getDescripcion());
         mantenimiento.setEstado(mantenimientoDTO.getEstado());
 
-        return mantenimientoRepository.save(mantenimiento);
+        Mantenimiento mantenimientoGuardado =
+                mantenimientoRepository.save(mantenimiento);
+
+        logger.info(
+                "Mantenimiento creado correctamente con ID {}",
+                mantenimientoGuardado.getId()
+        );
+
+        return mantenimientoGuardado;
     }
 
     public List<Mantenimiento> listar() {
+
+        logger.info("Listando todos los mantenimientos");
+
         return mantenimientoRepository.findAll();
     }
 
     public Mantenimiento buscarPorId(Long id) {
+
+        logger.info(
+                "Buscando mantenimiento con ID {}",
+                id
+        );
+
         return mantenimientoRepository.findById(id)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Mantenimiento no encontrado"));
+                .orElseThrow(() -> {
+
+                    logger.warn(
+                            "Mantenimiento con ID {} no encontrado",
+                            id
+                    );
+
+                    return new ResourceNotFoundException(
+                            "Mantenimiento no encontrado"
+                    );
+                });
     }
 
-    public Mantenimiento actualizar(Long id, MantenimientoDTO mantenimientoDTO) {
+    public Mantenimiento actualizar(
+            Long id,
+            MantenimientoDTO mantenimientoDTO) {
+
+        logger.info(
+                "Actualizando mantenimiento con ID {}",
+                id
+        );
 
         Mantenimiento mantenimiento = buscarPorId(id);
 
@@ -63,17 +117,41 @@ public class MantenimientoService {
         mantenimiento.setDescripcion(mantenimientoDTO.getDescripcion());
         mantenimiento.setEstado(mantenimientoDTO.getEstado());
 
-        return mantenimientoRepository.save(mantenimiento);
+        Mantenimiento mantenimientoActualizado =
+                mantenimientoRepository.save(mantenimiento);
+
+        logger.info(
+                "Mantenimiento actualizado correctamente con ID {}",
+                id
+        );
+
+        return mantenimientoActualizado;
     }
 
     public void eliminar(Long id) {
 
+        logger.info(
+                "Eliminando mantenimiento con ID {}",
+                id
+        );
+
         Mantenimiento mantenimiento = buscarPorId(id);
 
         mantenimientoRepository.delete(mantenimiento);
+
+        logger.info(
+                "Mantenimiento eliminado correctamente con ID {}",
+                id
+        );
     }
 
     public boolean existePorId(Long id) {
+
+        logger.info(
+                "Verificando existencia de mantenimiento con ID {}",
+                id
+        );
+
         return mantenimientoRepository.existsById(id);
     }
 }
