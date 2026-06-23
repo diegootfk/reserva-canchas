@@ -9,7 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.List;
 
@@ -20,11 +20,14 @@ public class ResenaService {
             LoggerFactory.getLogger(ResenaService.class);
 
     private final ResenaRepository resenaRepository;
-    private final RestTemplate restTemplate;
+    private final WebClient.Builder webClientBuilder;
 
-    public ResenaService(ResenaRepository resenaRepository) {
+    public ResenaService(
+            ResenaRepository resenaRepository,
+            WebClient.Builder webClientBuilder) {
+
         this.resenaRepository = resenaRepository;
-        this.restTemplate = new RestTemplate();
+        this.webClientBuilder = webClientBuilder;
     }
 
     public Resena guardar(ResenaDTO resenaDTO) {
@@ -36,43 +39,67 @@ public class ResenaService {
                 resenaDTO.getIdReserva()
         );
 
-        Boolean usuarioExiste = restTemplate.getForObject(
-                "http://localhost:7091/usuarios/" + resenaDTO.getIdUsuario() + "/exists",
-                Boolean.class
-        );
+        Boolean usuarioExiste = webClientBuilder.build()
+                .get()
+                .uri("http://localhost:7091/usuarios/"
+                        + resenaDTO.getIdUsuario()
+                        + "/exists")
+                .retrieve()
+                .bodyToMono(Boolean.class)
+                .block();
 
         if (usuarioExiste == null || !usuarioExiste) {
 
-            logger.warn("Usuario {} no existe",
-                    resenaDTO.getIdUsuario());
+            logger.warn(
+                    "Usuario {} no existe",
+                    resenaDTO.getIdUsuario()
+            );
 
-            throw new ResourceNotFoundException("Usuario no existe");
+            throw new ResourceNotFoundException(
+                    "Usuario no existe"
+            );
         }
 
-        Boolean canchaExiste = restTemplate.getForObject(
-                "http://localhost:7092/canchas/" + resenaDTO.getIdCancha() + "/exists",
-                Boolean.class
-        );
+        Boolean canchaExiste = webClientBuilder.build()
+                .get()
+                .uri("http://localhost:7092/canchas/"
+                        + resenaDTO.getIdCancha()
+                        + "/exists")
+                .retrieve()
+                .bodyToMono(Boolean.class)
+                .block();
 
         if (canchaExiste == null || !canchaExiste) {
 
-            logger.warn("Cancha {} no existe",
-                    resenaDTO.getIdCancha());
+            logger.warn(
+                    "Cancha {} no existe",
+                    resenaDTO.getIdCancha()
+            );
 
-            throw new ResourceNotFoundException("Cancha no existe");
+            throw new ResourceNotFoundException(
+                    "Cancha no existe"
+            );
         }
 
-        Boolean reservaExiste = restTemplate.getForObject(
-                "http://localhost:7093/reservas/" + resenaDTO.getIdReserva() + "/exists",
-                Boolean.class
-        );
+        Boolean reservaExiste = webClientBuilder.build()
+                .get()
+                .uri("http://localhost:7093/reservas/"
+                        + resenaDTO.getIdReserva()
+                        + "/exists")
+                .retrieve()
+                .bodyToMono(Boolean.class)
+                .block();
 
         if (reservaExiste == null || !reservaExiste) {
 
-            logger.warn("Reserva {} no existe",
-                    resenaDTO.getIdReserva());
+            logger.warn(
+                    "Reserva {} no existe",
+                    resenaDTO.getIdReserva()
+            );
 
-            throw new ResourceNotFoundException("Reserva no existe");
+            throw new ResourceNotFoundException(
+                    "Reserva no existe"
+            );
         }
 
         Resena resena = new Resena();
@@ -84,10 +111,13 @@ public class ResenaService {
         resena.setComentario(resenaDTO.getComentario());
         resena.setFechaResena(resenaDTO.getFechaResena());
 
-        Resena resenaGuardada = resenaRepository.save(resena);
+        Resena resenaGuardada =
+                resenaRepository.save(resena);
 
-        logger.info("Reseña creada correctamente con ID: {}",
-                resenaGuardada.getId());
+        logger.info(
+                "Reseña creada correctamente con ID: {}",
+                resenaGuardada.getId()
+        );
 
         return resenaGuardada;
     }
@@ -96,7 +126,15 @@ public class ResenaService {
 
         logger.info("Listando todas las reseñas");
 
-        return resenaRepository.findAll();
+        List<Resena> resenas =
+                resenaRepository.findAll();
+
+        logger.info(
+                "Se encontraron {} reseñas",
+                resenas.size()
+        );
+
+        return resenas;
     }
 
     public Resena buscarPorId(Long id) {
@@ -106,16 +144,23 @@ public class ResenaService {
         return resenaRepository.findById(id)
                 .orElseThrow(() -> {
 
-                    logger.error("Reseña no encontrada con ID: {}", id);
+                    logger.error(
+                            "Reseña no encontrada con ID: {}",
+                            id
+                    );
 
                     return new ResourceNotFoundException(
-                            "Reseña no encontrada");
+                            "Reseña no encontrada"
+                    );
                 });
     }
 
     public Resena actualizar(Long id, ResenaDTO resenaDTO) {
 
-        logger.info("Actualizando reseña con ID: {}", id);
+        logger.info(
+                "Actualizando reseña con ID: {}",
+                id
+        );
 
         Resena resena = buscarPorId(id);
 
@@ -126,28 +171,50 @@ public class ResenaService {
         resena.setComentario(resenaDTO.getComentario());
         resena.setFechaResena(resenaDTO.getFechaResena());
 
-        Resena resenaActualizada = resenaRepository.save(resena);
+        Resena resenaActualizada =
+                resenaRepository.save(resena);
 
-        logger.info("Reseña actualizada correctamente con ID: {}", id);
+        logger.info(
+                "Reseña actualizada correctamente con ID: {}",
+                resenaActualizada.getId()
+        );
 
         return resenaActualizada;
     }
 
     public void eliminar(Long id) {
 
-        logger.info("Eliminando reseña con ID: {}", id);
+        logger.info(
+                "Eliminando reseña con ID: {}",
+                id
+        );
 
         Resena resena = buscarPorId(id);
 
         resenaRepository.delete(resena);
 
-        logger.info("Reseña eliminada correctamente con ID: {}", id);
+        logger.info(
+                "Reseña eliminada correctamente con ID: {}",
+                id
+        );
     }
 
     public boolean existePorId(Long id) {
 
-        logger.info("Verificando existencia de reseña con ID: {}", id);
+        logger.info(
+                "Verificando existencia de reseña con ID: {}",
+                id
+        );
 
-        return resenaRepository.existsById(id);
+        boolean existe =
+                resenaRepository.existsById(id);
+
+        logger.info(
+                "Resultado existencia reseña {}: {}",
+                id,
+                existe
+        );
+
+        return existe;
     }
 }
