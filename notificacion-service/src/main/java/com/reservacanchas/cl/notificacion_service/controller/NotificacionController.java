@@ -1,5 +1,6 @@
 package com.reservacanchas.cl.notificacion_service.controller;
 
+import com.reservacanchas.cl.notificacion_service.assembler.NotificacionAssembler;
 import com.reservacanchas.cl.notificacion_service.dto.NotificacionDTO;
 import com.reservacanchas.cl.notificacion_service.model.Notificacion;
 import com.reservacanchas.cl.notificacion_service.service.NotificacionService;
@@ -11,6 +12,9 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import jakarta.validation.Valid;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
@@ -33,12 +37,17 @@ import java.util.stream.Collectors;
 @RequestMapping("/notificaciones")
 public class NotificacionController {
 
+    private static final Logger logger =
+            LoggerFactory.getLogger(NotificacionController.class);
+
     private static final String API_GATEWAY = "http://localhost:7090";
 
     private final NotificacionService notificacionService;
+    private final NotificacionAssembler notificacionAssembler;
 
-    public NotificacionController(NotificacionService notificacionService) {
+    public NotificacionController(NotificacionService notificacionService, NotificacionAssembler notificacionAssembler) {
         this.notificacionService = notificacionService;
+        this.notificacionAssembler = notificacionAssembler;
     }
 
     @Operation(
@@ -53,47 +62,67 @@ public class NotificacionController {
     public ResponseEntity<Notificacion> crear(
             @Valid @RequestBody NotificacionDTO notificacionDTO) {
 
+        logger.info("Solicitud para crear notificación para usuario {}",
+                notificacionDTO.getIdUsuario());
+
+        Notificacion notificacion =
+                notificacionService.guardar(notificacionDTO);
+
+        logger.info("Notificación creada correctamente con ID {}",
+                notificacion.getId());
+
         return new ResponseEntity<>(
-                notificacionService.guardar(notificacionDTO),
+                notificacion,
                 HttpStatus.CREATED
         );
     }
 
     @Operation(
             summary = "Listar notificaciones",
-            description = "Obtiene todas las notificaciones registradas con enlaces HATEOAS apuntando al API Gateway"
+            description = "Obtiene todas las notificaciones registradas con enlaces HATEOAS"
     )
     @ApiResponse(responseCode = "200", description = "Listado obtenido correctamente")
     @GetMapping
     public ResponseEntity<CollectionModel<EntityModel<Notificacion>>> listar() {
 
-        List<EntityModel<Notificacion>> notificaciones = notificacionService.listar()
-                .stream()
-                .map(this::agregarLinks)
-                .collect(Collectors.toList());
+        logger.info("Solicitud para listar todas las notificaciones");
 
-        CollectionModel<EntityModel<Notificacion>> respuesta = CollectionModel.of(
-                notificaciones,
-                Link.of(API_GATEWAY + "/notificaciones").withSelfRel()
-        );
+        List<EntityModel<Notificacion>> notificaciones =
+                notificacionService.listar()
+                        .stream()
+                        .map(notificacionAssembler::toModel)
+                        .collect(Collectors.toList());
+
+        CollectionModel<EntityModel<Notificacion>> respuesta =
+                CollectionModel.of(
+                        notificaciones,
+                        Link.of(API_GATEWAY + "/notificaciones").withSelfRel()
+                );
 
         return ResponseEntity.ok(respuesta);
     }
 
     @Operation(
             summary = "Buscar notificación por ID",
-            description = "Obtiene una notificación específica mediante su identificador con enlaces HATEOAS apuntando al API Gateway"
+            description = "Obtiene una notificación específica mediante su identificador con enlaces HATEOAS"
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Notificación encontrada"),
             @ApiResponse(responseCode = "404", description = "Notificación no encontrada")
     })
     @GetMapping("/{id}")
-    public ResponseEntity<EntityModel<Notificacion>> buscarPorId(@PathVariable Long id) {
+    public ResponseEntity<EntityModel<Notificacion>> buscarPorId(
+            @PathVariable Long id) {
 
-        Notificacion notificacion = notificacionService.buscarPorId(id);
+        logger.info("Solicitud para buscar notificación con ID {}",
+                id);
 
-        return ResponseEntity.ok(agregarLinks(notificacion));
+        Notificacion notificacion =
+                notificacionService.buscarPorId(id);
+
+        return ResponseEntity.ok(
+                notificacionAssembler.toModel(notificacion)
+        );
     }
 
     @Operation(
@@ -109,6 +138,9 @@ public class NotificacionController {
     public ResponseEntity<Notificacion> actualizar(
             @PathVariable Long id,
             @Valid @RequestBody NotificacionDTO notificacionDTO) {
+
+        logger.info("Solicitud para actualizar notificación con ID {}",
+                id);
 
         return ResponseEntity.ok(
                 notificacionService.actualizar(id, notificacionDTO)
@@ -126,6 +158,9 @@ public class NotificacionController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminar(@PathVariable Long id) {
 
+        logger.info("Solicitud para eliminar notificación con ID {}",
+                id);
+
         notificacionService.eliminar(id);
 
         return ResponseEntity.noContent().build();
@@ -139,18 +174,9 @@ public class NotificacionController {
     @GetMapping("/{id}/exists")
     public boolean existe(@PathVariable Long id) {
 
+        logger.info("Verificando existencia de notificación con ID {}",
+                id);
+
         return notificacionService.existePorId(id);
-    }
-
-    private EntityModel<Notificacion> agregarLinks(Notificacion notificacion) {
-
-        return EntityModel.of(
-                notificacion,
-                Link.of(API_GATEWAY + "/notificaciones/" + notificacion.getId()).withSelfRel(),
-                Link.of(API_GATEWAY + "/notificaciones").withRel("notificaciones"),
-                Link.of(API_GATEWAY + "/notificaciones/" + notificacion.getId() + "/exists").withRel("existe"),
-                Link.of(API_GATEWAY + "/usuarios/" + notificacion.getIdUsuario()).withRel("usuario"),
-                Link.of(API_GATEWAY + "/reservas/" + notificacion.getIdReserva()).withRel("reserva")
-        );
     }
 }

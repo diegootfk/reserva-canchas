@@ -1,5 +1,6 @@
 package com.reservacanchas.cl.cancha_service.controller;
 
+import com.reservacanchas.cl.cancha_service.assembler.CanchaAssembler;
 import com.reservacanchas.cl.cancha_service.dto.CanchaDTO;
 import com.reservacanchas.cl.cancha_service.model.Cancha;
 import com.reservacanchas.cl.cancha_service.service.CanchaService;
@@ -11,6 +12,9 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import jakarta.validation.Valid;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
@@ -33,12 +37,17 @@ import java.util.stream.Collectors;
 @RequestMapping("/canchas")
 public class CanchaController {
 
+    private static final Logger logger =
+            LoggerFactory.getLogger(CanchaController.class);
+
     private static final String API_GATEWAY = "http://localhost:7090";
 
     private final CanchaService canchaService;
+    private final CanchaAssembler canchaAssembler;
 
-    public CanchaController(CanchaService canchaService) {
+    public CanchaController(CanchaService canchaService, CanchaAssembler canchaAssembler) {
         this.canchaService = canchaService;
+        this.canchaAssembler = canchaAssembler;
     }
 
     @Operation(
@@ -52,22 +61,29 @@ public class CanchaController {
     @PostMapping
     public ResponseEntity<Cancha> crear(@Valid @RequestBody CanchaDTO canchaDTO) {
 
+        logger.info("Solicitud para crear cancha");
+
         Cancha cancha = canchaService.guardar(canchaDTO);
+
+        logger.info("Cancha creada correctamente con ID {}",
+                cancha.getId());
 
         return new ResponseEntity<>(cancha, HttpStatus.CREATED);
     }
 
     @Operation(
             summary = "Listar canchas",
-            description = "Obtiene todas las canchas registradas con enlaces HATEOAS apuntando al API Gateway"
+            description = "Obtiene todas las canchas registradas con enlaces HATEOAS"
     )
     @ApiResponse(responseCode = "200", description = "Listado obtenido correctamente")
     @GetMapping
     public ResponseEntity<CollectionModel<EntityModel<Cancha>>> listar() {
 
+        logger.info("Solicitud para listar canchas");
+
         List<EntityModel<Cancha>> canchas = canchaService.listar()
                 .stream()
-                .map(this::agregarLinks)
+                .map(canchaAssembler::toModel)
                 .collect(Collectors.toList());
 
         CollectionModel<EntityModel<Cancha>> respuesta = CollectionModel.of(
@@ -75,12 +91,14 @@ public class CanchaController {
                 Link.of(API_GATEWAY + "/canchas").withSelfRel()
         );
 
+        logger.info("Se encontraron {} canchas", canchas.size());
+
         return ResponseEntity.ok(respuesta);
     }
 
     @Operation(
             summary = "Buscar cancha por ID",
-            description = "Obtiene una cancha específica mediante su identificador con enlaces HATEOAS apuntando al API Gateway"
+            description = "Obtiene una cancha específica mediante su identificador con enlaces HATEOAS"
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Cancha encontrada"),
@@ -89,9 +107,13 @@ public class CanchaController {
     @GetMapping("/{id}")
     public ResponseEntity<EntityModel<Cancha>> buscarPorId(@PathVariable Long id) {
 
+        logger.info("Solicitud para buscar cancha con ID {}", id);
+
         Cancha cancha = canchaService.buscarPorId(id);
 
-        return ResponseEntity.ok(agregarLinks(cancha));
+        logger.info("Cancha encontrada con ID {}", id);
+
+        return ResponseEntity.ok(canchaAssembler.toModel(cancha));
     }
 
     @Operation(
@@ -109,7 +131,13 @@ public class CanchaController {
             @Valid @RequestBody CanchaDTO canchaDTO
     ) {
 
-        return ResponseEntity.ok(canchaService.actualizar(id, canchaDTO));
+        logger.info("Solicitud para actualizar cancha con ID {}", id);
+
+        Cancha cancha = canchaService.actualizar(id, canchaDTO);
+
+        logger.info("Cancha actualizada correctamente con ID {}", id);
+
+        return ResponseEntity.ok(cancha);
     }
 
     @Operation(
@@ -123,7 +151,11 @@ public class CanchaController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminar(@PathVariable Long id) {
 
+        logger.info("Solicitud para eliminar cancha con ID {}", id);
+
         canchaService.eliminar(id);
+
+        logger.info("Cancha eliminada correctamente con ID {}", id);
 
         return ResponseEntity.noContent().build();
     }
@@ -136,21 +168,8 @@ public class CanchaController {
     @GetMapping("/{id}/exists")
     public boolean existe(@PathVariable Long id) {
 
+        logger.info("Verificando existencia de cancha con ID {}", id);
+
         return canchaService.existePorId(id);
-    }
-
-    private EntityModel<Cancha> agregarLinks(Cancha cancha) {
-
-        return EntityModel.of(
-                cancha,
-                Link.of(API_GATEWAY + "/canchas/" + cancha.getId()).withSelfRel(),
-                Link.of(API_GATEWAY + "/canchas").withRel("canchas"),
-                Link.of(API_GATEWAY + "/canchas/" + cancha.getId() + "/exists").withRel("existe"),
-                Link.of(API_GATEWAY + "/reservas/cancha/" + cancha.getId()).withRel("reservas"),
-                Link.of(API_GATEWAY + "/disponibilidades/cancha/" + cancha.getId()).withRel("disponibilidades"),
-                Link.of(API_GATEWAY + "/horarios/cancha/" + cancha.getId()).withRel("horarios"),
-                Link.of(API_GATEWAY + "/resenas/cancha/" + cancha.getId()).withRel("resenas"),
-                Link.of(API_GATEWAY + "/mantenimientos/cancha/" + cancha.getId()).withRel("mantenimientos")
-        );
     }
 }

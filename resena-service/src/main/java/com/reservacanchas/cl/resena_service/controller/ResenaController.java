@@ -1,5 +1,6 @@
 package com.reservacanchas.cl.resena_service.controller;
 
+import com.reservacanchas.cl.resena_service.assembler.ResenaAssembler;
 import com.reservacanchas.cl.resena_service.dto.ResenaDTO;
 import com.reservacanchas.cl.resena_service.model.Resena;
 import com.reservacanchas.cl.resena_service.service.ResenaService;
@@ -11,6 +12,9 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import jakarta.validation.Valid;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
@@ -33,12 +37,17 @@ import java.util.stream.Collectors;
 @RequestMapping("/resenas")
 public class ResenaController {
 
+    private static final Logger logger =
+            LoggerFactory.getLogger(ResenaController.class);
+
     private static final String API_GATEWAY = "http://localhost:7090";
 
     private final ResenaService resenaService;
+    private final ResenaAssembler resenaAssembler;
 
-    public ResenaController(ResenaService resenaService) {
+    public ResenaController(ResenaService resenaService, ResenaAssembler resenaAssembler) {
         this.resenaService = resenaService;
+        this.resenaAssembler = resenaAssembler;
     }
 
     @Operation(
@@ -53,24 +62,32 @@ public class ResenaController {
     public ResponseEntity<Resena> crear(
             @Valid @RequestBody ResenaDTO resenaDTO) {
 
-        return new ResponseEntity<>(
-                resenaService.guardar(resenaDTO),
-                HttpStatus.CREATED
-        );
+        logger.info("Solicitud para crear reseña");
+
+        Resena resena = resenaService.guardar(resenaDTO);
+
+        logger.info("Reseña creada correctamente con ID: {}",
+                resena.getId());
+
+        return new ResponseEntity<>(resena, HttpStatus.CREATED);
     }
 
     @Operation(
             summary = "Listar reseñas",
-            description = "Obtiene todas las reseñas registradas con enlaces HATEOAS apuntando al API Gateway"
+            description = "Obtiene todas las reseñas registradas con enlaces HATEOAS"
     )
     @ApiResponse(responseCode = "200", description = "Listado obtenido correctamente")
     @GetMapping
     public ResponseEntity<CollectionModel<EntityModel<Resena>>> listar() {
 
+        logger.info("Solicitud para listar reseñas");
+
         List<EntityModel<Resena>> resenas = resenaService.listar()
                 .stream()
-                .map(this::agregarLinks)
+                .map(resenaAssembler::toModel)
                 .collect(Collectors.toList());
+
+        logger.info("Reseñas listadas correctamente");
 
         CollectionModel<EntityModel<Resena>> respuesta = CollectionModel.of(
                 resenas,
@@ -82,7 +99,7 @@ public class ResenaController {
 
     @Operation(
             summary = "Buscar reseña por ID",
-            description = "Obtiene una reseña específica mediante su identificador con enlaces HATEOAS apuntando al API Gateway"
+            description = "Obtiene una reseña específica mediante su identificador con enlaces HATEOAS"
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Reseña encontrada"),
@@ -91,9 +108,13 @@ public class ResenaController {
     @GetMapping("/{id}")
     public ResponseEntity<EntityModel<Resena>> buscarPorId(@PathVariable Long id) {
 
+        logger.info("Solicitud para buscar reseña con ID: {}", id);
+
         Resena resena = resenaService.buscarPorId(id);
 
-        return ResponseEntity.ok(agregarLinks(resena));
+        logger.info("Reseña encontrada con ID: {}", id);
+
+        return ResponseEntity.ok(resenaAssembler.toModel(resena));
     }
 
     @Operation(
@@ -110,9 +131,13 @@ public class ResenaController {
             @PathVariable Long id,
             @Valid @RequestBody ResenaDTO resenaDTO) {
 
-        return ResponseEntity.ok(
-                resenaService.actualizar(id, resenaDTO)
-        );
+        logger.info("Solicitud para actualizar reseña con ID: {}", id);
+
+        Resena resena = resenaService.actualizar(id, resenaDTO);
+
+        logger.info("Reseña actualizada correctamente con ID: {}", id);
+
+        return ResponseEntity.ok(resena);
     }
 
     @Operation(
@@ -126,7 +151,11 @@ public class ResenaController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminar(@PathVariable Long id) {
 
+        logger.info("Solicitud para eliminar reseña con ID: {}", id);
+
         resenaService.eliminar(id);
+
+        logger.info("Reseña eliminada correctamente con ID: {}", id);
 
         return ResponseEntity.noContent().build();
     }
@@ -139,19 +168,8 @@ public class ResenaController {
     @GetMapping("/{id}/exists")
     public boolean existe(@PathVariable Long id) {
 
+        logger.info("Verificando existencia de reseña con ID: {}", id);
+
         return resenaService.existePorId(id);
-    }
-
-    private EntityModel<Resena> agregarLinks(Resena resena) {
-
-        return EntityModel.of(
-                resena,
-                Link.of(API_GATEWAY + "/resenas/" + resena.getId()).withSelfRel(),
-                Link.of(API_GATEWAY + "/resenas").withRel("resenas"),
-                Link.of(API_GATEWAY + "/resenas/" + resena.getId() + "/exists").withRel("existe"),
-                Link.of(API_GATEWAY + "/usuarios/" + resena.getIdUsuario()).withRel("usuario"),
-                Link.of(API_GATEWAY + "/canchas/" + resena.getIdCancha()).withRel("cancha"),
-                Link.of(API_GATEWAY + "/reservas/" + resena.getIdReserva()).withRel("reserva")
-        );
     }
 }

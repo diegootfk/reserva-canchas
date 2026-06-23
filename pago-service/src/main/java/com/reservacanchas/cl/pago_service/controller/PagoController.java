@@ -1,5 +1,6 @@
 package com.reservacanchas.cl.pago_service.controller;
 
+import com.reservacanchas.cl.pago_service.assembler.PagoAssembler;
 import com.reservacanchas.cl.pago_service.dto.PagoDTO;
 import com.reservacanchas.cl.pago_service.model.Pago;
 import com.reservacanchas.cl.pago_service.service.PagoService;
@@ -11,6 +12,9 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import jakarta.validation.Valid;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
@@ -33,12 +37,17 @@ import java.util.stream.Collectors;
 @RequestMapping("/pagos")
 public class PagoController {
 
+    private static final Logger logger =
+            LoggerFactory.getLogger(PagoController.class);
+
     private static final String API_GATEWAY = "http://localhost:7090";
 
     private final PagoService pagoService;
+    private final PagoAssembler pagoAssembler;
 
-    public PagoController(PagoService pagoService) {
+    public PagoController(PagoService pagoService, PagoAssembler pagoAssembler) {
         this.pagoService = pagoService;
+        this.pagoAssembler = pagoAssembler;
     }
 
     @Operation(
@@ -53,22 +62,30 @@ public class PagoController {
     @PostMapping
     public ResponseEntity<Pago> crear(@Valid @RequestBody PagoDTO pagoDTO) {
 
+        logger.info("Solicitud para crear pago de reserva {}",
+                pagoDTO.getIdReserva());
+
         Pago pago = pagoService.guardar(pagoDTO);
+
+        logger.info("Pago creado correctamente con ID {}",
+                pago.getId());
 
         return new ResponseEntity<>(pago, HttpStatus.CREATED);
     }
 
     @Operation(
             summary = "Listar pagos",
-            description = "Obtiene todos los pagos registrados en el sistema con enlaces HATEOAS apuntando al API Gateway"
+            description = "Obtiene todos los pagos registrados en el sistema con enlaces HATEOAS"
     )
     @ApiResponse(responseCode = "200", description = "Listado obtenido correctamente")
     @GetMapping
     public ResponseEntity<CollectionModel<EntityModel<Pago>>> listar() {
 
+        logger.info("Solicitud para listar todos los pagos");
+
         List<EntityModel<Pago>> pagos = pagoService.listar()
                 .stream()
-                .map(this::agregarLinks)
+                .map(pagoAssembler::toModel)
                 .collect(Collectors.toList());
 
         CollectionModel<EntityModel<Pago>> respuesta = CollectionModel.of(
@@ -81,7 +98,7 @@ public class PagoController {
 
     @Operation(
             summary = "Buscar pago por ID",
-            description = "Obtiene un pago específico mediante su identificador con enlaces HATEOAS apuntando al API Gateway"
+            description = "Obtiene un pago específico mediante su identificador con enlaces HATEOAS"
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Pago encontrado"),
@@ -90,9 +107,11 @@ public class PagoController {
     @GetMapping("/{id}")
     public ResponseEntity<EntityModel<Pago>> buscarPorId(@PathVariable Long id) {
 
+        logger.info("Solicitud para buscar pago con ID {}", id);
+
         Pago pago = pagoService.buscarPorId(id);
 
-        return ResponseEntity.ok(agregarLinks(pago));
+        return ResponseEntity.ok(pagoAssembler.toModel(pago));
     }
 
     @Operation(
@@ -108,6 +127,8 @@ public class PagoController {
     public ResponseEntity<Pago> actualizar(
             @PathVariable Long id,
             @Valid @RequestBody PagoDTO pagoDTO) {
+
+        logger.info("Solicitud para actualizar pago con ID {}", id);
 
         return ResponseEntity.ok(
                 pagoService.actualizar(id, pagoDTO)
@@ -125,6 +146,8 @@ public class PagoController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminar(@PathVariable Long id) {
 
+        logger.info("Solicitud para eliminar pago con ID {}", id);
+
         pagoService.eliminar(id);
 
         return ResponseEntity.noContent().build();
@@ -138,21 +161,25 @@ public class PagoController {
     @GetMapping("/{id}/exists")
     public boolean existe(@PathVariable Long id) {
 
+        logger.info("Verificando existencia del pago con ID {}", id);
+
         return pagoService.existePorId(id);
     }
 
     @Operation(
             summary = "Buscar pagos por método",
-            description = "Obtiene todos los pagos realizados con un método de pago específico con enlaces HATEOAS apuntando al API Gateway"
+            description = "Obtiene todos los pagos realizados con un método de pago específico con enlaces HATEOAS"
     )
     @ApiResponse(responseCode = "200", description = "Pagos encontrados correctamente")
     @GetMapping("/metodo/{metodoPago}")
     public ResponseEntity<CollectionModel<EntityModel<Pago>>> buscarPorMetodoPago(
             @PathVariable String metodoPago) {
 
+        logger.info("Buscando pagos por método {}", metodoPago);
+
         List<EntityModel<Pago>> pagos = pagoService.buscarPorMetodoPago(metodoPago)
                 .stream()
-                .map(this::agregarLinks)
+                .map(pagoAssembler::toModel)
                 .collect(Collectors.toList());
 
         CollectionModel<EntityModel<Pago>> respuesta = CollectionModel.of(
@@ -166,16 +193,18 @@ public class PagoController {
 
     @Operation(
             summary = "Buscar pagos por estado",
-            description = "Obtiene todos los pagos según su estado con enlaces HATEOAS apuntando al API Gateway"
+            description = "Obtiene todos los pagos según su estado con enlaces HATEOAS"
     )
     @ApiResponse(responseCode = "200", description = "Pagos encontrados correctamente")
     @GetMapping("/estado/{estadoPago}")
     public ResponseEntity<CollectionModel<EntityModel<Pago>>> buscarPorEstadoPago(
             @PathVariable String estadoPago) {
 
+        logger.info("Buscando pagos por estado {}", estadoPago);
+
         List<EntityModel<Pago>> pagos = pagoService.buscarPorEstadoPago(estadoPago)
                 .stream()
-                .map(this::agregarLinks)
+                .map(pagoAssembler::toModel)
                 .collect(Collectors.toList());
 
         CollectionModel<EntityModel<Pago>> respuesta = CollectionModel.of(
@@ -189,16 +218,18 @@ public class PagoController {
 
     @Operation(
             summary = "Buscar pagos por reserva",
-            description = "Obtiene todos los pagos asociados a una reserva específica con enlaces HATEOAS apuntando al API Gateway"
+            description = "Obtiene todos los pagos asociados a una reserva específica con enlaces HATEOAS"
     )
     @ApiResponse(responseCode = "200", description = "Pagos encontrados correctamente")
     @GetMapping("/reserva/{idReserva}")
     public ResponseEntity<CollectionModel<EntityModel<Pago>>> buscarPorReserva(
             @PathVariable Long idReserva) {
 
+        logger.info("Buscando pagos de la reserva {}", idReserva);
+
         List<EntityModel<Pago>> pagos = pagoService.buscarPorReserva(idReserva)
                 .stream()
-                .map(this::agregarLinks)
+                .map(pagoAssembler::toModel)
                 .collect(Collectors.toList());
 
         CollectionModel<EntityModel<Pago>> respuesta = CollectionModel.of(
@@ -209,19 +240,5 @@ public class PagoController {
         );
 
         return ResponseEntity.ok(respuesta);
-    }
-
-    private EntityModel<Pago> agregarLinks(Pago pago) {
-
-        return EntityModel.of(
-                pago,
-                Link.of(API_GATEWAY + "/pagos/" + pago.getId()).withSelfRel(),
-                Link.of(API_GATEWAY + "/pagos").withRel("pagos"),
-                Link.of(API_GATEWAY + "/pagos/" + pago.getId() + "/exists").withRel("existe"),
-                Link.of(API_GATEWAY + "/pagos/metodo/" + pago.getMetodoPago()).withRel("pagos-por-metodo"),
-                Link.of(API_GATEWAY + "/pagos/estado/" + pago.getEstadoPago()).withRel("pagos-por-estado"),
-                Link.of(API_GATEWAY + "/pagos/reserva/" + pago.getIdReserva()).withRel("pagos-por-reserva"),
-                Link.of(API_GATEWAY + "/reservas/" + pago.getIdReserva()).withRel("reserva")
-        );
     }
 }

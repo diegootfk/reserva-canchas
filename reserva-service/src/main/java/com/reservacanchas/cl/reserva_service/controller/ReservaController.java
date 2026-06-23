@@ -1,5 +1,6 @@
 package com.reservacanchas.cl.reserva_service.controller;
 
+import com.reservacanchas.cl.reserva_service.assembler.ReservaAssembler;
 import com.reservacanchas.cl.reserva_service.dto.ReservaDTO;
 import com.reservacanchas.cl.reserva_service.model.Reserva;
 import com.reservacanchas.cl.reserva_service.service.ReservaService;
@@ -11,6 +12,9 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import jakarta.validation.Valid;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
@@ -33,12 +37,17 @@ import java.util.stream.Collectors;
 @RequestMapping("/reservas")
 public class ReservaController {
 
+    private static final Logger logger =
+            LoggerFactory.getLogger(ReservaController.class);
+
     private static final String API_GATEWAY = "http://localhost:7090";
 
     private final ReservaService reservaService;
+    private final ReservaAssembler reservaAssembler;
 
-    public ReservaController(ReservaService reservaService) {
+    public ReservaController(ReservaService reservaService, ReservaAssembler reservaAssembler) {
         this.reservaService = reservaService;
+        this.reservaAssembler = reservaAssembler;
     }
 
     @Operation(
@@ -53,23 +62,32 @@ public class ReservaController {
     @PostMapping
     public ResponseEntity<Reserva> crear(@Valid @RequestBody ReservaDTO reservaDTO) {
 
+        logger.info("Solicitud para crear reserva");
+
         Reserva reserva = reservaService.guardar(reservaDTO);
+
+        logger.info("Reserva creada correctamente con ID: {}",
+                reserva.getId());
 
         return new ResponseEntity<>(reserva, HttpStatus.CREATED);
     }
 
     @Operation(
             summary = "Listar reservas",
-            description = "Obtiene todas las reservas registradas en el sistema con enlaces HATEOAS apuntando al API Gateway"
+            description = "Obtiene todas las reservas registradas en el sistema con enlaces HATEOAS"
     )
     @ApiResponse(responseCode = "200", description = "Listado obtenido correctamente")
     @GetMapping
     public ResponseEntity<CollectionModel<EntityModel<Reserva>>> listar() {
 
+        logger.info("Solicitud para listar reservas");
+
         List<EntityModel<Reserva>> reservas = reservaService.listar()
                 .stream()
-                .map(this::agregarLinks)
+                .map(reservaAssembler::toModel)
                 .collect(Collectors.toList());
+
+        logger.info("Reservas listadas correctamente");
 
         CollectionModel<EntityModel<Reserva>> respuesta = CollectionModel.of(
                 reservas,
@@ -81,7 +99,7 @@ public class ReservaController {
 
     @Operation(
             summary = "Buscar reserva por ID",
-            description = "Obtiene una reserva específica mediante su identificador con enlaces HATEOAS apuntando al API Gateway"
+            description = "Obtiene una reserva específica mediante su identificador con enlaces HATEOAS"
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Reserva encontrada"),
@@ -90,9 +108,13 @@ public class ReservaController {
     @GetMapping("/{id}")
     public ResponseEntity<EntityModel<Reserva>> buscarPorId(@PathVariable Long id) {
 
+        logger.info("Solicitud para buscar reserva con ID: {}", id);
+
         Reserva reserva = reservaService.buscarPorId(id);
 
-        return ResponseEntity.ok(agregarLinks(reserva));
+        logger.info("Reserva encontrada con ID: {}", id);
+
+        return ResponseEntity.ok(reservaAssembler.toModel(reserva));
     }
 
     @Operation(
@@ -110,9 +132,13 @@ public class ReservaController {
             @Valid @RequestBody ReservaDTO reservaDTO
     ) {
 
-        return ResponseEntity.ok(
-                reservaService.actualizar(id, reservaDTO)
-        );
+        logger.info("Solicitud para actualizar reserva con ID: {}", id);
+
+        Reserva reserva = reservaService.actualizar(id, reservaDTO);
+
+        logger.info("Reserva actualizada correctamente con ID: {}", id);
+
+        return ResponseEntity.ok(reserva);
     }
 
     @Operation(
@@ -126,7 +152,11 @@ public class ReservaController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminar(@PathVariable Long id) {
 
+        logger.info("Solicitud para eliminar reserva con ID: {}", id);
+
         reservaService.eliminar(id);
+
+        logger.info("Reserva eliminada correctamente con ID: {}", id);
 
         return ResponseEntity.noContent().build();
     }
@@ -139,20 +169,24 @@ public class ReservaController {
     @GetMapping("/{id}/exists")
     public boolean existe(@PathVariable Long id) {
 
+        logger.info("Verificando existencia de reserva con ID: {}", id);
+
         return reservaService.existePorId(id);
     }
 
     @Operation(
             summary = "Buscar reservas por estado",
-            description = "Obtiene todas las reservas según su estado con enlaces HATEOAS apuntando al API Gateway"
+            description = "Obtiene todas las reservas según su estado con enlaces HATEOAS"
     )
     @ApiResponse(responseCode = "200", description = "Reservas encontradas correctamente")
     @GetMapping("/estado/{estado}")
     public ResponseEntity<CollectionModel<EntityModel<Reserva>>> buscarPorEstado(@PathVariable String estado) {
 
+        logger.info("Buscando reservas por estado: {}", estado);
+
         List<EntityModel<Reserva>> reservas = reservaService.buscarPorEstado(estado)
                 .stream()
-                .map(this::agregarLinks)
+                .map(reservaAssembler::toModel)
                 .collect(Collectors.toList());
 
         CollectionModel<EntityModel<Reserva>> respuesta = CollectionModel.of(
@@ -166,15 +200,17 @@ public class ReservaController {
 
     @Operation(
             summary = "Buscar reservas por usuario",
-            description = "Obtiene todas las reservas asociadas a un usuario específico con enlaces HATEOAS apuntando al API Gateway"
+            description = "Obtiene todas las reservas asociadas a un usuario específico con enlaces HATEOAS"
     )
     @ApiResponse(responseCode = "200", description = "Reservas encontradas correctamente")
     @GetMapping("/usuario/{idUsuario}")
     public ResponseEntity<CollectionModel<EntityModel<Reserva>>> buscarPorUsuario(@PathVariable Long idUsuario) {
 
+        logger.info("Buscando reservas del usuario ID: {}", idUsuario);
+
         List<EntityModel<Reserva>> reservas = reservaService.buscarPorUsuario(idUsuario)
                 .stream()
-                .map(this::agregarLinks)
+                .map(reservaAssembler::toModel)
                 .collect(Collectors.toList());
 
         CollectionModel<EntityModel<Reserva>> respuesta = CollectionModel.of(
@@ -189,15 +225,17 @@ public class ReservaController {
 
     @Operation(
             summary = "Buscar reservas por cancha",
-            description = "Obtiene todas las reservas asociadas a una cancha específica con enlaces HATEOAS apuntando al API Gateway"
+            description = "Obtiene todas las reservas asociadas a una cancha específica con enlaces HATEOAS"
     )
     @ApiResponse(responseCode = "200", description = "Reservas encontradas correctamente")
     @GetMapping("/cancha/{idCancha}")
     public ResponseEntity<CollectionModel<EntityModel<Reserva>>> buscarPorCancha(@PathVariable Long idCancha) {
 
+        logger.info("Buscando reservas de la cancha ID: {}", idCancha);
+
         List<EntityModel<Reserva>> reservas = reservaService.buscarPorCancha(idCancha)
                 .stream()
-                .map(this::agregarLinks)
+                .map(reservaAssembler::toModel)
                 .collect(Collectors.toList());
 
         CollectionModel<EntityModel<Reserva>> respuesta = CollectionModel.of(
@@ -208,21 +246,5 @@ public class ReservaController {
         );
 
         return ResponseEntity.ok(respuesta);
-    }
-
-    private EntityModel<Reserva> agregarLinks(Reserva reserva) {
-
-        return EntityModel.of(
-                reserva,
-                Link.of(API_GATEWAY + "/reservas/" + reserva.getId()).withSelfRel(),
-                Link.of(API_GATEWAY + "/reservas").withRel("reservas"),
-                Link.of(API_GATEWAY + "/reservas/" + reserva.getId() + "/exists").withRel("existe"),
-                Link.of(API_GATEWAY + "/reservas/estado/" + reserva.getEstado()).withRel("reservas-por-estado"),
-                Link.of(API_GATEWAY + "/reservas/usuario/" + reserva.getIdUsuario()).withRel("reservas-por-usuario"),
-                Link.of(API_GATEWAY + "/reservas/cancha/" + reserva.getIdCancha()).withRel("reservas-por-cancha"),
-                Link.of(API_GATEWAY + "/usuarios/" + reserva.getIdUsuario()).withRel("usuario"),
-                Link.of(API_GATEWAY + "/canchas/" + reserva.getIdCancha()).withRel("cancha"),
-                Link.of(API_GATEWAY + "/pagos/reserva/" + reserva.getId()).withRel("pagos")
-        );
     }
 }

@@ -1,5 +1,6 @@
 package com.reservacanchas.cl.mantenimiento_service.controller;
 
+import com.reservacanchas.cl.mantenimiento_service.assembler.MantenimientoAssembler;
 import com.reservacanchas.cl.mantenimiento_service.dto.MantenimientoDTO;
 import com.reservacanchas.cl.mantenimiento_service.model.Mantenimiento;
 import com.reservacanchas.cl.mantenimiento_service.service.MantenimientoService;
@@ -11,6 +12,9 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import jakarta.validation.Valid;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
@@ -33,12 +37,17 @@ import java.util.stream.Collectors;
 @RequestMapping("/mantenimientos")
 public class MantenimientoController {
 
+    private static final Logger logger =
+            LoggerFactory.getLogger(MantenimientoController.class);
+
     private static final String API_GATEWAY = "http://localhost:7090";
 
     private final MantenimientoService mantenimientoService;
+    private final MantenimientoAssembler mantenimientoAssembler;
 
-    public MantenimientoController(MantenimientoService mantenimientoService) {
+    public MantenimientoController(MantenimientoService mantenimientoService, MantenimientoAssembler mantenimientoAssembler) {
         this.mantenimientoService = mantenimientoService;
+        this.mantenimientoAssembler = mantenimientoAssembler;
     }
 
     @Operation(
@@ -53,47 +62,84 @@ public class MantenimientoController {
     public ResponseEntity<Mantenimiento> crear(
             @Valid @RequestBody MantenimientoDTO mantenimientoDTO) {
 
+        logger.info(
+                "Solicitud para crear mantenimiento de cancha {}",
+                mantenimientoDTO.getIdCancha()
+        );
+
+        Mantenimiento mantenimiento =
+                mantenimientoService.guardar(mantenimientoDTO);
+
+        logger.info(
+                "Mantenimiento creado correctamente con ID {}",
+                mantenimiento.getId()
+        );
+
         return new ResponseEntity<>(
-                mantenimientoService.guardar(mantenimientoDTO),
+                mantenimiento,
                 HttpStatus.CREATED
         );
     }
 
     @Operation(
             summary = "Listar mantenimientos",
-            description = "Obtiene todos los mantenimientos registrados con enlaces HATEOAS apuntando al API Gateway"
+            description = "Obtiene todos los mantenimientos registrados con enlaces HATEOAS"
     )
     @ApiResponse(responseCode = "200", description = "Listado obtenido correctamente")
     @GetMapping
     public ResponseEntity<CollectionModel<EntityModel<Mantenimiento>>> listar() {
 
-        List<EntityModel<Mantenimiento>> mantenimientos = mantenimientoService.listar()
-                .stream()
-                .map(this::agregarLinks)
-                .collect(Collectors.toList());
+        logger.info("Solicitud para listar todos los mantenimientos");
 
-        CollectionModel<EntityModel<Mantenimiento>> respuesta = CollectionModel.of(
-                mantenimientos,
-                Link.of(API_GATEWAY + "/mantenimientos").withSelfRel()
+        List<EntityModel<Mantenimiento>> mantenimientos =
+                mantenimientoService.listar()
+                        .stream()
+                        .map(mantenimientoAssembler::toModel)
+                        .collect(Collectors.toList());
+
+        logger.info(
+                "Se encontraron {} mantenimientos",
+                mantenimientos.size()
         );
+
+        CollectionModel<EntityModel<Mantenimiento>> respuesta =
+                CollectionModel.of(
+                        mantenimientos,
+                        Link.of(API_GATEWAY + "/mantenimientos")
+                                .withSelfRel()
+                );
 
         return ResponseEntity.ok(respuesta);
     }
 
     @Operation(
             summary = "Buscar mantenimiento por ID",
-            description = "Obtiene un mantenimiento específico mediante su identificador con enlaces HATEOAS apuntando al API Gateway"
+            description = "Obtiene un mantenimiento específico mediante su identificador con enlaces HATEOAS"
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Mantenimiento encontrado"),
             @ApiResponse(responseCode = "404", description = "Mantenimiento no encontrado")
     })
     @GetMapping("/{id}")
-    public ResponseEntity<EntityModel<Mantenimiento>> buscarPorId(@PathVariable Long id) {
+    public ResponseEntity<EntityModel<Mantenimiento>> buscarPorId(
+            @PathVariable Long id) {
 
-        Mantenimiento mantenimiento = mantenimientoService.buscarPorId(id);
+        logger.info(
+                "Solicitud para buscar mantenimiento con ID {}",
+                id
+        );
 
-        return ResponseEntity.ok(agregarLinks(mantenimiento));
+        Mantenimiento mantenimiento =
+                mantenimientoService.buscarPorId(id);
+
+        logger.info(
+                "Mantenimiento encontrado con ID {}",
+                id
+        );
+
+        return ResponseEntity.ok(
+                mantenimientoAssembler.toModel(mantenimiento)
+        );
     }
 
     @Operation(
@@ -110,8 +156,21 @@ public class MantenimientoController {
             @PathVariable Long id,
             @Valid @RequestBody MantenimientoDTO mantenimientoDTO) {
 
+        logger.info(
+                "Solicitud para actualizar mantenimiento con ID {}",
+                id
+        );
+
+        Mantenimiento mantenimientoActualizado =
+                mantenimientoService.actualizar(id, mantenimientoDTO);
+
+        logger.info(
+                "Mantenimiento actualizado correctamente con ID {}",
+                id
+        );
+
         return ResponseEntity.ok(
-                mantenimientoService.actualizar(id, mantenimientoDTO)
+                mantenimientoActualizado
         );
     }
 
@@ -126,7 +185,17 @@ public class MantenimientoController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminar(@PathVariable Long id) {
 
+        logger.info(
+                "Solicitud para eliminar mantenimiento con ID {}",
+                id
+        );
+
         mantenimientoService.eliminar(id);
+
+        logger.info(
+                "Mantenimiento eliminado correctamente con ID {}",
+                id
+        );
 
         return ResponseEntity.noContent().build();
     }
@@ -139,17 +208,11 @@ public class MantenimientoController {
     @GetMapping("/{id}/exists")
     public boolean existe(@PathVariable Long id) {
 
-        return mantenimientoService.existePorId(id);
-    }
-
-    private EntityModel<Mantenimiento> agregarLinks(Mantenimiento mantenimiento) {
-
-        return EntityModel.of(
-                mantenimiento,
-                Link.of(API_GATEWAY + "/mantenimientos/" + mantenimiento.getId()).withSelfRel(),
-                Link.of(API_GATEWAY + "/mantenimientos").withRel("mantenimientos"),
-                Link.of(API_GATEWAY + "/mantenimientos/" + mantenimiento.getId() + "/exists").withRel("existe"),
-                Link.of(API_GATEWAY + "/canchas/" + mantenimiento.getIdCancha()).withRel("cancha")
+        logger.info(
+                "Verificando existencia de mantenimiento con ID {}",
+                id
         );
+
+        return mantenimientoService.existePorId(id);
     }
 }

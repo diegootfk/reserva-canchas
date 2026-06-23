@@ -6,6 +6,7 @@ import com.reservacanchas.cl.pago_service.model.Pago;
 import com.reservacanchas.cl.pago_service.repository.PagoRepository;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -177,5 +178,52 @@ class PagoServiceTest {
                 1,
                 pagoService.buscarPorReserva(1L).size()
         );
+    }
+
+    // -------------------------------------------------------------------
+    // PRUEBAS DE REGLAS DE NEGOCIO (Requisito Evaluación 3)
+    // -------------------------------------------------------------------
+
+    @Test
+    @DisplayName("Regla de Negocio: Debe calcular correctamente el 19% de IVA sobre el monto neto")
+    void calcularIvaDebeRetornarMontoCorrecto() {
+        // Given
+        double montoNeto = 20000.0;
+        double ivaEsperado = 3800.0; // 20000 * 0.19
+
+        // When
+        double ivaCalculado = pagoService.calcularIva(montoNeto);
+
+        // Then
+        assertEquals(ivaEsperado, ivaCalculado, "El cálculo del IVA debe corresponder exactamente al 19% del monto neto");
+    }
+
+    @Test
+    @DisplayName("Regla de Negocio: Debe aplicar un descuento al monto total")
+    void aplicarDescuentoDebeRetornarMontoConRebaja() {
+        // Given
+        double montoInicial = 25000.0;
+        double porcentajeDescuento = 10.0; // 10% de descuento
+        double montoEsperado = 22500.0;    // 25000 - 2500
+
+        // When
+        double montoConDescuento = pagoService.aplicarDescuento(montoInicial, porcentajeDescuento);
+
+        // Then
+        assertEquals(montoEsperado, montoConDescuento, "El descuento debe aplicarse correctamente restando el porcentaje indicado al monto inicial");
+    }
+
+    @Test
+    @DisplayName("Regla de Negocio: Debe calcular el total a pagar sumando el IVA al monto neto")
+    void calcularTotalConIvaDebeRetornarSumaCorrecta() {
+        // Given
+        double montoNeto = 10000.0;
+        double totalEsperado = 11900.0; // 10000 + 1900 (IVA del 19%)
+
+        // When
+        double totalCalculado = pagoService.calcularTotalConIva(montoNeto);
+
+        // Then
+        assertEquals(totalEsperado, totalCalculado, "El total final debe ser la suma exacta del monto neto más el 19% de IVA");
     }
 }
