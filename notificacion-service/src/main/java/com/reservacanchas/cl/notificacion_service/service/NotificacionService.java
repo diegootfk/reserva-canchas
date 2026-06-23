@@ -9,7 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.List;
 
@@ -20,11 +20,14 @@ public class NotificacionService {
             LoggerFactory.getLogger(NotificacionService.class);
 
     private final NotificacionRepository notificacionRepository;
-    private final RestTemplate restTemplate;
+    private final WebClient.Builder webClientBuilder;
 
-    public NotificacionService(NotificacionRepository notificacionRepository) {
+    public NotificacionService(
+            NotificacionRepository notificacionRepository,
+            WebClient.Builder webClientBuilder) {
+
         this.notificacionRepository = notificacionRepository;
-        this.restTemplate = new RestTemplate();
+        this.webClientBuilder = webClientBuilder;
     }
 
     public Notificacion guardar(NotificacionDTO notificacionDTO) {
@@ -35,12 +38,14 @@ public class NotificacionService {
                 notificacionDTO.getIdReserva()
         );
 
-        Boolean usuarioExiste = restTemplate.getForObject(
-                "http://localhost:7091/usuarios/"
+        Boolean usuarioExiste = webClientBuilder.build()
+                .get()
+                .uri("http://localhost:7091/usuarios/"
                         + notificacionDTO.getIdUsuario()
-                        + "/exists",
-                Boolean.class
-        );
+                        + "/exists")
+                .retrieve()
+                .bodyToMono(Boolean.class)
+                .block();
 
         if (usuarioExiste == null || !usuarioExiste) {
 
@@ -52,12 +57,14 @@ public class NotificacionService {
             throw new ResourceNotFoundException("El usuario no existe");
         }
 
-        Boolean reservaExiste = restTemplate.getForObject(
-                "http://localhost:7093/reservas/"
+        Boolean reservaExiste = webClientBuilder.build()
+                .get()
+                .uri("http://localhost:7093/reservas/"
                         + notificacionDTO.getIdReserva()
-                        + "/exists",
-                Boolean.class
-        );
+                        + "/exists")
+                .retrieve()
+                .bodyToMono(Boolean.class)
+                .block();
 
         if (reservaExiste == null || !reservaExiste) {
 
@@ -96,7 +103,15 @@ public class NotificacionService {
 
         logger.info("Listando todas las notificaciones");
 
-        return notificacionRepository.findAll();
+        List<Notificacion> notificaciones =
+                notificacionRepository.findAll();
+
+        logger.info(
+                "Se encontraron {} notificaciones",
+                notificaciones.size()
+        );
+
+        return notificaciones;
     }
 
     public Notificacion buscarPorId(Long id) {
@@ -106,7 +121,7 @@ public class NotificacionService {
         return notificacionRepository.findById(id)
                 .orElseThrow(() -> {
 
-                    logger.warn(
+                    logger.error(
                             "Notificación con ID {} no encontrada",
                             id
                     );
@@ -170,6 +185,14 @@ public class NotificacionService {
                 id
         );
 
-        return notificacionRepository.existsById(id);
+        boolean existe = notificacionRepository.existsById(id);
+
+        logger.info(
+                "Resultado existencia notificación {}: {}",
+                id,
+                existe
+        );
+
+        return existe;
     }
 }

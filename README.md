@@ -1,172 +1,394 @@
-# Sistema de Reserva de Canchas
+# Sistema de Reserva de Canchas Deportivas
 
-Proyecto desarrollado con arquitectura de microservicios utilizando Spring Boot, API Gateway, JWT y MySQL.
+## Descripción General
+
+Sistema desarrollado bajo una arquitectura de microservicios para la gestión de reservas de canchas deportivas.
+
+La plataforma permite administrar usuarios, sedes, canchas, horarios, disponibilidades, reservas, pagos, reseñas, mantenimientos y notificaciones, incorporando autenticación mediante JWT y comunicación entre microservicios utilizando Spring WebClient.
 
 ---
 
-# Tecnologías utilizadas
+## Objetivo del Proyecto
 
-* Java 21
-* Spring Boot
-* Spring Security
-* JWT Authentication
-* Spring Cloud Gateway
-* MySQL
-* Liquibase
-* Maven
-* REST API
-* Postman
+Desarrollar una solución escalable y desacoplada que permita gestionar reservas de canchas deportivas mediante una arquitectura moderna basada en microservicios.
 
+---
 
-# Arquitectura del proyecto
-
-El sistema está compuesto por múltiples microservicios independientes conectados mediante REST.
-
-## Microservicios
-
-* usuario-service
-* cancha-service
-* reserva-service
-* pago-service
-* sede-service
-* horario-service
-* disponibilidad-service
-* notificacion-service
-* resena-service
-* mantenimiento-service
-* auth-service
-* api-gateway
-
-
-# API Gateway
-
-El proyecto utiliza un API Gateway centralizado para:
-
-* enrutar solicitudes
-* validar JWT
-* controlar accesos
-* centralizar seguridad
-
-Puerto del gateway:
+## Arquitectura del Sistema
 
 ```text
-7090
+                           ┌──────────────────┐
+                           │     Cliente      │
+                           └────────┬─────────┘
+                                    │
+                                    ▼
+                         ┌─────────────────────┐
+                         │     API Gateway     │
+                         └─────────┬───────────┘
+                                   │
+      ┌────────────────────────────┼────────────────────────────┐
+      │                            │                            │
+      ▼                            ▼                            ▼
+
+┌─────────────┐          ┌────────────────┐          ┌─────────────┐
+│ Auth Service│          │ Usuario Service│          │ Sede Service│
+└─────────────┘          └────────────────┘          └─────────────┘
+
+      │
+      ▼
+
+┌─────────────┐
+│CanchaService│
+└──────┬──────┘
+       │
+       ├──────────────┐
+       │              │
+       ▼              ▼
+
+┌─────────────┐   ┌─────────────┐
+│HorarioServ.│   │Disponib.Serv│
+└─────────────┘   └─────────────┘
+
+       │
+       ▼
+
+┌─────────────┐
+│ReservaServ.│
+└──────┬──────┘
+       │
+       ├───────────┬───────────┐
+       │           │           │
+       ▼           ▼           ▼
+
+┌───────────┐ ┌───────────┐ ┌──────────────┐
+│PagoServ.  │ │ReseñaServ.│ │Notificación  │
+└───────────┘ └───────────┘ └──────────────┘
+
+       │
+       ▼
+
+┌─────────────────┐
+│MantenimientoServ│
+└─────────────────┘
 ```
 
 ---
 
-# Seguridad JWT
+## Tecnologías Utilizadas
 
-El sistema implementa autenticación y autorización mediante JWT.
+### Backend
 
-## Roles implementados
+- Java 21
+- Spring Boot
+- Spring Data JPA
+- Spring Security
+- Spring Cloud Gateway
+- Spring WebClient
+- Spring HATEOAS
 
-* ADMIN
-* USER
+### Base de Datos
 
-## Funcionalidades
+- MySQL
 
-* Login
-* Generación de token
-* Protección de endpoints
-* Validación de JWT en Gateway
-* Validación de JWT en microservicios
+### Documentación
 
+- Swagger OpenAPI
 
-# Manejo de excepciones
+### Testing
 
-Se implementó manejo global de excepciones utilizando:
+- JUnit 5
+- Mockito
 
-* GlobalExceptionHandler
-* ResourceNotFoundException
-* BadRequestException
-* ApiErrorResponse
+### Gestión del Proyecto
 
-Respuestas JSON personalizadas:
+- Git
+- GitHub
+- Maven
 
-```json
-{
-  "timestamp": "2026-05-10T10:00:00",
-  "status": 404,
-  "error": "NOT_FOUND",
-  "message": "Recurso no encontrado"
-}
+---
+
+## Microservicios Implementados
+
+| Microservicio | Responsabilidad |
+|--------------|----------------|
+| Auth Service | Autenticación y generación de JWT |
+| API Gateway | Punto único de acceso y validación de tokens |
+| Usuario Service | Gestión de usuarios |
+| Sede Service | Gestión de sedes deportivas |
+| Cancha Service | Gestión de canchas |
+| Horario Service | Gestión de horarios |
+| Disponibilidad Service | Gestión de disponibilidades |
+| Reserva Service | Gestión de reservas |
+| Pago Service | Gestión de pagos |
+| Reseña Service | Gestión de reseñas |
+| Notificación Service | Gestión de notificaciones |
+| Mantenimiento Service | Gestión de mantenimientos |
+
+---
+
+## Funcionalidades Principales
+
+### Gestión de Usuarios
+
+- Registro de usuarios.
+- Administración de perfiles.
+- Validación de existencia.
+
+### Gestión de Canchas
+
+- Registro de canchas.
+- Configuración de horarios.
+- Control de disponibilidad.
+
+### Gestión de Reservas
+
+- Creación de reservas.
+- Validación de usuarios.
+- Validación de canchas.
+
+### Gestión de Pagos
+
+- Registro de pagos.
+- Cálculo de IVA.
+- Aplicación de descuentos.
+
+### Gestión de Reseñas
+
+- Evaluación de canchas.
+- Comentarios de usuarios.
+
+### Gestión de Notificaciones
+
+- Notificaciones asociadas a reservas.
+- Control de estados.
+
+### Gestión de Mantenimientos
+
+- Programación de mantenimientos.
+- Seguimiento de estado.
+
+---
+
+## Seguridad
+
+La plataforma implementa autenticación y autorización mediante JWT.
+
+### Características
+
+- Login seguro.
+- Tokens JWT.
+- Roles USER y ADMIN.
+- Protección de endpoints.
+- Validación centralizada en API Gateway.
+
+### Flujo de Seguridad
+
+```text
+Usuario
+   │
+   ▼
+Login
+   │
+   ▼
+Auth Service
+   │
+   ▼
+Generación JWT
+   │
+   ▼
+API Gateway
+   │
+   ▼
+Microservicios
 ```
 
 ---
 
-# Comunicación entre microservicios
+## Comunicación Entre Microservicios
 
-La comunicación se realiza mediante `RestTemplate`.
+La comunicación entre microservicios se implementa utilizando:
 
-## Ejemplos
+```text
+Spring WebClient
+```
 
-### reserva-service
+### Validaciones entre servicios
 
-Valida:
+Reserva Service valida:
 
-* existencia de usuario
-* existencia de cancha
+- Usuario existente.
+- Cancha existente.
 
-### pago-service
+Pago Service valida:
 
-Valida:
+- Reserva existente.
 
-* existencia de reserva
+Reseña Service valida:
 
+- Usuario existente.
+- Cancha existente.
+- Reserva existente.
 
-# Bases de datos
+Notificación Service valida:
 
-Cada microservicio posee su propia base de datos MySQL independiente.
+- Usuario existente.
+- Reserva existente.
 
-## Bases implementadas
+Horario Service valida:
 
-* db_usuario_service
-* db_cancha_service
-* db_reserva_service
-* db_pago_service
-* db_sede_service
-* db_horario_service
-* db_disponibilidad_service
-* db_notificacion_service
-* db_resena_service
-* db_mantenimiento_service
-* db_auth_service
+- Cancha existente.
 
+Disponibilidad Service valida:
 
-# Puertos utilizados
+- Cancha existente.
 
-| Microservicio          | Puerto |
-| ---------------------- | ------ |
-| api-gateway            | 7090   |
-| usuario-service        | 7091   |
-| cancha-service         | 7092   |
-| reserva-service        | 7093   |
-| pago-service           | 7094   |
-| sede-service           | 7095   |
-| horario-service        | 7096   |
-| disponibilidad-service | 7097   |
-| notificacion-service   | 7098   |
-| resena-service         | 7099   |
-| mantenimiento-service  | 7100   |
-| auth-service           | 7101   |
+Mantenimiento Service valida:
 
+- Cancha existente.
 
-# Funcionalidades principales
+---
 
-* CRUD de usuarios
-* CRUD de canchas
-* CRUD de reservas
-* CRUD de pagos
-* CRUD de sedes
-* CRUD de horarios
-* CRUD de disponibilidades
-* autenticación JWT
-* control de acceso por roles
-* validaciones entre microservicios
-* manejo global de excepciones
+## HATEOAS
 
+Todos los microservicios implementan HATEOAS mediante Assemblers dedicados.
 
-# Autor
+Beneficios:
 
-Proyecto desarrollado por Diego Berrios para la asignatura Fullstack.
+- Navegación dinámica entre recursos.
+- APIs más descriptivas.
+- Menor acoplamiento cliente-servidor.
+
+---
+
+## Reglas de Negocio Implementadas
+
+### Usuario
+
+- Email obligatorio.
+
+### Sede
+
+- Nombre obligatorio.
+
+### Cancha
+
+- Nombre obligatorio.
+- Precio mayor a cero.
+
+### Horario
+
+- Día de la semana obligatorio.
+
+### Disponibilidad
+
+- Fecha obligatoria.
+
+### Reserva
+
+- Usuario debe existir.
+- Cancha debe existir.
+- Estado inicial: CONFIRMADA.
+
+### Pago
+
+- Reserva debe existir.
+- Estado inicial: PAGADO.
+- IVA del 19%.
+- Aplicación de descuentos.
+
+### Reseña
+
+- Usuario debe existir.
+- Cancha debe existir.
+- Reserva debe existir.
+
+### Notificación
+
+- Usuario debe existir.
+- Reserva debe existir.
+- Estado inicial: ENVIADA.
+
+### Mantenimiento
+
+- Cancha debe existir.
+
+---
+
+## Testing
+
+Se implementaron pruebas unitarias utilizando:
+
+- JUnit 5
+- Mockito
+
+Cobertura:
+
+- CRUD completo.
+- Reglas de negocio.
+- Manejo de excepciones.
+- Validaciones.
+- Servicios de dominio.
+
+---
+
+## Documentación API
+
+Cada microservicio incorpora documentación Swagger.
+
+Ejemplos:
+
+```text
+http://localhost:7090/swagger-ui.html
+http://localhost:7091/swagger-ui.html
+http://localhost:7092/swagger-ui.html
+```
+
+---
+
+## Estructura General del Proyecto
+
+```text
+Proyecto
+
+├── api-gateway
+├── auth-service
+├── usuario-service
+├── sede-service
+├── cancha-service
+├── horario-service
+├── disponibilidad-service
+├── reserva-service
+├── pago-service
+├── resena-service
+├── notificacion-service
+├── mantenimiento-service
+└── README.md
+```
+
+---
+
+## Características Destacadas
+
+- Arquitectura basada en microservicios.
+- Seguridad con JWT.
+- API Gateway centralizado.
+- Comunicación mediante WebClient.
+- Documentación Swagger.
+- HATEOAS mediante Assemblers.
+- Persistencia con MySQL.
+- Testing con JUnit y Mockito.
+- Manejo centralizado de excepciones.
+- Registro de logs mediante SLF4J.
+
+---
+
+## Autores
+
+Proyecto desarrollado para la asignatura Fullstack I.
+
+Duoc UC – Ingeniería en Informática.
+
+Integrantes:
+
+- Diego
+- Oscar

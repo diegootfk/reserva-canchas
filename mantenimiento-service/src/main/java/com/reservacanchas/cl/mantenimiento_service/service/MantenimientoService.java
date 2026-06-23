@@ -9,7 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.List;
 
@@ -20,11 +20,14 @@ public class MantenimientoService {
             LoggerFactory.getLogger(MantenimientoService.class);
 
     private final MantenimientoRepository mantenimientoRepository;
-    private final RestTemplate restTemplate;
+    private final WebClient.Builder webClientBuilder;
 
-    public MantenimientoService(MantenimientoRepository mantenimientoRepository) {
+    public MantenimientoService(
+            MantenimientoRepository mantenimientoRepository,
+            WebClient.Builder webClientBuilder) {
+
         this.mantenimientoRepository = mantenimientoRepository;
-        this.restTemplate = new RestTemplate();
+        this.webClientBuilder = webClientBuilder;
     }
 
     public Mantenimiento guardar(MantenimientoDTO mantenimientoDTO) {
@@ -34,12 +37,14 @@ public class MantenimientoService {
                 mantenimientoDTO.getIdCancha()
         );
 
-        Boolean canchaExiste = restTemplate.getForObject(
-                "http://localhost:7092/canchas/"
+        Boolean canchaExiste = webClientBuilder.build()
+                .get()
+                .uri("http://localhost:7092/canchas/"
                         + mantenimientoDTO.getIdCancha()
-                        + "/exists",
-                Boolean.class
-        );
+                        + "/exists")
+                .retrieve()
+                .bodyToMono(Boolean.class)
+                .block();
 
         if (canchaExiste == null || !canchaExiste) {
 
@@ -76,7 +81,15 @@ public class MantenimientoService {
 
         logger.info("Listando todos los mantenimientos");
 
-        return mantenimientoRepository.findAll();
+        List<Mantenimiento> mantenimientos =
+                mantenimientoRepository.findAll();
+
+        logger.info(
+                "Se encontraron {} mantenimientos",
+                mantenimientos.size()
+        );
+
+        return mantenimientos;
     }
 
     public Mantenimiento buscarPorId(Long id) {
@@ -89,7 +102,7 @@ public class MantenimientoService {
         return mantenimientoRepository.findById(id)
                 .orElseThrow(() -> {
 
-                    logger.warn(
+                    logger.error(
                             "Mantenimiento con ID {} no encontrado",
                             id
                     );
@@ -152,6 +165,14 @@ public class MantenimientoService {
                 id
         );
 
-        return mantenimientoRepository.existsById(id);
+        boolean existe = mantenimientoRepository.existsById(id);
+
+        logger.info(
+                "Resultado existencia mantenimiento {}: {}",
+                id,
+                existe
+        );
+
+        return existe;
     }
 }

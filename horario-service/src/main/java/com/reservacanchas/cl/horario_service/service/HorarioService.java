@@ -10,7 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.List;
 
@@ -21,11 +21,14 @@ public class HorarioService {
             LoggerFactory.getLogger(HorarioService.class);
 
     private final HorarioRepository horarioRepository;
-    private final RestTemplate restTemplate;
+    private final WebClient.Builder webClientBuilder;
 
-    public HorarioService(HorarioRepository horarioRepository) {
+    public HorarioService(
+            HorarioRepository horarioRepository,
+            WebClient.Builder webClientBuilder) {
+
         this.horarioRepository = horarioRepository;
-        this.restTemplate = new RestTemplate();
+        this.webClientBuilder = webClientBuilder;
     }
 
     public Horario guardar(HorarioDTO horarioDTO) {
@@ -46,12 +49,14 @@ public class HorarioService {
                     "El día de la semana es obligatorio");
         }
 
-        Boolean canchaExiste = restTemplate.getForObject(
-                "http://localhost:7092/canchas/"
+        Boolean canchaExiste = webClientBuilder.build()
+                .get()
+                .uri("http://localhost:7092/canchas/"
                         + horarioDTO.getIdCancha()
-                        + "/exists",
-                Boolean.class
-        );
+                        + "/exists")
+                .retrieve()
+                .bodyToMono(Boolean.class)
+                .block();
 
         if (canchaExiste == null || !canchaExiste) {
 
@@ -88,7 +93,14 @@ public class HorarioService {
 
         logger.info("Listando todos los horarios");
 
-        return horarioRepository.findAll();
+        List<Horario> horarios = horarioRepository.findAll();
+
+        logger.info(
+                "Se encontraron {} horarios",
+                horarios.size()
+        );
+
+        return horarios;
     }
 
     public Horario buscarPorId(Long id) {
@@ -101,7 +113,7 @@ public class HorarioService {
         return horarioRepository.findById(id)
                 .orElseThrow(() -> {
 
-                    logger.warn(
+                    logger.error(
                             "Horario con ID {} no encontrado",
                             id
                     );
@@ -163,6 +175,14 @@ public class HorarioService {
                 id
         );
 
-        return horarioRepository.existsById(id);
+        boolean existe = horarioRepository.existsById(id);
+
+        logger.info(
+                "Resultado existencia horario {}: {}",
+                id,
+                existe
+        );
+
+        return existe;
     }
 }
