@@ -12,6 +12,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 
 import jakarta.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
@@ -33,6 +36,9 @@ import java.util.stream.Collectors;
 @RequestMapping("/sedes")
 public class SedeController {
 
+    private static final Logger logger =
+            LoggerFactory.getLogger(SedeController.class);
+
     private static final String API_GATEWAY = "http://localhost:7090";
 
     private final SedeService sedeService;
@@ -52,10 +58,13 @@ public class SedeController {
     @PostMapping
     public ResponseEntity<Sede> crear(@Valid @RequestBody SedeDTO sedeDTO) {
 
-        return new ResponseEntity<>(
-                sedeService.guardar(sedeDTO),
-                HttpStatus.CREATED
-        );
+        logger.info("POST /sedes - Creando sede: {}", sedeDTO.getNombre());
+
+        Sede sede = sedeService.guardar(sedeDTO);
+
+        logger.info("Sede creada correctamente con ID: {}", sede.getId());
+
+        return new ResponseEntity<>(sede, HttpStatus.CREATED);
     }
 
     @Operation(
@@ -66,10 +75,14 @@ public class SedeController {
     @GetMapping
     public ResponseEntity<CollectionModel<EntityModel<Sede>>> listar() {
 
+        logger.info("GET /sedes - Listando sedes");
+
         List<EntityModel<Sede>> sedes = sedeService.listar()
                 .stream()
                 .map(this::agregarLinks)
                 .collect(Collectors.toList());
+
+        logger.info("Se encontraron {} sedes", sedes.size());
 
         CollectionModel<EntityModel<Sede>> respuesta = CollectionModel.of(
                 sedes,
@@ -90,7 +103,11 @@ public class SedeController {
     @GetMapping("/{id}")
     public ResponseEntity<EntityModel<Sede>> buscarPorId(@PathVariable Long id) {
 
+        logger.info("GET /sedes/{} - Buscando sede", id);
+
         Sede sede = sedeService.buscarPorId(id);
+
+        logger.info("Sede encontrada con ID: {}", id);
 
         return ResponseEntity.ok(agregarLinks(sede));
     }
@@ -109,9 +126,13 @@ public class SedeController {
             @PathVariable Long id,
             @Valid @RequestBody SedeDTO sedeDTO) {
 
-        return ResponseEntity.ok(
-                sedeService.actualizar(id, sedeDTO)
-        );
+        logger.info("PUT /sedes/{} - Actualizando sede", id);
+
+        Sede sede = sedeService.actualizar(id, sedeDTO);
+
+        logger.info("Sede actualizada correctamente con ID: {}", id);
+
+        return ResponseEntity.ok(sede);
     }
 
     @Operation(
@@ -125,7 +146,11 @@ public class SedeController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminar(@PathVariable Long id) {
 
+        logger.info("DELETE /sedes/{} - Eliminando sede", id);
+
         sedeService.eliminar(id);
+
+        logger.info("Sede eliminada correctamente con ID: {}", id);
 
         return ResponseEntity.noContent().build();
     }
@@ -138,7 +163,13 @@ public class SedeController {
     @GetMapping("/{id}/exists")
     public boolean existe(@PathVariable Long id) {
 
-        return sedeService.existePorId(id);
+        logger.info("GET /sedes/{}/exists - Verificando existencia", id);
+
+        boolean existe = sedeService.existePorId(id);
+
+        logger.info("Resultado existencia sede {}: {}", id, existe);
+
+        return existe;
     }
 
     private EntityModel<Sede> agregarLinks(Sede sede) {
