@@ -9,7 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.List;
 
@@ -20,11 +20,14 @@ public class PagoService {
             LoggerFactory.getLogger(PagoService.class);
 
     private final PagoRepository pagoRepository;
-    private final RestTemplate restTemplate;
+    private final WebClient.Builder webClientBuilder;
 
-    public PagoService(PagoRepository pagoRepository) {
+    public PagoService(
+            PagoRepository pagoRepository,
+            WebClient.Builder webClientBuilder) {
+
         this.pagoRepository = pagoRepository;
-        this.restTemplate = new RestTemplate();
+        this.webClientBuilder = webClientBuilder;
     }
 
     public Pago guardar(PagoDTO pagoDTO) {
@@ -32,10 +35,14 @@ public class PagoService {
         logger.info("Iniciando registro de pago para reserva {}",
                 pagoDTO.getIdReserva());
 
-        Boolean reservaExiste = restTemplate.getForObject(
-                "http://localhost:7093/reservas/" + pagoDTO.getIdReserva() + "/exists",
-                Boolean.class
-        );
+        Boolean reservaExiste = webClientBuilder.build()
+                .get()
+                .uri("http://localhost:7093/reservas/"
+                        + pagoDTO.getIdReserva()
+                        + "/exists")
+                .retrieve()
+                .bodyToMono(Boolean.class)
+                .block();
 
         if (reservaExiste == null || !reservaExiste) {
 
@@ -70,7 +77,11 @@ public class PagoService {
 
         logger.info("Listando todos los pagos");
 
-        return pagoRepository.findAll();
+        List<Pago> pagos = pagoRepository.findAll();
+
+        logger.info("Se encontraron {} pagos", pagos.size());
+
+        return pagos;
     }
 
     public Pago buscarPorId(Long id) {
@@ -135,7 +146,15 @@ public class PagoService {
                 id
         );
 
-        return pagoRepository.existsById(id);
+        boolean existe = pagoRepository.existsById(id);
+
+        logger.info(
+                "Resultado existencia pago {}: {}",
+                id,
+                existe
+        );
+
+        return existe;
     }
 
     public List<Pago> buscarPorMetodoPago(String metodoPago) {
@@ -168,20 +187,39 @@ public class PagoService {
         return pagoRepository.findByIdReserva(idReserva);
     }
 
-
     public double calcularIva(double montoNeto) {
-        logger.info("Calculando 19% de IVA para el monto neto: {}", montoNeto);
+
+        logger.info(
+                "Calculando 19% de IVA para el monto neto: {}",
+                montoNeto
+        );
+
         return montoNeto * 0.19;
     }
 
-    public double aplicarDescuento(double montoOriginal, double porcentajeDescuento) {
-        logger.info("Aplicando un descuento del {}% al monto inicial: {}", porcentajeDescuento, montoOriginal);
-        double descuento = montoOriginal * (porcentajeDescuento / 100.0);
+    public double aplicarDescuento(
+            double montoOriginal,
+            double porcentajeDescuento) {
+
+        logger.info(
+                "Aplicando un descuento del {}% al monto inicial: {}",
+                porcentajeDescuento,
+                montoOriginal
+        );
+
+        double descuento =
+                montoOriginal * (porcentajeDescuento / 100.0);
+
         return montoOriginal - descuento;
     }
 
     public double calcularTotalConIva(double montoNeto) {
-        logger.info("Calculando total a pagar sumando IVA para el monto neto: {}", montoNeto);
+
+        logger.info(
+                "Calculando total a pagar sumando IVA para el monto neto: {}",
+                montoNeto
+        );
+
         return montoNeto + calcularIva(montoNeto);
     }
 }
