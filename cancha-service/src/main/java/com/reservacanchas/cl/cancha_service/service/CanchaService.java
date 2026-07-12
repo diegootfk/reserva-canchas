@@ -38,6 +38,18 @@ public class CanchaService {
                     "El nombre de la cancha es obligatorio");
         }
 
+        if (canchaDTO.getPrecioHora() == null
+                || canchaDTO.getPrecioHora() <= 0) {
+
+            logger.error(
+                    "Error al crear cancha: precio por hora inválido ({})",
+                    canchaDTO.getPrecioHora()
+            );
+
+            throw new BadRequestException(
+                    "El precio por hora debe ser mayor a 0");
+        }
+
         Cancha cancha = new Cancha();
 
         cancha.setNombre(canchaDTO.getNombre());

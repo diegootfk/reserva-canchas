@@ -7,6 +7,7 @@ import com.reservacanchas.cl.cancha_service.model.Cancha;
 import com.reservacanchas.cl.cancha_service.repository.CanchaRepository;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -172,5 +173,36 @@ class CanchaServiceTest {
                 .thenReturn(false);
 
         assertFalse(canchaService.existePorId(99L));
+    }
+
+
+    @Test
+    @DisplayName("Regla de Negocio: Debe lanzar excepción si el precio por hora es cero")
+    void guardarDebeLanzarExcepcionSiPrecioEsCero() {
+        // Given
+        canchaDTO.setPrecioHora(0.0);
+
+        // When / Then
+        assertThrows(
+                BadRequestException.class,
+                () -> canchaService.guardar(canchaDTO)
+        );
+
+        verify(canchaRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("Regla de Negocio: Debe lanzar excepción si el precio por hora es negativo")
+    void guardarDebeLanzarExcepcionSiPrecioEsNegativo() {
+        // Given
+        canchaDTO.setPrecioHora(-1000.0);
+
+        // When / Then
+        assertThrows(
+                BadRequestException.class,
+                () -> canchaService.guardar(canchaDTO)
+        );
+
+        verify(canchaRepository, never()).save(any());
     }
 }

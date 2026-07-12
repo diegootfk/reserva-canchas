@@ -1,11 +1,13 @@
 package com.reservacanchas.cl.horario_service.service;
 
 import com.reservacanchas.cl.horario_service.dto.HorarioDTO;
+import com.reservacanchas.cl.horario_service.exception.BadRequestException;
 import com.reservacanchas.cl.horario_service.exception.ResourceNotFoundException;
 import com.reservacanchas.cl.horario_service.model.Horario;
 import com.reservacanchas.cl.horario_service.repository.HorarioRepository;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -29,12 +31,21 @@ class HorarioServiceTest {
     private HorarioService horarioService;
 
     private Horario horario;
+    private HorarioDTO horarioDTO;
 
     @BeforeEach
     void setUp() {
 
         horario = new Horario(
                 1L,
+                1L,
+                "LUNES",
+                "09:00",
+                "10:00",
+                "ACTIVO"
+        );
+
+        horarioDTO = new HorarioDTO(
                 1L,
                 "LUNES",
                 "09:00",
@@ -147,6 +158,18 @@ class HorarioServiceTest {
     }
 
     @Test
+    void eliminarDebeLanzarExcepcionSiNoExiste() {
+
+        when(horarioRepository.findById(99L))
+                .thenReturn(Optional.empty());
+
+        assertThrows(
+                ResourceNotFoundException.class,
+                () -> horarioService.eliminar(99L)
+        );
+    }
+
+    @Test
     void existePorIdDebeRetornarTrue() {
 
         when(horarioRepository.existsById(1L))
@@ -162,5 +185,71 @@ class HorarioServiceTest {
                 .thenReturn(false);
 
         assertFalse(horarioService.existePorId(99L));
+    }
+
+    // -------------------------------------------------------------------
+    // REGLAS DE NEGOCIO
+    // -------------------------------------------------------------------
+
+    @Test
+    @DisplayName("Regla de Negocio: Debe lanzar excepción si el día de la semana está vacío")
+    void guardarDebeLanzarExcepcionSiDiaSemanaVacio() {
+        // Given
+        horarioDTO.setDiaSemana("");
+
+        // When / Then
+        assertThrows(
+                BadRequestException.class,
+                () -> horarioService.guardar(horarioDTO)
+        );
+
+        verify(horarioRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("Regla de Negocio: Debe lanzar excepción si el día de la semana es nulo")
+    void guardarDebeLanzarExcepcionSiDiaSemanaEsNulo() {
+        // Given
+        horarioDTO.setDiaSemana(null);
+
+        // When / Then
+        assertThrows(
+                BadRequestException.class,
+                () -> horarioService.guardar(horarioDTO)
+        );
+
+        verify(horarioRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("Regla de Negocio: Debe lanzar excepción si horaFin no es posterior a horaInicio")
+    void guardarDebeLanzarExcepcionSiHoraFinEsAnteriorAInicio() {
+        // Given
+        horarioDTO.setHoraInicio("10:00");
+        horarioDTO.setHoraFin("09:00");
+
+        // When / Then
+        assertThrows(
+                BadRequestException.class,
+                () -> horarioService.guardar(horarioDTO)
+        );
+
+        verify(horarioRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("Regla de Negocio: Debe lanzar excepción si horaFin es igual a horaInicio")
+    void guardarDebeLanzarExcepcionSiHoraFinEsIgualAInicio() {
+        // Given
+        horarioDTO.setHoraInicio("10:00");
+        horarioDTO.setHoraFin("10:00");
+
+        // When / Then
+        assertThrows(
+                BadRequestException.class,
+                () -> horarioService.guardar(horarioDTO)
+        );
+
+        verify(horarioRepository, never()).save(any());
     }
 }

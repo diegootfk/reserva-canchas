@@ -1,9 +1,13 @@
 package com.reservacanchas.cl.mantenimiento_service.service;
 
 import com.reservacanchas.cl.mantenimiento_service.dto.MantenimientoDTO;
+import com.reservacanchas.cl.mantenimiento_service.exception.BadRequestException;
+import com.reservacanchas.cl.mantenimiento_service.exception.ResourceNotFoundException;
 import com.reservacanchas.cl.mantenimiento_service.model.Mantenimiento;
 import com.reservacanchas.cl.mantenimiento_service.repository.MantenimientoRepository;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -26,10 +30,13 @@ class MantenimientoServiceTest {
     @InjectMocks
     private MantenimientoService mantenimientoService;
 
-    @Test
-    void debeListarMantenimientos() {
+    private Mantenimiento mantenimiento;
+    private MantenimientoDTO mantenimientoDTO;
 
-        Mantenimiento mantenimiento = new Mantenimiento(
+    @BeforeEach
+    void setUp() {
+
+        mantenimiento = new Mantenimiento(
                 1L,
                 1L,
                 "2025-06-20",
@@ -37,6 +44,18 @@ class MantenimientoServiceTest {
                 "Cambio de césped",
                 "PENDIENTE"
         );
+
+        mantenimientoDTO = new MantenimientoDTO(
+                1L,
+                "2025-06-20",
+                "2025-06-21",
+                "Cambio de césped",
+                "PENDIENTE"
+        );
+    }
+
+    @Test
+    void listarDebeRetornarMantenimientos() {
 
         when(mantenimientoRepository.findAll())
                 .thenReturn(List.of(mantenimiento));
@@ -50,16 +69,7 @@ class MantenimientoServiceTest {
     }
 
     @Test
-    void debeBuscarPorId() {
-
-        Mantenimiento mantenimiento = new Mantenimiento(
-                1L,
-                1L,
-                "2025-06-20",
-                "2025-06-21",
-                "Cambio de césped",
-                "PENDIENTE"
-        );
+    void buscarPorIdDebeRetornarMantenimiento() {
 
         when(mantenimientoRepository.findById(1L))
                 .thenReturn(Optional.of(mantenimiento));
@@ -74,16 +84,19 @@ class MantenimientoServiceTest {
     }
 
     @Test
-    void debeActualizarMantenimiento() {
+    void buscarPorIdDebeLanzarExcepcion() {
 
-        Mantenimiento actual = new Mantenimiento(
-                1L,
-                1L,
-                "2025-06-20",
-                "2025-06-21",
-                "Cambio de césped",
-                "PENDIENTE"
+        when(mantenimientoRepository.findById(99L))
+                .thenReturn(Optional.empty());
+
+        assertThrows(
+                ResourceNotFoundException.class,
+                () -> mantenimientoService.buscarPorId(99L)
         );
+    }
+
+    @Test
+    void actualizarDebeActualizarMantenimiento() {
 
         MantenimientoDTO dto = new MantenimientoDTO(
                 1L,
@@ -103,7 +116,7 @@ class MantenimientoServiceTest {
         );
 
         when(mantenimientoRepository.findById(1L))
-                .thenReturn(Optional.of(actual));
+                .thenReturn(Optional.of(mantenimiento));
 
         when(mantenimientoRepository.save(any(Mantenimiento.class)))
                 .thenReturn(actualizado);
@@ -111,46 +124,100 @@ class MantenimientoServiceTest {
         Mantenimiento resultado =
                 mantenimientoService.actualizar(1L, dto);
 
-        assertEquals("FINALIZADO",
-                resultado.getEstado());
+        assertEquals("FINALIZADO", resultado.getEstado());
 
         verify(mantenimientoRepository)
                 .save(any(Mantenimiento.class));
     }
 
     @Test
-    void debeEliminarMantenimiento() {
+    void actualizarDebeLanzarExcepcionSiNoExiste() {
 
-        Mantenimiento mantenimiento = new Mantenimiento(
-                1L,
-                1L,
-                "2025-06-20",
-                "2025-06-21",
-                "Cambio de césped",
-                "PENDIENTE"
+        when(mantenimientoRepository.findById(99L))
+                .thenReturn(Optional.empty());
+
+        assertThrows(
+                ResourceNotFoundException.class,
+                () -> mantenimientoService.actualizar(99L, mantenimientoDTO)
         );
+    }
+
+    @Test
+    void eliminarDebeEliminarMantenimiento() {
 
         when(mantenimientoRepository.findById(1L))
                 .thenReturn(Optional.of(mantenimiento));
 
         mantenimientoService.eliminar(1L);
 
-        verify(mantenimientoRepository)
-                .delete(mantenimiento);
+        verify(mantenimientoRepository).delete(mantenimiento);
     }
 
     @Test
-    void debeVerificarExistencia() {
+    void eliminarDebeLanzarExcepcionSiNoExiste() {
+
+        when(mantenimientoRepository.findById(99L))
+                .thenReturn(Optional.empty());
+
+        assertThrows(
+                ResourceNotFoundException.class,
+                () -> mantenimientoService.eliminar(99L)
+        );
+    }
+
+    @Test
+    void existePorIdDebeRetornarTrue() {
 
         when(mantenimientoRepository.existsById(1L))
                 .thenReturn(true);
 
-        boolean existe =
-                mantenimientoService.existePorId(1L);
+        assertTrue(mantenimientoService.existePorId(1L));
 
-        assertTrue(existe);
+        verify(mantenimientoRepository).existsById(1L);
+    }
 
-        verify(mantenimientoRepository)
-                .existsById(1L);
+    @Test
+    void existePorIdDebeRetornarFalse() {
+
+        when(mantenimientoRepository.existsById(99L))
+                .thenReturn(false);
+
+        assertFalse(mantenimientoService.existePorId(99L));
+
+        verify(mantenimientoRepository).existsById(99L);
+    }
+
+    // -------------------------------------------------------------------
+    // REGLA DE NEGOCIO: descripción no puede estar vacía
+    // -------------------------------------------------------------------
+
+    @Test
+    @DisplayName("Regla de Negocio: Debe lanzar excepción si la descripción está vacía")
+    void guardarDebeLanzarExcepcionSiDescripcionEsVacia() {
+        // Given
+        mantenimientoDTO.setDescripcion("");
+
+        // When / Then
+        assertThrows(
+                BadRequestException.class,
+                () -> mantenimientoService.guardar(mantenimientoDTO)
+        );
+
+        verify(mantenimientoRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("Regla de Negocio: Debe lanzar excepción si la descripción es nula")
+    void guardarDebeLanzarExcepcionSiDescripcionEsNula() {
+        // Given
+        mantenimientoDTO.setDescripcion(null);
+
+        // When / Then
+        assertThrows(
+                BadRequestException.class,
+                () -> mantenimientoService.guardar(mantenimientoDTO)
+        );
+
+        verify(mantenimientoRepository, never()).save(any());
     }
 }

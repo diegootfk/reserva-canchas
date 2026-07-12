@@ -1,6 +1,7 @@
 package com.reservacanchas.cl.resena_service.service;
 
 import com.reservacanchas.cl.resena_service.dto.ResenaDTO;
+import com.reservacanchas.cl.resena_service.exception.BadRequestException;
 import com.reservacanchas.cl.resena_service.exception.ResourceNotFoundException;
 import com.reservacanchas.cl.resena_service.model.Resena;
 import com.reservacanchas.cl.resena_service.repository.ResenaRepository;
@@ -38,6 +39,19 @@ public class ResenaService {
                 resenaDTO.getIdCancha(),
                 resenaDTO.getIdReserva()
         );
+
+        if (resenaDTO.getCalificacion() == null
+                || resenaDTO.getCalificacion() < 1
+                || resenaDTO.getCalificacion() > 5) {
+
+            logger.warn(
+                    "Calificación {} fuera de rango permitido (1-5)",
+                    resenaDTO.getCalificacion()
+            );
+
+            throw new BadRequestException(
+                    "La calificación debe estar entre 1 y 5");
+        }
 
         Boolean usuarioExiste = webClientBuilder.build()
                 .get()

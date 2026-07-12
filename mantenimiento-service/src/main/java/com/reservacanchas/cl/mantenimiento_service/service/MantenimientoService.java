@@ -1,6 +1,7 @@
 package com.reservacanchas.cl.mantenimiento_service.service;
 
 import com.reservacanchas.cl.mantenimiento_service.dto.MantenimientoDTO;
+import com.reservacanchas.cl.mantenimiento_service.exception.BadRequestException;
 import com.reservacanchas.cl.mantenimiento_service.exception.ResourceNotFoundException;
 import com.reservacanchas.cl.mantenimiento_service.model.Mantenimiento;
 import com.reservacanchas.cl.mantenimiento_service.repository.MantenimientoRepository;
@@ -36,6 +37,17 @@ public class MantenimientoService {
                 "Iniciando creación de mantenimiento para cancha {}",
                 mantenimientoDTO.getIdCancha()
         );
+
+        if (mantenimientoDTO.getDescripcion() == null
+                || mantenimientoDTO.getDescripcion().isBlank()) {
+
+            logger.warn(
+                    "No se pudo crear mantenimiento: descripción vacía"
+            );
+
+            throw new BadRequestException(
+                    "La descripción del mantenimiento es obligatoria");
+        }
 
         Boolean canchaExiste = webClientBuilder.build()
                 .get()

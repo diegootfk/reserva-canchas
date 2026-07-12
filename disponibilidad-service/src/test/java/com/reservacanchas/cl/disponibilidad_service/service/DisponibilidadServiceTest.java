@@ -1,9 +1,12 @@
 package com.reservacanchas.cl.disponibilidad_service.service;
 
 import com.reservacanchas.cl.disponibilidad_service.dto.DisponibilidadDTO;
+import com.reservacanchas.cl.disponibilidad_service.exception.BadRequestException;
+import com.reservacanchas.cl.disponibilidad_service.exception.ResourceNotFoundException;
 import com.reservacanchas.cl.disponibilidad_service.model.Disponibilidad;
 import com.reservacanchas.cl.disponibilidad_service.repository.DisponibilidadRepository;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -26,12 +29,27 @@ class DisponibilidadServiceTest {
     @InjectMocks
     private DisponibilidadService disponibilidadService;
 
-    @Test
-    void debeListarDisponibilidades() {
+    private Disponibilidad disponibilidad;
+    private DisponibilidadDTO disponibilidadDTO;
 
-        Disponibilidad disponibilidad = new Disponibilidad(
-                1L,1L,"2025-06-20","09:00","10:00","DISPONIBLE"
+    @BeforeEach
+    void setUp() {
+
+        disponibilidad = new Disponibilidad(
+                1L, 1L, "2025-06-20", "09:00", "10:00", "DISPONIBLE"
         );
+
+        disponibilidadDTO = new DisponibilidadDTO(
+                1L,
+                "2025-06-20",
+                "09:00",
+                "10:00",
+                "DISPONIBLE"
+        );
+    }
+
+    @Test
+    void listarDebeRetornarDisponibilidades() {
 
         when(disponibilidadRepository.findAll())
                 .thenReturn(List.of(disponibilidad));
@@ -41,16 +59,11 @@ class DisponibilidadServiceTest {
 
         assertEquals(1, resultado.size());
 
-        verify(disponibilidadRepository)
-                .findAll();
+        verify(disponibilidadRepository).findAll();
     }
 
     @Test
-    void debeBuscarDisponibilidadPorId() {
-
-        Disponibilidad disponibilidad = new Disponibilidad(
-                1L,1L,"2025-06-20","09:00","10:00","DISPONIBLE"
-        );
+    void buscarPorIdDebeRetornarDisponibilidad() {
 
         when(disponibilidadRepository.findById(1L))
                 .thenReturn(Optional.of(disponibilidad));
@@ -61,16 +74,23 @@ class DisponibilidadServiceTest {
         assertNotNull(resultado);
         assertEquals(1L, resultado.getId());
 
-        verify(disponibilidadRepository)
-                .findById(1L);
+        verify(disponibilidadRepository).findById(1L);
     }
 
     @Test
-    void debeActualizarDisponibilidad() {
+    void buscarPorIdDebeLanzarExcepcion() {
 
-        Disponibilidad actual = new Disponibilidad(
-                1L,1L,"2025-06-20","09:00","10:00","DISPONIBLE"
+        when(disponibilidadRepository.findById(99L))
+                .thenReturn(Optional.empty());
+
+        assertThrows(
+                ResourceNotFoundException.class,
+                () -> disponibilidadService.buscarPorId(99L)
         );
+    }
+
+    @Test
+    void actualizarDebeActualizarDisponibilidad() {
 
         DisponibilidadDTO dto = new DisponibilidadDTO(
                 1L,
@@ -81,11 +101,11 @@ class DisponibilidadServiceTest {
         );
 
         Disponibilidad actualizada = new Disponibilidad(
-                1L,1L,"2025-06-21","10:00","11:00","OCUPADO"
+                1L, 1L, "2025-06-21", "10:00", "11:00", "OCUPADO"
         );
 
         when(disponibilidadRepository.findById(1L))
-                .thenReturn(Optional.of(actual));
+                .thenReturn(Optional.of(disponibilidad));
 
         when(disponibilidadRepository.save(any(Disponibilidad.class)))
                 .thenReturn(actualizada);
@@ -93,41 +113,94 @@ class DisponibilidadServiceTest {
         Disponibilidad resultado =
                 disponibilidadService.actualizar(1L, dto);
 
-        assertEquals("OCUPADO",
-                resultado.getEstado());
+        assertEquals("OCUPADO", resultado.getEstado());
 
         verify(disponibilidadRepository)
                 .save(any(Disponibilidad.class));
     }
 
     @Test
-    void debeEliminarDisponibilidad() {
+    void actualizarDebeLanzarExcepcionSiNoExiste() {
 
-        Disponibilidad disponibilidad = new Disponibilidad(
-                1L,1L,"2025-06-20","09:00","10:00","DISPONIBLE"
+        when(disponibilidadRepository.findById(99L))
+                .thenReturn(Optional.empty());
+
+        assertThrows(
+                ResourceNotFoundException.class,
+                () -> disponibilidadService.actualizar(99L, disponibilidadDTO)
         );
+    }
+
+    @Test
+    void eliminarDebeEliminarDisponibilidad() {
 
         when(disponibilidadRepository.findById(1L))
                 .thenReturn(Optional.of(disponibilidad));
 
         disponibilidadService.eliminar(1L);
 
-        verify(disponibilidadRepository)
-                .delete(disponibilidad);
+        verify(disponibilidadRepository).delete(disponibilidad);
     }
 
     @Test
-    void debeVerificarExistencia() {
+    void eliminarDebeLanzarExcepcionSiNoExiste() {
+
+        when(disponibilidadRepository.findById(99L))
+                .thenReturn(Optional.empty());
+
+        assertThrows(
+                ResourceNotFoundException.class,
+                () -> disponibilidadService.eliminar(99L)
+        );
+    }
+
+    @Test
+    void existePorIdDebeRetornarTrue() {
 
         when(disponibilidadRepository.existsById(1L))
                 .thenReturn(true);
 
-        boolean existe =
-                disponibilidadService.existePorId(1L);
+        assertTrue(disponibilidadService.existePorId(1L));
 
-        assertTrue(existe);
+        verify(disponibilidadRepository).existsById(1L);
+    }
 
-        verify(disponibilidadRepository)
-                .existsById(1L);
+    @Test
+    void existePorIdDebeRetornarFalse() {
+
+        when(disponibilidadRepository.existsById(99L))
+                .thenReturn(false);
+
+        assertFalse(disponibilidadService.existePorId(99L));
+
+        verify(disponibilidadRepository).existsById(99L);
+    }
+
+    @Test
+    void guardarDebeLanzarExcepcionSiFechaEsVacia() {
+        // Given
+        disponibilidadDTO.setFecha("");
+
+        // When / Then
+        assertThrows(
+                BadRequestException.class,
+                () -> disponibilidadService.guardar(disponibilidadDTO)
+        );
+
+        verify(disponibilidadRepository, never()).save(any());
+    }
+
+    @Test
+    void guardarDebeLanzarExcepcionSiFechaEsNula() {
+        // Given
+        disponibilidadDTO.setFecha(null);
+
+        // When / Then
+        assertThrows(
+                BadRequestException.class,
+                () -> disponibilidadService.guardar(disponibilidadDTO)
+        );
+
+        verify(disponibilidadRepository, never()).save(any());
     }
 }

@@ -49,6 +49,21 @@ public class HorarioService {
                     "El día de la semana es obligatorio");
         }
 
+        if (horarioDTO.getHoraInicio() != null
+                && horarioDTO.getHoraFin() != null
+                && horarioDTO.getHoraFin().compareTo(
+                        horarioDTO.getHoraInicio()) <= 0) {
+
+            logger.warn(
+                    "No se pudo crear horario: horaFin {} no es posterior a horaInicio {}",
+                    horarioDTO.getHoraFin(),
+                    horarioDTO.getHoraInicio()
+            );
+
+            throw new BadRequestException(
+                    "La hora de fin debe ser posterior a la hora de inicio");
+        }
+
         Boolean canchaExiste = webClientBuilder.build()
                 .get()
                 .uri("http://localhost:7092/canchas/"

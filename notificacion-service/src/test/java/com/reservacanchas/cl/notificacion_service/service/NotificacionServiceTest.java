@@ -1,9 +1,11 @@
 package com.reservacanchas.cl.notificacion_service.service;
 
 import com.reservacanchas.cl.notificacion_service.dto.NotificacionDTO;
+import com.reservacanchas.cl.notificacion_service.exception.ResourceNotFoundException;
 import com.reservacanchas.cl.notificacion_service.model.Notificacion;
 import com.reservacanchas.cl.notificacion_service.repository.NotificacionRepository;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -26,10 +28,13 @@ class NotificacionServiceTest {
     @InjectMocks
     private NotificacionService notificacionService;
 
-    @Test
-    void debeListarNotificaciones() {
+    private Notificacion notificacion;
+    private NotificacionDTO notificacionDTO;
 
-        Notificacion notificacion = new Notificacion(
+    @BeforeEach
+    void setUp() {
+
+        notificacion = new Notificacion(
                 1L,
                 1L,
                 1L,
@@ -38,6 +43,19 @@ class NotificacionServiceTest {
                 "2025-06-20",
                 "ENVIADA"
         );
+
+        notificacionDTO = new NotificacionDTO(
+                1L,
+                1L,
+                "Reserva modificada",
+                "SMS",
+                "2025-06-21",
+                "PENDIENTE"
+        );
+    }
+
+    @Test
+    void listarDebeRetornarNotificaciones() {
 
         when(notificacionRepository.findAll())
                 .thenReturn(List.of(notificacion));
@@ -51,17 +69,7 @@ class NotificacionServiceTest {
     }
 
     @Test
-    void debeBuscarPorId() {
-
-        Notificacion notificacion = new Notificacion(
-                1L,
-                1L,
-                1L,
-                "Reserva confirmada",
-                "EMAIL",
-                "2025-06-20",
-                "ENVIADA"
-        );
+    void buscarPorIdDebeRetornarNotificacion() {
 
         when(notificacionRepository.findById(1L))
                 .thenReturn(Optional.of(notificacion));
@@ -76,26 +84,19 @@ class NotificacionServiceTest {
     }
 
     @Test
-    void debeActualizarNotificacion() {
+    void buscarPorIdDebeLanzarExcepcion() {
 
-        Notificacion actual = new Notificacion(
-                1L,
-                1L,
-                1L,
-                "Reserva confirmada",
-                "EMAIL",
-                "2025-06-20",
-                "ENVIADA"
-        );
+        when(notificacionRepository.findById(99L))
+                .thenReturn(Optional.empty());
 
-        NotificacionDTO dto = new NotificacionDTO(
-                1L,
-                1L,
-                "Reserva modificada",
-                "SMS",
-                "2025-06-21",
-                "PENDIENTE"
+        assertThrows(
+                ResourceNotFoundException.class,
+                () -> notificacionService.buscarPorId(99L)
         );
+    }
+
+    @Test
+    void actualizarDebeActualizarNotificacion() {
 
         Notificacion actualizada = new Notificacion(
                 1L,
@@ -108,55 +109,74 @@ class NotificacionServiceTest {
         );
 
         when(notificacionRepository.findById(1L))
-                .thenReturn(Optional.of(actual));
+                .thenReturn(Optional.of(notificacion));
 
         when(notificacionRepository.save(any(Notificacion.class)))
                 .thenReturn(actualizada);
 
         Notificacion resultado =
-                notificacionService.actualizar(1L, dto);
+                notificacionService.actualizar(1L, notificacionDTO);
 
-        assertEquals("SMS",
-                resultado.getTipoNotificacion());
+        assertEquals("SMS", resultado.getTipoNotificacion());
 
         verify(notificacionRepository)
                 .save(any(Notificacion.class));
     }
 
     @Test
-    void debeEliminarNotificacion() {
+    void actualizarDebeLanzarExcepcionSiNoExiste() {
 
-        Notificacion notificacion = new Notificacion(
-                1L,
-                1L,
-                1L,
-                "Reserva confirmada",
-                "EMAIL",
-                "2025-06-20",
-                "ENVIADA"
+        when(notificacionRepository.findById(99L))
+                .thenReturn(Optional.empty());
+
+        assertThrows(
+                ResourceNotFoundException.class,
+                () -> notificacionService.actualizar(99L, notificacionDTO)
         );
+    }
+
+    @Test
+    void eliminarDebeEliminarNotificacion() {
 
         when(notificacionRepository.findById(1L))
                 .thenReturn(Optional.of(notificacion));
 
         notificacionService.eliminar(1L);
 
-        verify(notificacionRepository)
-                .delete(notificacion);
+        verify(notificacionRepository).delete(notificacion);
     }
 
     @Test
-    void debeVerificarExistencia() {
+    void eliminarDebeLanzarExcepcionSiNoExiste() {
+
+        when(notificacionRepository.findById(99L))
+                .thenReturn(Optional.empty());
+
+        assertThrows(
+                ResourceNotFoundException.class,
+                () -> notificacionService.eliminar(99L)
+        );
+    }
+
+    @Test
+    void existePorIdDebeRetornarTrue() {
 
         when(notificacionRepository.existsById(1L))
                 .thenReturn(true);
 
-        boolean existe =
-                notificacionService.existePorId(1L);
+        assertTrue(notificacionService.existePorId(1L));
 
-        assertTrue(existe);
+        verify(notificacionRepository).existsById(1L);
+    }
 
-        verify(notificacionRepository)
-                .existsById(1L);
+    @Test
+    void existePorIdDebeRetornarFalse() {
+
+        when(notificacionRepository.existsById(99L))
+                .thenReturn(false);
+
+        assertFalse(notificacionService.existePorId(99L));
+
+        verify(notificacionRepository).existsById(99L);
     }
 }
